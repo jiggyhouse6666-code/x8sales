@@ -87,6 +87,16 @@ main{padding-top:14px;}
 .tbl tr.tap{cursor:pointer;}
 .tbl td.z{color:#5d576a;}
 .tbl tr.total td{border-top:1px solid var(--gold2); font-weight:700; color:var(--gold);}
+.gridwrap{overflow:auto; max-height:70vh; margin:0 -16px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+.grid{border-collapse:separate; border-spacing:0; font-size:12px; font-variant-numeric:tabular-nums;}
+.grid th,.grid td{padding:6px 7px; text-align:right; white-space:nowrap; border-right:1px solid rgba(255,255,255,.06); border-bottom:1px solid rgba(255,255,255,.06); background:var(--bg);}
+.grid thead th{position:sticky; top:0; z-index:3; background:#1d1925; color:var(--dim); font-weight:600; font-size:11px;}
+.grid tr.gt td{position:sticky; top:27px; z-index:3; background:#2a2212; color:var(--gold); font-weight:700; border-bottom:1px solid var(--gold2);}
+.grid .c1{position:sticky; left:0; z-index:2; text-align:center; min-width:44px; font-weight:700; color:var(--text); background:#1d1925; cursor:pointer;}
+.grid .c2{position:sticky; left:44px; z-index:2; min-width:64px; color:var(--gold); font-weight:700; background:#1d1925; border-right:1px solid var(--gold2);}
+.grid thead .c1,.grid thead .c2,.grid tr.gt .c1,.grid tr.gt .c2{z-index:4;}
+.grid td.z{color:#4b4658;}
+.grid td.hi{color:var(--gold); font-weight:700;}
 .scrollx{overflow-x:auto; margin:0 -6px; padding:0 6px;}
 input[type=text],input[type=password],input[type=number],select{width:100%; background:#0f0d14; border:1px solid var(--line); color:var(--text); border-radius:10px; padding:12px; font-size:16px; font-family:inherit;}
 .btn{display:block; width:100%; background:linear-gradient(180deg,#e9c97f,#c99a3e); color:#2a1c00; font-weight:700; border:none; border-radius:12px; padding:14px; font-size:16px;}
@@ -383,7 +393,7 @@ const FIREBASE_CONFIG = {
 };
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-2 - 2026-10-23';
+const BUILD = 'sales-3 - 2026-10-23';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -508,7 +518,7 @@ const S = {
   meta: { months: [], targets: {} },
   ym: null, M: null, prevM: null, updatedAt: null,
   dd: null,               // 選択中の日
-  rankMetric: 'sub', rankScope: 'month',
+  rankMetric: 'sub', rankScope: 'month', dayView: 'cal', gridMetric: 'gross',
   empId: lsGet('x8s_emp') || null, empQuery: '',
   dayDetail: null,        // 日別画面で詳細表示中のdd
   loginRole: 'staff', loginErr: '', loginBusy: false,
@@ -675,6 +685,24 @@ function viewRank(){
   ${updatedLine()}`;
 }
 
+function viewGrid(M){
+  const m = MET.find(z => z.k === S.gridMetric) || MET[1];
+  const days = dayList(M);
+  const emps = M.employees;
+  const colTot = emps.map(e => days.reduce((a, dd) => { const r = M.days[dd].rows[e.id]; return a + (r ? r[m.i] : 0); }, 0));
+  const all = days.reduce((a, dd) => a + (M.days[dd].store[m.k] || 0), 0);
+  const cell = (v) => v ? fmt(v) : '·';
+  const head = `<tr><th class="c1">日</th><th class="c2">店合計</th>${emps.map((e, i) => `<th>${esc(e.name)}</th>`).join('')}</tr>`;
+  const tot = `<tr class="gt"><td class="c1">計</td><td class="c2">${fmt(all)}</td>${colTot.map(v => `<td>${cell(v)}</td>`).join('')}</tr>`;
+  const body = days.map(dd => { const d = M.days[dd];
+    return `<tr><td class="c1" data-a="openday" data-d="${dd}">${Number(dd)}</td><td class="c2">${fmt(d.store[m.k] || 0)}</td>${emps.map(e => { const r = d.rows[e.id]; const v = r ? r[m.i] : 0; return `<td class="${v ? '' : 'z'}">${cell(v)}</td>`; }).join('')}</tr>`; }).join('');
+  return `<div class="seg">${MET.map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="gmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
+  <div class="card" style="padding-left:16px;padding-right:16px"><h2>${ymLabel(M.ym)} 日別 × 人別（${m.label}）</h2>
+    <div class="gridwrap"><table class="grid"><thead>${head}</thead><tbody>${tot}${body}</tbody></table></div>
+    <div class="note">左の日付をタップすると、その日の内訳が見られます。横にスワイプすると全員が見られます。「店合計」は一覧に載せていない運営メンバー${m.k === 'gross' ? 'と担当なしの売上' : ''}を含みます。「·」は0です。</div>
+  </div>`;
+}
+
 function viewDays(){
   const M = S.M; if (!M) return noData();
   if (S.dayDetail && M.days[S.dayDetail]) return viewDayDetail(S.dayDetail);
@@ -686,9 +714,9 @@ function viewDays(){
     cells += d ? `<div class="d has ${dd === S.dd ? 'sel' : ''}" data-a="openday" data-d="${dd}"><b>${i}</b><span>${manS(d.store.gross)}</span></div>`
                : `<div class="d none"><b>${i}</b><span style="color:#5d576a">—</span></div>`;
   }
-  const empty = [];
-  for (let i = 1; i <= N; i++) { const dd = (i < 10 ? '0' : '') + i; if (!M.days[dd]) empty.push(i); }
-  return `
+  const toggle = `<div class="seg2"><button class="${S.dayView === 'cal' ? 'on' : ''}" data-a="dview" data-v="cal">カレンダー</button><button class="${S.dayView === 'grid' ? 'on' : ''}" data-a="dview" data-v="grid">一覧表（日×人）</button></div>`;
+  if (S.dayView === 'grid') return toggle + viewGrid(M) + updatedLine();
+  return toggle + `
   <div class="card"><h2>${ymLabel(M.ym)} カレンダー（総売）</h2>
     <div class="cal">${'日月火水木金土'.split('').map(w => `<div class="dw">${w}</div>`).join('')}${cells}</div>
     <div class="note">日付をタップすると、その日の内訳が見られます。「—」はデータ未入力（または営業なし）の日で、集計には含めていません。</div>
@@ -898,6 +926,8 @@ document.addEventListener('click', async (ev) => {
   if (a === 'tab') { S.tab = el.dataset.t; if (S.tab === 'days') S.dayDetail = null; render(); window.scrollTo(0, 0); }
   else if (a === 'mprev' || a === 'mnext') { const ms = S.meta.months, i = ms.indexOf(S.ym) + (a === 'mnext' ? 1 : -1); if (ms[i]) { S.targetDraft = ''; selectMonth(ms[i]); } }
   else if (a === 'pickday') { S.dd = el.dataset.d; render(); }
+  else if (a === 'dview') { S.dayView = el.dataset.v; render(); }
+  else if (a === 'gmetric') { S.gridMetric = el.dataset.k; render(); }
   else if (a === 'rmetric') { S.rankMetric = el.dataset.k; render(); }
   else if (a === 'rscope') { S.rankScope = el.dataset.s; render(); }
   else if (a === 'openday') { S.dd = el.dataset.d; S.dayDetail = el.dataset.d; S.tab = 'days'; render(); window.scrollTo(0, 0); }
