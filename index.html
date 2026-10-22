@@ -239,6 +239,20 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
     return out;
   }
 
+  // 日別シート右側の「総売上(カード込み)」(Excelの月間合計の元)を探す
+  var DAY_TOTAL_LABEL = '総売上(カード込み)';
+  function findDayTotal(ws) {
+    for (var r = 1; r <= 20; r++) {
+      for (var c = 1; c <= 60; c++) {
+        var t = str(val(ws, r, c)).replace(/[（]/g, '(').replace(/[）]/g, ')');
+        if (t === DAY_TOTAL_LABEL) {
+          for (var k = 1; k <= 4; k++) { var n = num(val(ws, r, c + k)); if (n !== null) return n; }
+        }
+      }
+    }
+    return null;
+  }
+
   function isEmptyDay(rows) {
     return !rows.some(function (r) {
       return METRICS.some(function (m) { return r.m[m.key] !== 0; });
@@ -321,6 +335,16 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
           }
         });
       });
+      // 店の総売: Excelの日別集計(総売上(カード込み))を採用。個人の合計との差は「担当なし」
+      var personGross = day.store.gross;
+      var exGross = findDayTotal(ws);
+      if (exGross === null) {
+        report.warnings.push({ level: 'warn', day: dd, msg: '「総売上(カード込み)」が見つかりません。個人別の合計を使います' });
+        day.unas = 0;
+      } else {
+        day.store.gross = exGross;
+        day.unas = exGross - personGross;
+      }
       days[dd] = day;
     }
 
@@ -359,7 +383,7 @@ const FIREBASE_CONFIG = {
 };
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-1 - 2026-10-23';
+const BUILD = 'sales-2 - 2026-10-23';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -392,6 +416,7 @@ function dayLabel(ym, dd){ const [y, m] = ym.split('-').map(Number); const w = '
 /* ---------- month data helpers ---------- */
 const dayList = (M) => Object.keys(M.days).sort();
 function storeSum(M, dds){ const t = {}; KEYS8.forEach(k => t[k] = 0); (dds || dayList(M)).forEach(dd => KEYS8.forEach(k => t[k] += (M.days[dd].store[k] || 0))); return t; }
+function unasSum(M){ return dayList(M).reduce((a, dd) => a + (M.days[dd].unas || 0), 0); }
 function hiddenSum(M){ const t = {}; KEYS8.forEach(k => t[k] = 0); dayList(M).forEach(dd => KEYS8.forEach(k => t[k] += (M.days[dd].hidden && M.days[dd].hidden[k]) || 0)); return t; }
 function empMonth(M, id){ const t = new Array(8).fill(0); let n = 0; dayList(M).forEach(dd => { const r = M.days[dd].rows[id]; if (r) { for (let i = 0; i < 8; i++) t[i] += r[i] || 0; n++; } }); t.days = n; return t; }
 function ranking(M, i, dd){
@@ -592,7 +617,7 @@ function viewHome(){
     ${rk.length ? rk.map(rkRow(1, false)).join('') : '<div class="dim">データなし</div>'}
     <div style="margin-top:10px"><button class="btn ghost small" data-a="tab" data-t="rank">ランキングをすべて見る</button></div>
   </div>
-  <div class="note" style="text-align:center">店舗合計には、一覧・ランキングに載せていない運営メンバー分（総売 ${yen(hid.gross)}／小計 ${yen(hid.sub)}）を含みます。</div>
+  <div class="note" style="text-align:center">店舗合計には、一覧・ランキングに載せていない運営メンバー分（総売 ${yen(hid.gross)}／小計 ${yen(hid.sub)}）を含みます。${unasSum(M) ? `<br>さらに「担当なしの売上」${yen(unasSum(M))}（伝票にあるが個人の欄に入っていない分）を含み、Excelの月間合計と同じ数字です。` : ''}</div>
   ${updatedLine()}`;
 }
 
@@ -687,7 +712,7 @@ function viewDayDetail(dd){
     <div class="scrollx"><table class="tbl"><thead><tr><th>名前</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
     ${rows.map(({ e, r }) => `<tr class="tap" data-a="person" data-id="${esc(e.id)}"><td>${esc(e.name)}</td><td>${fmt(r[0])}</td><td>${fmt(r[1])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" class="dim">実績のある人がいません</td></tr>'}
     </tbody></table></div>
-    <div class="note">飲=飲み直し／送=送り／ヘ=ヘルプ指名／同=同伴。店舗合計には、一覧に載せていない運営メンバー分（総売 ${yen(hid.gross || 0)}）を含みます。</div>
+    <div class="note">飲=飲み直し／送=送り／ヘ=ヘルプ指名／同=同伴。店舗合計には、一覧に載せていない運営メンバー分（総売 ${yen(hid.gross || 0)}）を含みます。${d.unas ? `<br>さらに「担当なしの売上」${yen(d.unas)}を含みます。` : ''}</div>
   </div>`;
 }
 
