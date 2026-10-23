@@ -393,7 +393,7 @@ const FIREBASE_CONFIG = {
 };
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-1 - 2026-10-23';
+const BUILD = 'sales-6 - 2026-10-23';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -428,7 +428,26 @@ const dayList = (M) => Object.keys(M.days).sort();
 function storeSum(M, dds){ const t = {}; KEYS8.forEach(k => t[k] = 0); (dds || dayList(M)).forEach(dd => KEYS8.forEach(k => t[k] += (M.days[dd].store[k] || 0))); return t; }
 function unasSum(M){ return dayList(M).reduce((a, dd) => a + (M.days[dd].unas || 0), 0); }
 function hiddenSum(M){ const t = {}; KEYS8.forEach(k => t[k] = 0); dayList(M).forEach(dd => KEYS8.forEach(k => t[k] += (M.days[dd].hidden && M.days[dd].hidden[k]) || 0)); return t; }
-function empMonth(M, id){ const t = new Array(8).fill(0); let n = 0; dayList(M).forEach(dd => { const r = M.days[dd].rows[id]; if (r) { for (let i = 0; i < 8; i++) t[i] += r[i] || 0; n++; } }); t.days = n; return t; }
+const hexOf = (name) => { const s = String(name == null ? '' : name).normalize('NFKC').trim(); let h = 'u'; for (let i = 0; i < s.length; i++) h += s.charCodeAt(i).toString(16).padStart(4, '0'); return h; };
+// 公開用の月データ（個人の日別は入れない）と、個人ごとの日別データに分ける
+function splitMonth(M){
+  const pub = { ym: M.ym, year: M.year, month: M.month, daysInMonth: M.daysInMonth, employees: M.employees, metrics: M.metrics, days: {}, totals: {} };
+  const privs = {};
+  M.employees.forEach(e => { privs[e.id] = { days: {} }; const t = new Array(9).fill(0); pub.totals[e.id] = t; });
+  Object.keys(M.days).forEach(dd => {
+    const d = M.days[dd];
+    pub.days[dd] = { store: d.store, hidden: d.hidden, unas: d.unas || 0, rows: {} };
+    Object.keys(d.rows).forEach(id => {
+      if (!privs[id]) return;
+      privs[id].days[dd] = d.rows[id];
+      const t = pub.totals[id]; for (let i = 0; i < 8; i++) t[i] += d.rows[id][i] || 0; t[8]++;
+    });
+  });
+  return { pub, privs };
+}
+function empMonth(M, id){
+  if (M.totals) { const a = M.totals[id] || new Array(9).fill(0); const t = a.slice(0, 8); t.days = a[8] || 0; return t; }
+  const t = new Array(8).fill(0); let n = 0; dayList(M).forEach(dd => { const r = M.days[dd].rows[id]; if (r) { for (let i = 0; i < 8; i++) t[i] += r[i] || 0; n++; } }); t.days = n; return t; }
 function ranking(M, i, dd){
   const list = M.employees.map((e, idx) => ({ id: e.id, name: e.name, kind: e.kind, idx, v: dd ? (((M.days[dd] && M.days[dd].rows[e.id]) || [])[i] || 0) : empMonth(M, e.id)[i] }));
   list.sort((a, b) => b.v - a.v || a.idx - b.idx);
@@ -449,14 +468,54 @@ async function makeFirebaseBackend(){
   const app = A.initializeApp(FIREBASE_CONFIG);
   const auth = Au.getAuth(app);
   const db = F.getFirestore(app);
-  const roleOf = (u) => !u ? null : (u.email === ADMIN_EMAIL ? 'admin' : (u.email === STAFF_EMAIL ? 'staff' : null));
+  const infoOf = (u) => {
+    if (!u || !u.email) return null;
+    if (u.email === ADMIN_EMAIL) return { role: 'admin' };
+    if (u.email === STAFF_EMAIL) return { role: 'staff' };
+    const m = /^(u[0-9a-f]+)@x8sales\.app$/.exec(u.email); return m ? { role: 'member', hex: m[1] } : null;
+  };
+  let suppress = false, theCb = null, curRole = null;
+  const memEmail = (name) => hexOf(name) + '@x8sales.app';
+  const monthCol = () => curRole === 'admin' ? 'full' : 'months';
+  async function writeMonth(ym, M, prevPayload){
+    const sp = splitMonth(M); const b = F.writeBatch(db);
+    b.set(F.doc(db, 'months', ym), { ym, payload: JSON.stringify(sp.pub), updatedAt: F.serverTimestamp() });
+    b.set(F.doc(db, 'full', ym), { ym, payload: JSON.stringify(M), prev: prevPayload || null, updatedAt: F.serverTimestamp() });
+    M.employees.forEach(e => { const h = hexOf(e.name); b.set(F.doc(db, 'priv', ym + '_' + h), { ym, owner: h, payload: JSON.stringify(sp.privs[e.id]), updatedAt: F.serverTimestamp() }); });
+    await b.commit();
+  }
   return {
-    onAuth(cb){ return Au.onAuthStateChanged(auth, (u) => cb(roleOf(u))); },
+    onAuth(cb){ theCb = cb; return Au.onAuthStateChanged(auth, (u) => { if (suppress) return; const i = infoOf(u); curRole = i && i.role; cb(i); }); },
     async login(role, pw){ await Au.signInWithEmailAndPassword(auth, role === 'admin' ? ADMIN_EMAIL : STAFF_EMAIL, pw); },
+    async loginMember(name, pw){ await Au.signInWithEmailAndPassword(auth, memEmail(name), pw); },
+    async registerMember(name, code, pw){
+      suppress = true; let cred;
+      try { cred = await Au.createUserWithEmailAndPassword(auth, memEmail(name), pw); } catch (e) { suppress = false; throw e; }
+      try { await F.setDoc(F.doc(db, 'members', hexOf(name)), { uid: cred.user.uid, code: String(code).trim().toUpperCase(), name: String(name).trim(), at: F.serverTimestamp() }); }
+      catch (e) { try { await cred.user.delete(); } catch (_) {} try { await Au.signOut(auth); } catch (_) {} suppress = false; const er = new Error('bad-code'); er.code = 'bad-code'; throw er; }
+      suppress = false; const i = infoOf(auth.currentUser); curRole = i && i.role; if (theCb) theCb(i);
+    },
+    async changePassword(pw){ await Au.updatePassword(auth.currentUser, pw); },
     async logout(){ await Au.signOut(auth); },
+    subPriv(ym, hex, cb, err){
+      return F.onSnapshot(F.doc(db, 'priv', ym + '_' + hex), (s) => { if (!s.exists()) return cb(null); try { cb(JSON.parse(s.data().payload)); } catch (e) { cb(null); } }, err);
+    },
+    async listMembers(){
+      const [m, i] = await Promise.all([F.getDocs(F.collection(db, 'members')), F.getDocs(F.collection(db, 'invites'))]);
+      const out = { members: {}, invites: {} };
+      m.docs.forEach(d => out.members[d.id] = d.data()); i.docs.forEach(d => out.invites[d.id] = d.data());
+      return out;
+    },
+    async issueInvite(name){
+      const al = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; const a = new Uint8Array(8); crypto.getRandomValues(a);
+      const code = Array.from(a).map(x => al[x % al.length]).join('');
+      await F.setDoc(F.doc(db, 'invites', hexOf(name)), { code, name, at: F.serverTimestamp() });
+      return code;
+    },
+    async unregister(name){ await F.deleteDoc(F.doc(db, 'members', hexOf(name))); },
     subMeta(cb, err){ return F.onSnapshot(F.doc(db, 'meta', 'app'), (s) => cb(s.exists() ? s.data() : { months: [], targets: {} }), err); },
     subMonth(ym, cb, err){
-      return F.onSnapshot(F.doc(db, 'months', ym), (s) => {
+      return F.onSnapshot(F.doc(db, monthCol(), ym), (s) => {
         if (!s.exists()) return cb(null, null);
         const d = s.data(); let M = null; try { M = JSON.parse(d.payload); } catch (e) {}
         const ts = d.updatedAt && d.updatedAt.toMillis ? d.updatedAt.toMillis() : null;
@@ -464,15 +523,14 @@ async function makeFirebaseBackend(){
       }, err);
     },
     async getMonthOnce(ym){
-      const s = await F.getDoc(F.doc(db, 'months', ym));
+      const s = await F.getDoc(F.doc(db, monthCol(), ym));
       if (!s.exists()) return null;
       const d = s.data(); try { return JSON.parse(d.payload); } catch (e) { return null; }
     },
     async saveMonth(ym, M, rec, monthsList){
-      const ref = F.doc(db, 'months', ym);
-      const cur = await F.getDoc(ref);
+      const cur = await F.getDoc(F.doc(db, 'full', ym));
       const prev = cur.exists() ? (cur.data().payload || null) : null;
-      await F.setDoc(ref, { ym, payload: JSON.stringify(M), prev, updatedAt: F.serverTimestamp() });
+      await writeMonth(ym, M, prev);
       await F.setDoc(F.doc(db, 'meta', 'app'), { months: monthsList, updatedAt: F.serverTimestamp() }, { merge: true });
       await F.addDoc(F.collection(db, 'imports'), Object.assign({}, rec, { at: F.serverTimestamp(), by: auth.currentUser ? auth.currentUser.email : '' }));
     },
@@ -486,11 +544,10 @@ async function makeFirebaseBackend(){
       return s.docs.map(d => { const x = d.data(); x.id = d.id; x.atMs = x.at && x.at.toMillis ? x.at.toMillis() : null; return x; });
     },
     async restorePrev(ym){
-      const ref = F.doc(db, 'months', ym);
-      const s = await F.getDoc(ref);
+      const s = await F.getDoc(F.doc(db, 'full', ym));
       if (!s.exists() || !s.data().prev) throw new Error('戻せる履歴がありません');
       const d = s.data();
-      await F.setDoc(ref, { ym, payload: d.prev, prev: d.payload, updatedAt: F.serverTimestamp() });
+      await writeMonth(ym, JSON.parse(d.prev), d.payload);
       await F.addDoc(F.collection(db, 'imports'), { kind: 'restore', ym, at: F.serverTimestamp(), by: auth.currentUser ? auth.currentUser.email : '' });
     }
   };
@@ -499,8 +556,11 @@ async function makeFirebaseBackend(){
 function makeTestBackend(){
   const T = TEST; let cbAuth = null;
   return {
-    onAuth(cb){ cbAuth = cb; setTimeout(() => cb(T.role || 'staff'), 0); return () => {}; },
-    async login(){}, async logout(){},
+    onAuth(cb){ cbAuth = cb; setTimeout(() => cb(T.role === 'none' ? null : { role: T.role || 'staff', hex: T.hex }), 0); return () => {}; },
+    async login(){}, async loginMember(){}, async registerMember(){}, async changePassword(){}, async logout(){},
+    subPriv(ym, hex, cb){ setTimeout(() => cb(T.priv ? JSON.parse(JSON.stringify(T.priv)) : null), 0); return () => {}; },
+    async listMembers(){ return T.members || { members: {}, invites: {} }; },
+    async issueInvite(){ return 'TEST2345'; }, async unregister(){},
     subMeta(cb){ setTimeout(() => cb(T.meta), 0); return () => {}; },
     subMonth(ym, cb){ setTimeout(() => cb(T.months[ym] ? JSON.parse(JSON.stringify(T.months[ym])) : null, T.updatedAt || Date.now()), 0); return () => {}; },
     async getMonthOnce(ym){ return T.months[ym] ? JSON.parse(JSON.stringify(T.months[ym])) : null; },
@@ -521,10 +581,10 @@ const S = {
   rankMetric: 'sub', rankScope: 'month', dayView: 'cal', gridMetric: 'gross',
   empId: lsGet('x8s_emp') || null, empQuery: '',
   dayDetail: null,        // 日別画面で詳細表示中のdd
-  loginRole: 'staff', loginErr: '', loginBusy: false,
+  loginRole: 'staff', regMode: false, hex: null, priv: null, memberInfo: null, loginErr: '', loginBusy: false,
   imp: null, importsList: null, targetDraft: ''
 };
-let unsubMonth = null, unsubMeta = null;
+let unsubMonth = null, unsubMeta = null, unsubPriv = null;
 
 function pickDefaultDay(){
   if (!S.M) { S.dd = null; return; }
@@ -534,11 +594,13 @@ function pickDefaultDay(){
 
 function selectMonth(ym){
   if (unsubMonth) { unsubMonth(); unsubMonth = null; }
+  if (unsubPriv) { unsubPriv(); unsubPriv = null; } S.priv = null;
   S.ym = ym; S.M = null; S.prevM = null; S.dd = null; S.dayDetail = null; S.loading = true; render();
   unsubMonth = backend.subMonth(ym, (M, ts) => {
     S.loading = false; S.M = M; S.updatedAt = ts; pickDefaultDay();
     loadPrev(); render();
   }, (e) => { S.loading = false; S.err = '読み込みに失敗しました'; render(); });
+  if (S.role === 'member' && S.hex) unsubPriv = backend.subPriv(ym, S.hex, (P) => { S.priv = P; render(); }, () => {});
 }
 async function loadPrev(){
   const p = prevYm(S.ym);
@@ -665,17 +727,17 @@ function rkRow(i, byDay){
 function viewRank(){
   const M = S.M; if (!M) return noData();
   const m = MET.find(z => z.k === S.rankMetric) || MET[0];
-  const byDay = S.rankScope === 'day' && S.dd;
+  const byDay = S.role === 'admin' && S.rankScope === 'day' && S.dd;
   const list = ranking(M, m.i, byDay ? S.dd : null);
   const pos = list.filter(x => x.v > 0), zero = list.filter(x => x.v === 0);
   const days = dayList(M);
   return `
   <div class="seg">${MET.map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="rmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
-  <div class="seg2">
+  ${S.role === 'admin' ? `<div class="seg2">
     <button class="${!byDay ? 'on' : ''}" data-a="rscope" data-s="month">${ymLabel(M.ym)} 月間</button>
     <button class="${byDay ? 'on' : ''}" data-a="rscope" data-s="day">日別</button>
-  </div>
-  ${S.rankScope === 'day' ? `<div class="seg">${days.map(d => `<button class="${d === S.dd ? 'on' : ''}" data-a="pickday" data-d="${d}">${Number(d)}日</button>`).join('')}</div>` : ''}
+  </div>` : ''}
+  ${byDay ? `<div class="seg">${days.map(d => `<button class="${d === S.dd ? 'on' : ''}" data-a="pickday" data-d="${d}">${Number(d)}日</button>`).join('')}</div>` : ''}
   <div class="card">
     <h2>${byDay ? dayLabel(M.ym, S.dd) : ymLabel(M.ym) + ' 月間'}　${m.label}ランキング</h2>
     ${pos.length ? pos.map(rkRow(m.i, byDay)).join('') : '<div class="empty">この項目の実績はまだありません</div>'}
@@ -720,8 +782,8 @@ function viewDays(){
                : `<div class="d none"><b>${i}</b><span style="color:#5d576a">—</span></div>`;
   }
   const toggle = `<div class="seg2"><button class="${S.dayView === 'cal' ? 'on' : ''}" data-a="dview" data-v="cal">カレンダー</button><button class="${S.dayView === 'grid' ? 'on' : ''}" data-a="dview" data-v="grid">一覧表（日×人）</button></div>`;
-  if (S.dayView === 'grid') return toggle + viewGrid(M) + updatedLine();
-  return toggle + `
+  if (S.role === 'admin' && S.dayView === 'grid') return toggle + viewGrid(M) + updatedLine();
+  return (S.role === 'admin' ? toggle : '') + `
   <div class="card"><h2>${ymLabel(M.ym)} カレンダー（総売）</h2>
     <div class="cal">${'日月火水木金土'.split('').map(w => `<div class="dw">${w}</div>`).join('')}${cells}</div>
     <div class="note">日付をタップすると、その日の内訳が見られます。「—」はデータ未入力（または営業なし）の日で、集計には含めていません。</div>
@@ -741,18 +803,26 @@ function viewDayDetail(dd){
     ${pair(d.store.gross, d.store.sub)}
     <div class="kpis" style="margin-top:12px">${[['本数', 'shimei'], ['新規', 'shinki'], ['飲み直し', 'nomi'], ['送り', 'okuri'], ['ヘルプ', 'help'], ['同伴', 'douhan']].map(([l, k]) => `<div class="kpi"><div class="v">${fmt(d.store[k])}</div><div class="l">${l}</div></div>`).join('')}</div>
   </div>
-  <div class="card"><h2>個人別</h2>
+  ${S.role !== 'admin' ? `<div class="card"><h2>🔒 個人別</h2><div class="dim">個人の日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div><div class="note">店舗合計には、一覧に載せていない運営メンバー分（総売 ${yen(hid.gross || 0)}）${d.unas ? `と「担当なしの売上」${yen(d.unas)}` : ''}を含みます。</div></div>` : `<div class="card"><h2>個人別</h2>
     <div class="scrollx"><table class="tbl"><thead><tr><th>名前</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
     ${rows.map(({ e, r }) => `<tr class="tap" data-a="person" data-id="${esc(e.id)}"><td>${esc(e.name)}</td><td>${fmt(r[0])}</td><td>${fmt(r[1])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" class="dim">実績のある人がいません</td></tr>'}
     </tbody></table></div>
     <div class="note">飲=飲み直し／送=送り／ヘ=ヘルプ指名／同=同伴。店舗合計には、一覧に載せていない運営メンバー分（総売 ${yen(hid.gross || 0)}）を含みます。${d.unas ? `<br>さらに「担当なしの売上」${yen(d.unas)}を含みます。` : ''}</div>
-  </div>`;
+  </div>`}`;
 }
 
+function rowOf(e, dd){
+  const d = S.M && S.M.days[dd]; if (!d) return null;
+  if (S.role === 'admin') return d.rows[e.id] || null;
+  if (S.role === 'member' && hexOf(e.name) === S.hex && S.priv && S.priv.days) return S.priv.days[dd] || null;
+  return null;
+}
+function canDetail(e){ return S.role === 'admin' || (S.role === 'member' && hexOf(e.name) === S.hex); }
 function viewPerson(){
   const M = S.M; if (!M) return noData();
+  if (S.role === 'member' && !S.empId) { const me = M.employees.find(x => hexOf(x.name) === S.hex); if (me) S.empId = me.id; else return '<div class="card"><h2>あなたの実績</h2><div class="dim">この月の名簿にあなたの名前がありません。名前が変わった場合は、管理者に伝えてください。</div></div>'; }
   const e = M.employees.find(x => x.id === S.empId);
-  if (!e) {
+  if (!e && S.role !== 'member') {
     const q = S.empQuery.trim();
     const list = M.employees.filter(x => !q || x.name.includes(q));
     return `<div class="card"><h2>だれの実績を見ますか？</h2>
@@ -762,15 +832,16 @@ function viewPerson(){
   const t = empMonth(M, e.id);
   const days = dayList(M);
   const rS = ranking(M, 0, null).find(x => x.id === e.id), rG = ranking(M, 1, null).find(x => x.id === e.id);
-  const dd = S.dd, td = dd && M.days[dd].rows[e.id];
+  const detail = canDetail(e);
+  const dd = S.dd, td = dd && rowOf(e, dd);
   const pt = S.prevM && S.prevM.employees.some(x => x.id === e.id) ? empMonth(S.prevM, e.id) : null;
   const WORK = ['A出勤', 'B出勤', '遅刻'];
-  const hist = days.map(d => ({ d, r: M.days[d].rows[e.id] })).filter(x => x.r && (x.r.slice(0, 8).some(n => n !== 0) || WORK.includes(x.r[8])));
+  const hist = days.map(d => ({ d, r: rowOf(e, d) })).filter(x => x.r && (x.r.slice(0, 8).some(n => n !== 0) || WORK.includes(x.r[8])));
   return `
-  <button class="btn ghost small" data-a="persclear" style="margin-bottom:10px">← 人を選びなおす</button>
+  <button class="btn ghost small" data-a="persclear" style="margin-bottom:10px">${S.role === 'member' ? '← 自分の画面に戻る' : '← 人を選びなおす'}</button>
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:22px;font-weight:700">${esc(e.name)}</div><span class="pill">${e.kind === 'ops' ? '運営' : 'キャスト'}</span></div>
-    ${td ? `<div class="hr"></div><div class="lbl">${dayLabel(M.ym, dd)}</div>${pair(td[1], td[0])}` : `<div class="note">${dd ? dayLabel(M.ym, dd) + ' は実績なし' : ''}</div>`}
+    ${!detail ? '' : td ? `<div class="hr"></div><div class="lbl">${dayLabel(M.ym, dd)}</div>${pair(td[1], td[0])}` : `<div class="note">${dd ? dayLabel(M.ym, dd) + ' は実績なし' : ''}</div>`}
   </div>
   <div class="card"><h2>${ymLabel(M.ym)} 累計</h2>
     ${pair(t[1], t[0],
@@ -780,12 +851,13 @@ function viewPerson(){
     ${pt ? '' : '<div class="note">前月のデータがないため、前月比は表示していません。</div>'}
     <div class="note">月間目標は店舗全体のみです（個人目標は未設定）。</div>
   </div>
-  <div class="card"><h2>日別履歴</h2>
+  ${!detail ? '<div class="card"><h2>🔒 日別履歴</h2><div class="dim">日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div></div>' : `<div class="card"><h2>日別履歴</h2>
     <div class="scrollx"><table class="tbl"><thead><tr><th>営業日</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
     ${hist.slice().reverse().map(({ d, r }) => `<tr class="tap" data-a="openday" data-d="${d}"><td>${Number(M.ym.split('-')[1])}/${Number(d)}</td><td>${fmt(r[0])}</td><td>${fmt(r[1])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" class="dim">実績なし</td></tr>'}
     </tbody></table></div>
     <div class="note">実績のある日と、出勤していて実績が0だった日を表示しています。出勤の記録がない日は表示していません。</div>
-  </div>
+  </div>`}
+  ${S.role === 'member' && detail ? `<div class="card"><h2>パスワードを変える</h2><input type="password" id="newpw" placeholder="新しいパスワード（6文字以上）" autocomplete="new-password"><div style="margin-top:10px"><button class="btn ghost small" data-a="chgpw">変更する</button></div></div>` : ''}
   ${updatedLine()}`;
 }
 
@@ -804,6 +876,14 @@ function viewAdmin(){
     <input type="number" id="tgt" inputmode="numeric" placeholder="例: 30000000" value="${esc(S.targetDraft !== '' ? S.targetDraft : (S.meta.targets && S.meta.targets[S.ym]) || '')}">
     <div style="margin-top:10px"><button class="btn ghost small" data-a="settarget">目標を保存</button></div>
     <div class="note">表示中の月（上の ◀ ▶ で切り替え）の目標です。</div>
+  </div>
+  <div class="card"><h2>個人ログイン（招待コード）</h2>
+    <div class="note" style="margin-top:0">本人にコードを伝えてください。本人は「個人」タブ →「初めての人は登録」で、コードと新しいパスワードを入れます。</div>
+    ${!S.memberInfo ? '<button class="btn ghost small" data-a="loadmembers">登録の状況を読み込む</button>'
+      : (S.M ? S.M.employees.map(e => { const h = hexOf(e.name), reg = S.memberInfo.members[h], inv = S.memberInfo.invites[h];
+        return `<div class="rk"><div class="nm">${esc(e.name)}<small>${reg ? '登録済み' : (inv ? '招待コード: <b style="color:var(--gold);letter-spacing:1px">' + esc(inv.code) + '</b>' : '未招待')}</small></div>
+          <div class="vl"><button class="btn ghost small" data-a="issueinv" data-n="${esc(e.name)}">${inv ? 'コード作りなおし' : 'コードを作る'}</button>${reg ? `<button class="btn ghost small" data-a="unreg" data-n="${esc(e.name)}" style="margin-top:6px">登録を解除</button>` : ''}</div></div>`; }).join('') : '<div class="dim">先に月のデータを取り込んでください</div>')}
+    <div class="note">パスワードを忘れた人は「登録を解除」を押し、Firebaseの Authentication のユーザー一覧から、その人（u…@x8sales.app）を削除すると、新しいコードで登録しなおせます。</div>
   </div>
   <div class="card"><h2>取り込み履歴・変更履歴</h2>
     ${S.importsList == null ? '<button class="btn ghost small" data-a="loadimports">履歴を読み込む</button>'
@@ -886,14 +966,20 @@ function mergeMonth(oldM, newM, allowRemove){
 
 /* ---------- login ---------- */
 function viewLogin(){
-  const adm = S.loginRole === 'admin';
+  const r = S.loginRole, reg = S.regMode && r === 'member', B = S.loginBusy ? 'disabled' : '';
+  const tabs = [['staff', 'みんなで見る'], ['member', '個人'], ['admin', '管理者']];
+  const f = (id, lbl, type, ph, ac) => `<div class="f"><label class="lbl">${lbl}</label><input type="${type}" id="${id}" placeholder="${ph}" autocomplete="${ac}" ${B}></div>`;
+  let fields = '';
+  if (r === 'member') fields = f('nm', 'お名前（Excelと同じ表記）', 'text', '例: るい', 'username') + (reg ? f('code', '招待コード（管理者からもらったもの）', 'text', '例: AB12CD34', 'off') + f('pw', '新しいパスワード（6文字以上）', 'password', 'パスワード', 'new-password') + f('pw2', 'もう一度', 'password', 'パスワード（確認）', 'new-password') : f('pw', '個人パスワード', 'password', 'パスワード', 'current-password'));
+  else fields = f('pw', r === 'admin' ? '管理者パスワード' : 'パスワード', 'password', 'パスワード', 'current-password');
   return `<div class="login">
     <div class="logo">X8</div><div class="sub">本店 売上管理</div>
-    <div class="f"><label class="lbl">${adm ? '管理者パスワード' : 'パスワード'}</label>
-      <input type="password" id="pw" autocomplete="current-password" placeholder="パスワード" ${S.loginBusy ? 'disabled' : ''}></div>
+    <div class="seg2" style="margin-bottom:18px">${tabs.map(([k, l]) => `<button class="${r === k ? 'on' : ''}" data-a="logintab" data-r="${k}">${l}</button>`).join('')}</div>
+    ${fields}
     <div class="err">${esc(S.loginErr)}</div>
-    <button class="btn" data-a="login" ${S.loginBusy ? 'disabled' : ''}>${S.loginBusy ? '確認中…' : 'ログイン'}</button>
-    <div style="margin-top:22px"><button class="iconbtn" data-a="switchrole">${adm ? '従業員ログインに戻る' : '管理者はこちら'}</button></div>
+    <button class="btn" data-a="login" ${B}>${S.loginBusy ? '確認中…' : (reg ? '登録してログイン' : 'ログイン')}</button>
+    ${r === 'member' ? `<div style="margin-top:18px"><button class="iconbtn" data-a="regtoggle">${reg ? 'ログインに戻る' : '初めての人は登録（招待コードが必要）'}</button></div>` : ''}
+    <div class="note" style="margin-top:18px">${r === 'member' ? '個人ログインでは、自分の日別の売上も見られます。' : r === 'staff' ? 'お店の合計とランキングが見られます。個人の日別は個人ログインで見られます。' : ''}</div>
   </div>`;
 }
 
@@ -902,7 +988,7 @@ function render(){
   const root = $('#root');
   if (S.phase === 'boot') { root.innerHTML = '<div class="loading">読み込み中…</div>'; return; }
   if (S.phase === 'fatal') { root.innerHTML = `<div class="login"><div class="logo">X8</div><div class="err" style="margin-top:20px">${esc(S.fatal || '接続できません')}</div><button class="btn ghost" onclick="location.reload()">再読み込み</button></div>`; return; }
-  if (S.phase === 'login') { const keep = $('#pw') ? $('#pw').value : ''; root.innerHTML = viewLogin(); if (keep && $('#pw')) $('#pw').value = keep; return; }
+  if (S.phase === 'login') { const ids = ['nm', 'code', 'pw', 'pw2']; const keep = {}; ids.forEach(k => { if ($('#' + k)) keep[k] = $('#' + k).value; }); root.innerHTML = viewLogin(); ids.forEach(k => { if (keep[k] && $('#' + k)) $('#' + k).value = keep[k]; }); return; }
   const tabs = [['home', '🏠', 'ホーム'], ['rank', '🏆', 'ランキング'], ['days', '📅', '日別'], ['pers', '👤', '個人']];
   if (S.role === 'admin') tabs.push(['admin', '⚙️', '管理']);
   let body = '';
@@ -937,10 +1023,15 @@ document.addEventListener('click', async (ev) => {
   else if (a === 'rscope') { S.rankScope = el.dataset.s; render(); }
   else if (a === 'openday') { S.dd = el.dataset.d; S.dayDetail = el.dataset.d; S.tab = 'days'; render(); window.scrollTo(0, 0); }
   else if (a === 'backdays') { S.dayDetail = null; render(); }
-  else if (a === 'person') { S.empId = el.dataset.id; lsSet('x8s_emp', S.empId); S.tab = 'pers'; render(); window.scrollTo(0, 0); }
+  else if (a === 'person') { S.empId = el.dataset.id; if (S.role !== 'member') lsSet('x8s_emp', S.empId); S.tab = 'pers'; render(); window.scrollTo(0, 0); }
   else if (a === 'persclear') { S.empId = null; S.empQuery = ''; render(); }
+  else if (a === 'logintab') { S.loginRole = el.dataset.r; S.regMode = false; S.loginErr = ''; render(); }
+  else if (a === 'regtoggle') { S.regMode = !S.regMode; S.loginErr = ''; render(); }
+  else if (a === 'chgpw') doChangePw();
+  else if (a === 'loadmembers') loadMembers();
+  else if (a === 'issueinv') doIssue(el.dataset.n);
+  else if (a === 'unreg') doUnreg(el.dataset.n);
   else if (a === 'logout') { try { await backend.logout(); } catch (e) {} if (TEST) return; }
-  else if (a === 'switchrole') { S.loginRole = S.loginRole === 'admin' ? 'staff' : 'admin'; S.loginErr = ''; render(); }
   else if (a === 'login') doLogin();
   else if (a === 'pickfile') $('#xfile').click();
   else if (a === 'cancelimp') { S.imp = null; render(); }
@@ -957,21 +1048,50 @@ document.addEventListener('change', (ev) => {
   if (ev.target.id === 'xfile' && ev.target.files && ev.target.files[0]) { const f = ev.target.files[0]; ev.target.value = ''; doParse(f); }
   if (ev.target.id === 'allowrm' && S.imp) S.imp.allowRemove = ev.target.checked;
 });
-document.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && ev.target.id === 'pw') doLogin(); });
+document.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && ['pw', 'pw2', 'nm', 'code'].includes(ev.target.id)) doLogin(); });
 window.addEventListener('online', () => { $('#offline').style.display = 'none'; });
 window.addEventListener('offline', () => { $('#offline').style.display = 'block'; });
 
 async function doLogin(){
-  const pw = $('#pw') ? $('#pw').value : ''; if (!pw) { S.loginErr = 'パスワードを入力してください'; render(); return; }
+  const v = (id) => ($('#' + id) ? $('#' + id).value : '');
+  const pw = v('pw'), r = S.loginRole, reg = S.regMode && r === 'member', nm = v('nm').trim();
+  if (r === 'member' && !nm) { S.loginErr = 'お名前を入力してください'; render(); return; }
+  if (!pw) { S.loginErr = 'パスワードを入力してください'; render(); return; }
+  if (reg) {
+    if (!v('code').trim()) { S.loginErr = '招待コードを入力してください'; render(); return; }
+    if (pw.length < 6) { S.loginErr = 'パスワードは6文字以上にしてください'; render(); return; }
+    if (pw !== v('pw2')) { S.loginErr = '確認用のパスワードが一致しません'; render(); return; }
+  }
   S.loginBusy = true; S.loginErr = ''; render();
-  try { await backend.login(S.loginRole, pw); }
-  catch (e) {
+  try {
+    if (reg) await backend.registerMember(nm, v('code'), pw);
+    else if (r === 'member') await backend.loginMember(nm, pw);
+    else await backend.login(r, pw);
+  } catch (e) {
     const c = e && e.code || '';
-    S.loginErr = (c.includes('invalid-credential') || c.includes('wrong-password') || c.includes('user-not-found') || c.includes('invalid-login')) ? 'パスワードが違います'
+    S.loginErr = c === 'bad-code' ? '招待コードが違うか、まだ招待されていません。管理者に確認してください'
+      : c.includes('email-already-in-use') ? 'この名前はすでに登録されています。パスワードを忘れた場合は管理者に連絡してください'
+      : c.includes('weak-password') ? 'パスワードは6文字以上にしてください'
+      : (c.includes('invalid-credential') || c.includes('wrong-password') || c.includes('user-not-found') || c.includes('invalid-login')) ? (r === 'member' ? '名前かパスワードが違います' : 'パスワードが違います')
       : c.includes('too-many-requests') ? '試行回数が多すぎます。しばらくしてからやり直してください'
       : c.includes('network') ? '通信できません。電波を確認してください' : 'ログインできませんでした';
   }
   S.loginBusy = false; render();
+}
+async function doChangePw(){
+  const pw = $('#newpw') ? $('#newpw').value : '';
+  if (pw.length < 6) { toast('パスワードは6文字以上にしてください'); return; }
+  try { await backend.changePassword(pw); $('#newpw').value = ''; toast('パスワードを変えました'); }
+  catch (e) { toast((e && e.code || '').includes('requires-recent-login') ? '一度ログアウトして、入りなおしてからやり直してください' : '変更できませんでした'); }
+}
+async function loadMembers(){ try { S.memberInfo = await backend.listMembers(); } catch (e) { toast('読み込めませんでした'); } render(); }
+async function doIssue(name){
+  if (S.memberInfo && S.memberInfo.members[hexOf(name)] && !confirm(name + ' さんはすでに登録済みです。新しい招待コードを作ります（今のパスワードはそのまま使えます）。')) return;
+  try { await backend.issueInvite(name); toast('招待コードを作りました'); await loadMembers(); } catch (e) { toast('作れませんでした'); }
+}
+async function doUnreg(name){
+  if (!confirm(name + ' さんの個人登録を解除します。本人はもう一度、新しい招待コードで登録しなおす必要があります。よろしいですか？')) return;
+  try { await backend.unregister(name); await backend.issueInvite(name); toast('登録を解除しました'); await loadMembers(); } catch (e) { toast('解除できませんでした'); }
 }
 
 function loadXLSX(){
@@ -1031,10 +1151,12 @@ async function doRestore(){
   if (!navigator.onLine) $('#offline').style.display = 'block';
   try { backend = TEST ? makeTestBackend() : await makeFirebaseBackend(); }
   catch (e) { S.phase = 'fatal'; S.fatal = '接続できませんでした。電波を確認して、再読み込みしてください。'; render(); return; }
-  backend.onAuth((role) => {
-    if (unsubMonth) { unsubMonth(); unsubMonth = null; } if (unsubMeta) { unsubMeta(); unsubMeta = null; }
-    if (!role) { S.phase = 'login'; S.role = null; S.M = null; S.ym = null; S.meta = { months: [], targets: {} }; render(); return; }
-    startApp(role);
+  backend.onAuth((info) => {
+    if (unsubMonth) { unsubMonth(); unsubMonth = null; } if (unsubMeta) { unsubMeta(); unsubMeta = null; } if (unsubPriv) { unsubPriv(); unsubPriv = null; }
+    S.priv = null; S.empId = null; S.memberInfo = null; S.dayView = 'cal'; S.rankScope = 'month';
+    if (!info) { S.phase = 'login'; S.role = null; S.hex = null; S.M = null; S.ym = null; S.meta = { months: [], targets: {} }; render(); return; }
+    S.hex = info.hex || null; if (info.role !== 'member') S.empId = lsGet('x8s_emp') || null;
+    startApp(info.role);
   });
 })();
 </script>
