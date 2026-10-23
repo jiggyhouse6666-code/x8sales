@@ -399,7 +399,7 @@ const FIREBASE_CONFIG = {
 };
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-8 - 2026-10-23';
+const BUILD = 'sales-10 - 2026-10-24';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -584,7 +584,7 @@ const S = {
   meta: { months: [], targets: {} },
   ym: null, M: null, prevM: null, updatedAt: null,
   dd: null,               // 選択中の日
-  rankMetric: 'sub', rankScope: 'month', dayView: 'cal', gridMetric: 'gross',
+  rankMetric: 'sub', rankScope: 'month', rankView: 'rank', dayView: 'cal', gridMetric: 'gross',
   empId: lsGet('x8s_emp') || null, empQuery: '',
   dayDetail: null,        // 日別画面で詳細表示中のdd
   loginRole: 'staff', regMode: false, hex: null, priv: null, memberInfo: null, loginErr: '', loginBusy: false,
@@ -652,15 +652,15 @@ function delta(cur, prev, unit){
 function viewHomeLite(){
   const M = S.M; if (!M) return noData();
   const days = dayList(M);
-  const rk = ranking(M, 1, null).filter(x => x.v > 0).slice(0, 5);
+  const rk = ranking(M, 0, null).filter(x => x.v > 0).slice(0, 5);
   return `
   <div class="card"><h2>${ymLabel(M.ym)}</h2>
     <div class="lbl">営業日</div><div class="big sm">${days.length}日</div>
     <div class="note">お店全体の売上は、管理者だけが見られます。</div>
   </div>
   <div class="card">
-    <h2>月間 総売ランキング TOP5</h2>
-    ${rk.length ? rk.map(rkRow(1, false)).join('') : '<div class="dim">データなし</div>'}
+    <h2>月間 小計ランキング TOP5</h2>
+    ${rk.length ? rk.map(rkRow(0, false)).join('') : '<div class="dim">データなし</div>'}
     <div style="margin-top:10px"><button class="btn ghost small" data-a="tab" data-t="rank">ランキングをすべて見る</button></div>
   </div>
   ${S.role === 'member' ? '<div class="card"><button class="btn" data-a="tab" data-t="pers">自分の実績を見る</button></div>' : ''}
@@ -755,15 +755,40 @@ function rkRow(i, byDay){
   };
 }
 
+const metList = () => S.role === 'admin' ? MET : MET.filter(z => z.k !== 'gross');
+function viewCompare(M, m){
+  if (!S.prevM) return '<div class="card"><div class="empty">前月のデータがまだありません。<br>管理者が前月のExcelを取り込むと表示されます。</div></div>';
+  const P = S.prevM, i = m.i;
+  const ids = {}; M.employees.forEach(e => ids[e.id] = e.name); P.employees.forEach(e => { if (!ids[e.id]) ids[e.id] = e.name; });
+  const inM = {}, inP = {}; M.employees.forEach(e => inM[e.id] = 1); P.employees.forEach(e => inP[e.id] = 1);
+  const rows = Object.keys(ids).map(id => ({ id, name: ids[id], cur: inM[id] ? empMonth(M, id)[i] : 0, prev: inP[id] ? empMonth(P, id)[i] : 0, hasP: !!inP[id], hasM: !!inM[id] }))
+    .filter(r => r.cur || r.prev).sort((a, b) => b.cur - a.cur || b.prev - a.prev);
+  const fv = (n) => m.unit === 'yen' ? fmt(n) : fmt(n);
+  const pct = (r) => !r.hasP ? '<span class="dim">新</span>' : (r.prev === 0 ? '<span class="dim">—</span>' : ((r.cur - r.prev) / r.prev * 100 >= 0 ? '+' : '−') + Math.abs(Math.round((r.cur - r.prev) / r.prev * 100)) + '%');
+  const dl = (r) => { const d = r.cur - r.prev; return `<span class="${d > 0 ? 'pos' : d < 0 ? 'neg' : 'dim'}">${d > 0 ? '+' : d < 0 ? '−' : ''}${fv(Math.abs(d))}</span>`; };
+  const tc = rows.reduce((a, r) => a + r.cur, 0), tp = rows.reduce((a, r) => a + r.prev, 0);
+  return `<div class="card"><h2>${m.label}　${ymLabel(P.ym)} → ${ymLabel(M.ym)}</h2>
+    <div class="scrollx"><table class="tbl"><thead><tr><th>名前</th><th>先月</th><th>今月</th><th>差（率）</th></tr></thead><tbody>
+    ${rows.map(r => `<tr class="tap" data-a="person" data-id="${esc(r.id)}"><td>${esc(r.name)}</td><td class="${r.prev ? '' : 'z'}">${fv(r.prev)}</td><td class="${r.cur ? '' : 'z'}">${fv(r.cur)}</td><td>${dl(r)}<br><small class="dim">${pct(r)}</small></td></tr>`).join('')}
+    <tr class="total"><td>合計</td><td>${fv(tp)}</td><td>${fv(tc)}</td><td>${dl({ cur: tc, prev: tp })}</td></tr>
+    </tbody></table></div>
+    <div class="note">先月は月全体の合計、今月は${dayList(M).length}日分（月の途中）です。「新」は先月の名簿にいなかった人です。${m.k === 'gross' || m.k === 'sub' ? '合計は表に載っている人だけの合計です。' : ''}</div>
+  </div>`;
+}
+
 function viewRank(){
   const M = S.M; if (!M) return noData();
-  const m = MET.find(z => z.k === S.rankMetric) || MET[0];
+  const m = metList().find(z => z.k === S.rankMetric) || MET[0];
+  if (S.rankView === 'cmp') return `<div class="seg2"><button data-a="rview" data-v="rank">ランキング</button><button class="on" data-a="rview" data-v="cmp">前月比一覧</button></div>
+  <div class="seg">${metList().map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="rmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
+  ${viewCompare(M, m)}${updatedLine()}`;
   const byDay = S.role === 'admin' && S.rankScope === 'day' && S.dd;
   const list = ranking(M, m.i, byDay ? S.dd : null);
   const pos = list.filter(x => x.v > 0), zero = list.filter(x => x.v === 0);
   const days = dayList(M);
   return `
-  <div class="seg">${MET.map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="rmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
+  <div class="seg2"><button class="on" data-a="rview" data-v="rank">ランキング</button><button data-a="rview" data-v="cmp">前月比一覧</button></div>
+  <div class="seg">${metList().map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="rmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
   ${S.role === 'admin' ? `<div class="seg2">
     <button class="${!byDay ? 'on' : ''}" data-a="rscope" data-s="month">${ymLabel(M.ym)} 月間</button>
     <button class="${byDay ? 'on' : ''}" data-a="rscope" data-s="day">日別</button>
@@ -774,7 +799,7 @@ function viewRank(){
     ${pos.length ? pos.map(rkRow(m.i, byDay)).join('') : '<div class="empty">この項目の実績はまだありません</div>'}
     ${(!byDay && !S.prevM) ? '<div class="note">前月のデータが入ると、前月比が表示されます。</div>' : ''}
   </div>
-  <div class="note">同じ数字の人は同じ順位です。同順位の並びは名簿順です。小計と総売は別々に集計しています。${zero.length ? ` 実績0の ${zero.length}人 は表示していません。` : ''}</div>
+  <div class="note">同じ数字の人は同じ順位です。同順位の並びは名簿順です。${S.role === 'admin' ? '小計と総売は別々に集計しています。' : '総売は、個人ページで見られます。'}${zero.length ? ` 実績0の ${zero.length}人 は表示していません。` : ''}</div>
   ${updatedLine()}`;
 }
 
@@ -1055,6 +1080,7 @@ document.addEventListener('click', async (ev) => {
   else if (a === 'pickday') { S.dd = el.dataset.d; render(); }
   else if (a === 'dview') { S.dayView = el.dataset.v; render(); }
   else if (a === 'gmetric') { S.gridMetric = el.dataset.k; render(); }
+  else if (a === 'rview') { S.rankView = el.dataset.v; render(); }
   else if (a === 'rmetric') { S.rankMetric = el.dataset.k; render(); }
   else if (a === 'rscope') { S.rankScope = el.dataset.s; render(); }
   else if (a === 'openday') { S.dd = el.dataset.d; S.dayDetail = el.dataset.d; S.tab = 'days'; render(); window.scrollTo(0, 0); }
