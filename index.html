@@ -87,13 +87,13 @@ main{padding-top:14px;}
 .tbl tr.tap{cursor:pointer;}
 .tbl td.z{color:#5d576a;}
 .tbl tr.total td{border-top:1px solid var(--gold2); font-weight:700; color:var(--gold);}
-.gridwrap{overflow:auto; max-height:70vh; margin:0 -16px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+.gridwrap{overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain; touch-action:pan-x pan-y; margin:0 -16px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
 .grid{border-collapse:separate; border-spacing:0; font-size:12px; font-variant-numeric:tabular-nums;}
-.grid th,.grid td{padding:6px 7px; text-align:right; white-space:nowrap; border-right:1px solid rgba(255,255,255,.06); border-bottom:1px solid rgba(255,255,255,.06); background:var(--bg);}
-.grid thead th{position:sticky; top:0; z-index:3; background:#1d1925; color:var(--dim); font-weight:600; font-size:11px;}
-.grid tr.gt td{position:sticky; top:27px; z-index:3; background:#2a2212; color:var(--gold); font-weight:700; border-bottom:1px solid var(--gold2);}
-.grid .c1{position:sticky; left:0; z-index:2; text-align:center; min-width:44px; font-weight:700; color:var(--text); background:#1d1925; cursor:pointer;}
-.grid .c2{position:sticky; left:44px; z-index:2; min-width:64px; color:var(--gold); font-weight:700; background:#1d1925; border-right:1px solid var(--gold2);}
+.grid th,.grid td{padding:7px 6px; text-align:right; white-space:nowrap; border-right:1px solid rgba(255,255,255,.06); border-bottom:1px solid rgba(255,255,255,.06); background:var(--bg);}
+.grid thead th{ background:#1d1925; color:var(--dim); font-weight:600; font-size:11px;}
+.grid tr.gt td{background:#2a2212; color:var(--gold); font-weight:700; border-bottom:1px solid var(--gold2);}
+.grid .c1{position:sticky; left:0; z-index:2; text-align:center; min-width:38px; font-weight:700; color:var(--text); background:#1d1925; cursor:pointer;}
+.grid .c2{position:sticky; left:38px; z-index:2; min-width:58px; color:var(--gold); font-weight:700; background:#1d1925; border-right:1px solid var(--gold2);}
 .grid thead .c1,.grid thead .c2,.grid tr.gt .c1,.grid tr.gt .c2{z-index:4;}
 .grid td.z{color:#4b4658;}
 .grid td.hi{color:var(--gold); font-weight:700;}
@@ -393,7 +393,7 @@ const FIREBASE_CONFIG = {
 };
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-3 - 2026-10-23';
+const BUILD = 'sales-1 - 2026-10-23';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -688,18 +688,23 @@ function viewRank(){
 function viewGrid(M){
   const m = MET.find(z => z.k === S.gridMetric) || MET[1];
   const days = dayList(M);
-  const emps = M.employees;
+  const empsAll = M.employees;
+  const colTotAll = empsAll.map(e => days.reduce((a, dd) => { const r = M.days[dd].rows[e.id]; return a + (r ? r[m.i] : 0); }, 0));
+  const emps = empsAll.filter((e, i) => colTotAll[i] !== 0);
+  const hiddenN = empsAll.length - emps.length;
   const colTot = emps.map(e => days.reduce((a, dd) => { const r = M.days[dd].rows[e.id]; return a + (r ? r[m.i] : 0); }, 0));
   const all = days.reduce((a, dd) => a + (M.days[dd].store[m.k] || 0), 0);
-  const cell = (v) => v ? fmt(v) : '·';
+  const isY = m.unit === 'yen';
+  const nf = (v) => isY ? (Math.round(v / 100) / 10).toLocaleString('ja-JP', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : fmt(v);
+  const cell = (v) => v ? nf(v) : '·';
   const head = `<tr><th class="c1">日</th><th class="c2">店合計</th>${emps.map((e, i) => `<th>${esc(e.name)}</th>`).join('')}</tr>`;
-  const tot = `<tr class="gt"><td class="c1">計</td><td class="c2">${fmt(all)}</td>${colTot.map(v => `<td>${cell(v)}</td>`).join('')}</tr>`;
+  const tot = `<tr class="gt"><td class="c1">計</td><td class="c2">${nf(all)}</td>${colTot.map(v => `<td>${cell(v)}</td>`).join('')}</tr>`;
   const body = days.map(dd => { const d = M.days[dd];
-    return `<tr><td class="c1" data-a="openday" data-d="${dd}">${Number(dd)}</td><td class="c2">${fmt(d.store[m.k] || 0)}</td>${emps.map(e => { const r = d.rows[e.id]; const v = r ? r[m.i] : 0; return `<td class="${v ? '' : 'z'}">${cell(v)}</td>`; }).join('')}</tr>`; }).join('');
+    return `<tr><td class="c1" data-a="openday" data-d="${dd}">${Number(dd)}</td><td class="c2">${nf(d.store[m.k] || 0)}</td>${emps.map(e => { const r = d.rows[e.id]; const v = r ? r[m.i] : 0; return `<td class="${v ? '' : 'z'}">${cell(v)}</td>`; }).join('')}</tr>`; }).join('');
   return `<div class="seg">${MET.map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="gmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
-  <div class="card" style="padding-left:16px;padding-right:16px"><h2>${ymLabel(M.ym)} 日別 × 人別（${m.label}）</h2>
+  <div class="card" style="padding-left:16px;padding-right:16px"><h2>${ymLabel(M.ym)} 日別 × 人別（${m.label}${isY ? '・単位:千円' : ''}）</h2>
     <div class="gridwrap"><table class="grid"><thead>${head}</thead><tbody>${tot}${body}</tbody></table></div>
-    <div class="note">左の日付をタップすると、その日の内訳が見られます。横にスワイプすると全員が見られます。「店合計」は一覧に載せていない運営メンバー${m.k === 'gross' ? 'と担当なしの売上' : ''}を含みます。「·」は0です。</div>
+    <div class="note">左の日付をタップすると、その日の内訳が見られます。横にスワイプすると全員が見られます。この月に数字がない人（${hiddenN}人）は表から省いています。「店合計」は一覧に載せていない運営メンバー${m.k === 'gross' ? 'と担当なしの売上' : ''}を含みます。「·」は0です。</div>
   </div>`;
 }
 
