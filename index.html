@@ -157,6 +157,10 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
   // 運営メンバーのうち、一覧・ランキングに載せる人(しんさんの指定)
   var OPS_SHOWN = ['るか', 'りお', 'かなた'];
 
+  // 名前の表記ゆれをそろえる（「（運営）」の注記を外し、全角半角をそろえる）
+  function cleanName(s) { return String(s == null ? '' : s).normalize('NFKC').replace(/\(運営\)\s*$/, '').trim(); }
+  function nameId(name) { var s = cleanName(name), h = 'u'; for (var i = 0; i < s.length; i++) { var c = s.charCodeAt(i).toString(16); h += ('0000' + c).slice(-4); } return h; }
+
   function colLetter(n) { var s = ''; while (n > 0) { var m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; }
   function cell(ws, r, c) { return ws[colLetter(c) + r]; }
   function val(ws, r, c) { var x = cell(ws, r, c); return x ? x.v : undefined; }
@@ -204,7 +208,7 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
         if (b === '合計') break;
         var no = num(val(ws, r, noCol));
         if (no === null) continue;
-        var name = str(val(ws, r, nameCol));
+        var name = cleanName(val(ws, r, nameCol));
         var rec = { no: no, name: name, kind: kind, m: {}, att: str(val(ws, r, cols[ATT_HEADER])) };
         METRICS.forEach(function (m) {
           var v = val(ws, r, cols[m.header]);
@@ -322,15 +326,17 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
           METRICS.forEach(function (m) { day.hidden[m.key] += r.m[m.key]; });
           return;
         }
-        var id = 'e' + (r.no < 10 ? '0' : '') + r.no;
+        var id = nameId(r.name);
         if (!empMap[id]) empMap[id] = { id: id, name: r.name, kind: r.kind, no: r.no };
-        else if (empMap[id].name !== r.name) {
-          report.warnings.push({ level: 'warn', day: dd, msg: 'No.' + r.no + ' の名前が日によって違います: 「' + empMap[id].name + '」と「' + r.name + '」(先に出た名前を使います)' });
-        }
         var any = METRICS.some(function (m) { return r.m[m.key] !== 0; });
         if (any || r.att) {
           var arr = METRICS.map(function (m) { return r.m[m.key]; });
           arr.push(r.att || '');
+          if (day.rows[id]) {
+            report.warnings.push({ level: 'warn', day: dd, msg: '同じ名前「' + r.name + '」が同じ日に2行あります。数字を足し合わせました' });
+            for (var q = 0; q < 8; q++) arr[q] += day.rows[id][q];
+            if (!arr[8]) arr[8] = day.rows[id][8];
+          }
           day.rows[id] = arr;
         }
       });
@@ -393,7 +399,7 @@ const FIREBASE_CONFIG = {
 };
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-6 - 2026-10-23';
+const BUILD = 'sales-8 - 2026-10-23';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -436,7 +442,7 @@ function splitMonth(M){
   M.employees.forEach(e => { privs[e.id] = { days: {} }; const t = new Array(9).fill(0); pub.totals[e.id] = t; });
   Object.keys(M.days).forEach(dd => {
     const d = M.days[dd];
-    pub.days[dd] = { store: d.store, hidden: d.hidden, unas: d.unas || 0, rows: {} };
+    pub.days[dd] = { rows: {} };  // 店舗の数字は公開用に入れない（管理者用のfullにだけある）
     Object.keys(d.rows).forEach(id => {
       if (!privs[id]) return;
       privs[id].days[dd] = d.rows[id];
@@ -643,13 +649,35 @@ function delta(cur, prev, unit){
   return `<span class="${d > 0 ? 'pos' : 'neg'}">${d > 0 ? '▲' : '▼'} ${s}</span>`;
 }
 
+function viewHomeLite(){
+  const M = S.M; if (!M) return noData();
+  const days = dayList(M);
+  const rk = ranking(M, 1, null).filter(x => x.v > 0).slice(0, 5);
+  return `
+  <div class="card"><h2>${ymLabel(M.ym)}</h2>
+    <div class="lbl">営業日</div><div class="big sm">${days.length}日</div>
+    <div class="note">お店全体の売上は、管理者だけが見られます。</div>
+  </div>
+  <div class="card">
+    <h2>月間 総売ランキング TOP5</h2>
+    ${rk.length ? rk.map(rkRow(1, false)).join('') : '<div class="dim">データなし</div>'}
+    <div style="margin-top:10px"><button class="btn ghost small" data-a="tab" data-t="rank">ランキングをすべて見る</button></div>
+  </div>
+  ${S.role === 'member' ? '<div class="card"><button class="btn" data-a="tab" data-t="pers">自分の実績を見る</button></div>' : ''}
+  ${updatedLine()}`;
+}
+
 function viewHome(){
+  if (S.role !== 'admin') return viewHomeLite();
   const M = S.M; if (!M) return noData();
   const days = dayList(M); const tot = storeSum(M); const hid = hiddenSum(M);
   const dd = S.dd, today = dd ? M.days[dd].store : null;
   const target = S.meta.targets && S.meta.targets[S.ym];
   const pct = target ? Math.min(100, tot.gross / target * 100) : 0;
   const prevTot = S.prevM ? storeSum(S.prevM) : null;
+  const lastN = days.length ? Number(days[days.length - 1]) : 0;
+  const prevTo = S.prevM ? storeSum(S.prevM, dayList(S.prevM).filter(d => Number(d) <= lastN)) : null;
+  const prevToN = S.prevM ? dayList(S.prevM).filter(d => Number(d) <= lastN).length : 0;
   // 同じ営業日数までの前月累計で比べるのではなく、前月の月間合計と比較する
   const bars = trendSvg(M);
   const rk = ranking(M, 1, null).filter(x => x.v > 0).slice(0, 5);
@@ -668,10 +696,13 @@ function viewHome(){
       <div class="bar"><i style="width:${pct}%"></i></div>`
       : `<div class="lbl">月間目標: 未設定${S.role === 'admin' ? '（管理タブで設定できます）' : ''}</div>`}
     <div class="hr"></div>
-    <div class="lbl">前月比（前月の月間合計との差）</div>
-    ${prevTot ? `<div style="margin-top:4px">総売 ${delta(tot.gross, prevTot.gross, 'yen')}　<span class="dim">前月 ${yen(prevTot.gross)}</span></div>
-      <div>小計 ${delta(tot.sub, prevTot.sub, 'yen')}　<span class="dim">前月 ${yen(prevTot.sub)}</span></div>`
+    <div class="lbl">前月比 ①同じ日まで（前月の${lastN}日まで・営業${prevToN}日）</div>
+    ${prevTo ? `<div style="margin-top:4px">総売 ${delta(tot.gross, prevTo.gross, 'yen')}　<span class="dim">前月 ${yen(prevTo.gross)}</span></div>
+      <div>小計 ${delta(tot.sub, prevTo.sub, 'yen')}　<span class="dim">前月 ${yen(prevTo.sub)}</span></div>
+      <div class="dim" style="margin-top:2px">本数 ${delta(tot.shimei, prevTo.shimei)}　新規 ${delta(tot.shinki, prevTo.shinki)}　送り ${delta(tot.okuri, prevTo.okuri)}　同伴 ${delta(tot.douhan, prevTo.douhan)}</div>`
       : '<div class="dim" style="margin-top:4px">前月のデータがまだありません</div>'}
+    ${prevTot ? `<div class="lbl" style="margin-top:12px">②前月の月間合計との差</div>
+      <div style="margin-top:4px">総売 ${delta(tot.gross, prevTot.gross, 'yen')}　<span class="dim">前月全体 ${yen(prevTot.gross)}（営業${dayList(S.prevM).length}日）</span></div>` : ''}
   </div>
   <div class="card">
     <h2>営業日ごとの総売</h2>${bars}
@@ -847,13 +878,13 @@ function viewPerson(){
     ${pair(t[1], t[0],
       `<div class="lbl">総売 順位 ${rG && rG.v > 0 ? rG.rank + '位' : '—'}${pt ? '　' + delta(t[1], pt[1], 'yen') : ''}</div>`,
       `<div class="lbl" style="margin-top:4px">小計 順位 ${rS && rS.v > 0 ? rS.rank + '位' : '—'}${pt ? '　' + delta(t[0], pt[0], 'yen') : ''}</div>`)}
-    <div class="kpis" style="margin-top:14px">${[['本数', 2], ['新規', 4], ['飲み直し', 5], ['送り', 7], ['ヘルプ指名', 6], ['同伴', 3]].map(([l, i]) => `<div class="kpi"><div class="v">${fmt(t[i])}</div><div class="l">${l}</div></div>`).join('')}</div>
-    ${pt ? '' : '<div class="note">前月のデータがないため、前月比は表示していません。</div>'}
+    <div class="kpis" style="margin-top:14px">${[['本数', 2], ['新規', 4], ['飲み直し', 5], ['送り', 7], ['ヘルプ指名', 6], ['同伴', 3]].map(([l, i]) => `<div class="kpi"><div class="v">${fmt(t[i])}</div><div class="l">${l}</div>${pt ? `<div class="l" style="margin-top:3px">${delta(t[i], pt[i])}</div>` : ''}</div>`).join('')}</div>
+    ${pt ? `<div class="note">前月（${ymLabel(S.prevM.ym)}・${pt.days}日出勤）との差です。前月は月全体の合計です。</div>` : '<div class="note">前月のデータがない（または前月に名簿にいなかった）ため、前月比は表示していません。</div>'}
     <div class="note">月間目標は店舗全体のみです（個人目標は未設定）。</div>
   </div>
   ${!detail ? '<div class="card"><h2>🔒 日別履歴</h2><div class="dim">日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div></div>' : `<div class="card"><h2>日別履歴</h2>
     <div class="scrollx"><table class="tbl"><thead><tr><th>営業日</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
-    ${hist.slice().reverse().map(({ d, r }) => `<tr class="tap" data-a="openday" data-d="${d}"><td>${Number(M.ym.split('-')[1])}/${Number(d)}</td><td>${fmt(r[0])}</td><td>${fmt(r[1])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" class="dim">実績なし</td></tr>'}
+    ${hist.slice().reverse().map(({ d, r }) => `<tr ${S.role === 'admin' ? `class="tap" data-a="openday" data-d="${d}"` : ''}><td>${Number(M.ym.split('-')[1])}/${Number(d)}</td><td>${fmt(r[0])}</td><td>${fmt(r[1])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" class="dim">実績なし</td></tr>'}
     </tbody></table></div>
     <div class="note">実績のある日と、出勤していて実績が0だった日を表示しています。出勤の記録がない日は表示していません。</div>
   </div>`}
@@ -959,8 +990,10 @@ function computeDiff(oldM, newM){
 function mergeMonth(oldM, newM, allowRemove){
   const days = Object.assign({}, newM.days);
   if (oldM && !allowRemove) Object.keys(oldM.days).forEach(dd => { if (!days[dd]) days[dd] = oldM.days[dd]; });
-  const emp = {}; (oldM ? oldM.employees : []).forEach(e => emp[e.id] = e); newM.employees.forEach(e => emp[e.id] = e);
-  const employees = Object.keys(emp).sort().map(k => emp[k]);
+  const used = {}; Object.keys(days).forEach(dd => Object.keys(days[dd].rows).forEach(id => used[id] = 1));
+  const emp = {}; (oldM ? oldM.employees : []).forEach(e => { if (used[e.id]) emp[e.id] = e; }); newM.employees.forEach(e => emp[e.id] = e);
+  const order = {}; newM.employees.forEach((e, i) => order[e.id] = i);
+  const employees = Object.keys(emp).sort((x, y) => (order[x] != null ? order[x] : 1e6) - (order[y] != null ? order[y] : 1e6)).map(k => emp[k]);
   return Object.assign({}, newM, { days, employees });
 }
 
@@ -989,8 +1022,11 @@ function render(){
   if (S.phase === 'boot') { root.innerHTML = '<div class="loading">読み込み中…</div>'; return; }
   if (S.phase === 'fatal') { root.innerHTML = `<div class="login"><div class="logo">X8</div><div class="err" style="margin-top:20px">${esc(S.fatal || '接続できません')}</div><button class="btn ghost" onclick="location.reload()">再読み込み</button></div>`; return; }
   if (S.phase === 'login') { const ids = ['nm', 'code', 'pw', 'pw2']; const keep = {}; ids.forEach(k => { if ($('#' + k)) keep[k] = $('#' + k).value; }); root.innerHTML = viewLogin(); ids.forEach(k => { if (keep[k] && $('#' + k)) $('#' + k).value = keep[k]; }); return; }
-  const tabs = [['home', '🏠', 'ホーム'], ['rank', '🏆', 'ランキング'], ['days', '📅', '日別'], ['pers', '👤', '個人']];
+  const tabs = [['home', '🏠', 'ホーム'], ['rank', '🏆', 'ランキング']];
+  if (S.role === 'admin') tabs.push(['days', '📅', '日別']);
+  tabs.push(['pers', '👤', '個人']);
   if (S.role === 'admin') tabs.push(['admin', '⚙️', '管理']);
+  if (S.role !== 'admin' && (S.tab === 'days' || S.tab === 'admin')) S.tab = 'home';
   let body = '';
   if (S.tab === 'home') body = viewHome();
   else if (S.tab === 'rank') body = viewRank();
