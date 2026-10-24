@@ -421,7 +421,7 @@ const FIREBASE_CONFIG = {
 const ME_MODE = /*ME_MODE*/false;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-25 - 2026-10-25';
+const BUILD = 'sales-26 - 2026-10-25';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -528,6 +528,10 @@ async function makeFirebaseBackend(){
       suppress = false; const i = infoOf(auth.currentUser); curRole = i && i.role; if (theCb) theCb(i);
     },
     async changePassword(pw){ await Au.updatePassword(auth.currentUser, pw); },
+    async verifyAdminPassword(pw){
+      const u = auth.currentUser; if (!u || u.email !== ADMIN_EMAIL) throw new Error('not-admin');
+      await Au.reauthenticateWithCredential(u, Au.EmailAuthProvider.credential(ADMIN_EMAIL, pw));
+    },
     async changeAdminPassword(cur, pw){
       const u = auth.currentUser; if (!u || u.email !== ADMIN_EMAIL) throw new Error('not-admin');
       await Au.reauthenticateWithCredential(u, Au.EmailAuthProvider.credential(ADMIN_EMAIL, cur));
@@ -594,7 +598,7 @@ function makeTestBackend(){
   const T = TEST; let cbAuth = null;
   return {
     onAuth(cb){ cbAuth = cb; setTimeout(() => cb(T.role === 'none' ? null : { role: T.role || 'staff', hex: T.hex }), 0); return () => {}; },
-    async login(){}, async loginMember(){}, async registerMember(){}, async changePassword(){}, async changeAdminPassword(c){ if (c !== 'old') { const e = new Error('x'); e.code = 'auth/invalid-credential'; throw e; } }, async logout(){},
+    async login(){}, async loginMember(){}, async registerMember(){}, async changePassword(){}, async verifyAdminPassword(c){ if (c !== 'old') { const e = new Error('x'); e.code = 'auth/invalid-credential'; throw e; } }, async changeAdminPassword(c){ if (c !== 'old') { const e = new Error('x'); e.code = 'auth/invalid-credential'; throw e; } }, async logout(){},
     subPriv(ym, hex, cb){ setTimeout(() => cb(T.priv ? JSON.parse(JSON.stringify(T.priv)) : null), 0); return () => {}; },
     async listMembers(){ return T.members || { members: {}, invites: {} }; },
     async issueInvite(){ return 'TEST2345'; }, async unregister(){},
@@ -1120,6 +1124,19 @@ function mergeMonth(oldM, newM, allowRemove){
 }
 
 /* ---------- login ---------- */
+function lockGate(){
+  if (ME_MODE || S.role !== 'admin' || S.unlocked) return '';
+  return `<div class="card"><h2>🔒 パスワードを入れてください</h2>
+    <div class="note" style="margin-top:0">「日別」と「個人」は、管理者パスワードをもう一度入れると見られます。</div>
+    <input type="password" id="lockpw" placeholder="管理者パスワード" autocomplete="current-password" style="margin-top:10px">
+    <div style="margin-top:10px"><button class="btn" data-a="unlock">開く</button></div></div>`;
+}
+async function doUnlock(){
+  const pw = $('#lockpw') ? $('#lockpw').value : '';
+  if (!pw) { toast('パスワードを入れてください'); return; }
+  try { await backend.verifyAdminPassword(pw); S.unlocked = true; render(); }
+  catch (e) { const c = (e && e.code) || ''; toast(/invalid-credential|wrong-password/.test(c) ? 'パスワードが違います' : /too-many/.test(c) ? '回数が多すぎます。しばらくしてから' : '確認できませんでした'); }
+}
 function viewLogin(){
   const r = S.loginRole, reg = S.regMode && r === 'member', B = S.loginBusy ? 'disabled' : '';
   const tabs = [];  // みんなで見る は廃止。全体用は管理者のみ、個人用は me.html
@@ -1157,8 +1174,8 @@ function render(){
   let body = '';
   if (S.tab === 'home') body = viewHome();
   else if (S.tab === 'rank') body = viewRank();
-  else if (S.tab === 'days') body = viewDays();
-  else if (S.tab === 'pers') body = viewPerson();
+  else if (S.tab === 'days') body = lockGate() || viewDays();
+  else if (S.tab === 'pers') body = lockGate() || viewPerson();
   else if (S.tab === 'admin') body = viewAdmin();
   const active = document.activeElement; const keepId = active && active.id; const keepSel = active && active.selectionStart;
   const sx = window.scrollX, sy = window.scrollY;
@@ -1193,6 +1210,8 @@ document.addEventListener('click', async (ev) => {
   else if (a === 'regtoggle') { S.regMode = !S.regMode; S.loginErr = ''; render(); }
   else if (a === 'chgpw') doChangePw();
   else if (a === 'chgadm') doChangeAdminPw();
+  else if (a === 'unlock') doUnlock();
+  else if (a === 'relock') { S.unlocked = false; render(); }
   else if (a === 'loadmembers') loadMembers();
   else if (a === 'issueinv') doIssue(el.dataset.n);
   else if (a === 'unreg') doUnreg(el.dataset.n);
@@ -1327,7 +1346,7 @@ async function doRestore(){
   catch (e) { S.phase = 'fatal'; S.fatal = '接続できませんでした。電波を確認して、再読み込みしてください。'; render(); return; }
   backend.onAuth((info) => {
     if (unsubMonth) { unsubMonth(); unsubMonth = null; } if (unsubMeta) { unsubMeta(); unsubMeta = null; } if (unsubPriv) { unsubPriv(); unsubPriv = null; } if (unsubPrivPrev) { unsubPrivPrev(); unsubPrivPrev = null; }
-    S.priv = null; S.privPrev = null; S.empId = null; S.memberInfo = null; S.dayView = 'cal'; S.rankScope = 'month';
+    S.unlocked = false; S.priv = null; S.privPrev = null; S.empId = null; S.memberInfo = null; S.dayView = 'cal'; S.rankScope = 'month';
     if (!info) { S.phase = 'login'; S.role = null; S.hex = null; S.M = null; S.ym = null; S.meta = { months: [], targets: {} }; render(); return; }
     S.hex = info.hex || null; if (info.role !== 'member') S.empId = lsGet('x8s_emp') || null;
     startApp(info.role);
