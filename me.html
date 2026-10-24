@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>X8 個人ページ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a090e">
+<meta name="robots" content="noindex,nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="X8売上">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" href="data:image/png;base64,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">
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIlg4IOacrOW6lyDlo7LkuIoiLCAic2hvcnRfbmFtZSI6ICJYOOWjsuS4iiIsICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLCAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGEwOTBlIiwgInRoZW1lX2NvbG9yIjogIiMwYTA5MGUiLCAiaWNvbnMiOiBbeyJzcmMiOiAiZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFMUUFBQUMwQ0FJQUFBQ3lyNUZsQUFBVEswbEVRVlI0bk8yZGFVQlRWOXFBVHhLU0VMYUV5STRpSXJpaEFpcmlnb2hZd2QwWnJXdHJyWXpXNm1lMXJXQ3RvM1d2RmJTTzFWcjlIT3N5Mm1ycnFGVEhIZHhRNndZcVZsUVFCZGxCZGdpQkxQTUR4QXptM0hOenMzQkQzK2VYeGpmM0hIT2VuSFB2V2Q1d3JFUjJDQUMwd1czcENnRHNCZVFBc0lBY0FCYVFBOEFDY2dCWUxJeDY5ZlJ6ODR4NmZjQTdmTHZ4THM0eCtLTXNDTkZTR0Z3VVE4b0JXckFCQXlwaUFEbkFDWGFpdnlYNnlrRnRobEZIUkFBWitmTm5MZ2RGdGNBSjAyT001bUFvaDlhcWdCTnN3SUJOdzBTT3Q0c0hMZGlHUWRwSTUwa3dNTU1zZUx0UkdEdzM2Tlp6TkNzQXRHQS8ralNaRGowSG1HR09OR3NtbmZvUHVuS0FHZVlMWXo5b3lRRm1tRHZNL0NETEFXYTBEaGo0b2R2VENwaGgxdWphZkFRNVlOMmtGVU5zWENvNVlFQnBmZWcwdU5BZFZzQ01WZ1A5cG9SdGdnQVdyQnlhSFE1MEc2ME16UWFsR0ZtZzV3Q3dhSmNESGxMK1ZPQ2FtOXh6d0pqU0txSFRyRENzQUZoQURnQ0xGam5nT2VWUEF2R1pCWG9PQUF2SUFXQUJPUUFzSUFlQUJlUUFzSUFjQUJhUUE4QUNjZ0JZUUE0QUM4Z0JZQUU1QUN3Z0I0QUY1QUN3Z0J3QUZwQUR3QUp5QUZoQURnQUx5QUZnQVRrQUxDQUhnTVc0djVyUTZ2RndFL2YyZGVuVzBhRzl1OWpOMGRiZXp0TE9Sc0MzNEhGNUhJVkNKWk1yeWl0cWk4dGtML01xMGpKTFVwNFdKdjJSTDVNcldycldkR0dGSER3ZTkraldDYjdlanRSaDE1T3paeXo1VGExbVVrUlVaTCtQcC9TaWpwSEpGYVBtSE03S0xTZGV6YzNKWnRLSWJtT0grSGk0aVhFeEFqNVB3T2VKYllRZWJ1SmUzVndhWHF5clZ5WW12VHg2N3NuNWF4bEtGYVAvaVFsaHhiQ2lWS3FpTnNUWDFTdXB3d1lFdEowMnVqdUQ2L3QxZHBvOUtZQVl0bUhYZGFJWkVsdmhtb1dERS9hK1AvKzlQaFJtNEJEd2VXRkJudHVXUjV6ZFBlMmRBUjEwZmJ1SllZVWNDS0cwekpJdCsyOFJ3NWJNN3E5cmt3Z0Z2Smpvb1R3dWh6cnN4cjJjZ3ljZVVzZjA2ZTU2ZXRmVXFhTjhMU3owL2R3ODNjVTdWbzZJalI0cUZQRDB2SlR4WUlzY0NLRi8vbnJ2WG1vQmRZeklrcjhoS296TEliUzBKcC9OQ09yb1lVOGRVeTJyWDdJcGdYckFDdTdkYnYrR3NZNVNLL3BGRS9ucnNNNDdWNDhVOEZucUI0dmtVS3JVMGJIeHRhVDd0Y0R1cmpQKzJwUG1OUU82dVVTKzYwY01XN2ZqV2s1QkpVV0FoNXQ0Mi9JSVk3UmljSzkyeStZR0cveXlCb0ZGY2lDRW5tZVhiZHB6a3hpMmFHWlFoN1lTWXBpbDBDS0dSamR6NVhiV0w2Y2ZVY2VzbWovSXhrcEFMSkVaMDBiN050MnhzZ3AyeVlFUTJudnMvdTJVWE9vWVM2RkZMSTNiaUtqSWZrU0hLcXJrWDI2K1NCM2o2KzA0cUk4SGRZeWVmRHlWOENUVklyRGlVVllUdFJvdDNwaHdhdWRra1NXZklzeS9xL09zaWY0N0R5ZmpBZ0o3dU0zNEMzbjBXYjA5c2FDNG1qcG0zTkJPeE9zZ2hJcEthdllkZjNENVZsWldYcm04WG1sdlo5bkR4Mm5paUs3RGFEeVZEQTVzYjJjanJLaVMweW5JWkxDdTUwQUl2Y3lyK0diWERXTFl3Zy82K3JTWGF2MG5rU1UvSmlxTWVOdDY0ZnJ6NHhlZUVBc0s4bk1qeGlRL3loL3gwYUVkaDVKU000cXJaZlVLaGFxb3BDYmg1b3U1SzA4djJuQkJSWnFjNFhFNWZYeGRpYVdZR0RiS2dSRDY2ZVREYTBuWjFERUNQaTkyOFZBZVQ4dC9ZY25zL3UxY0NUOFZVbFpSdTJ6TFpUcVY4V3BIZU5pUjFkYlBXMzJtcktKVzY3L0d4VC9kZnp5RlhJcUhoRTVsVEFsTDVWQ3IwWkpOQ1ZVMWRkUmgzWDBjNTc0MTc5bmYzNTNPWE5sWFc2OFVsOVlRd3l5RkZpSWhZZkE5ZVNtOXFJVHFVdnVPUHlBV0pMRzFKTWFZR0piS2dSREtLNnBhKzBNaU1XeitlMzI2ZG5SbytxdTFpTDkrRVhsQStjL2w5Rk9YMCtsVWc4Nk1TakpwZXVabFhrVlpKZUYrZ2t1NnZ6WTk3SlVESVhUazdPT0xOek9wWXl3c3VMSFJRL212cHl5WHpoblkxdG1XK2kzRnBUVXJ0bDZoV1FlWlhFR2MxNmR6STFsSmlpbXYxRDRxdFNDc2xnTWg5UGZORjRuZnVTNWViVDU1UHhBaEZOeTczZVNSM1lqWFhMYmxNdTcrUUN1WnBBVVhPeHNoOFNKMnRvU1l6TndLK2xVeURXeVhvN0NrWnZYMzVHLzVuTWtCQXdMYXJ2OThDREh5MlBrbkY2NC8xNmtPZHg3bVVRY0VkSFdtRG1qdkpoYVRCTHI3QjZFVTA4TjJPUkJDdnlXa25VM01vSTdoOGJoNzFvOXhkYlNoRGlzb3JsNUQ0ejZtZVFYaW4xSUhqQnJzN1dCUHRlWkNuSEZKVEhwSmZVdmJJcGlCSEFpaDVWc3VsNVRMcUdPSUU2WUlvUzgzWDJRdzBYVDdZVjdTbzN5S0FDc1IvL3V2SW5COXc3aWhuYWFQNjBGZHhNNURTYnJXeWdTWWh4d2w1Ykt2dnFON0M0bmo4S2xIVjI1bk1YdnZsNXN1VXE4STl2WjFQYjFyeWtlVEFycDR0YkVTOFhrOHJvTzlWVmlRNS9ZVnd6ZDk4UTcxMDlQaFU0OXUzTXRoVmpHandycnBjeHhucmo0N2NURnR6QkFmWm0vUEthajhldWMxeHFVL2UxbjZmNnZQN0ZnMWtvL2Z5ZUhVeG5yeHJQNkxaL1hYNmNxWGJtV3UzS2F2OTBiQ1BIcU9CbFp0dTFMSWFHQnVtRktybHRYclUvcmwyMW5URjhmbEZWWHBjNUZtN0QrZU1tL1ZtWHFGeW9EWE5DRG1KRWRacFh6WjVrc00zbmpndHhTRDlOdDNIdWFObW5ONDUrRmsvVGNKSnozS254WjFmUFgycThSSmxCYkViSWFWQmhKdXZqaHk5dkc3RVYzb3Z5VXp0enptbitSbFBKcFVWTWxqZDkvWTlXdnltQ0UrODkvcjAwWWkwdlVLSnk2bTdZOUxTYWE4dzJVSjV0UnpOTEJ1UnlMOXZsMmxWaStPVFREc2FRQUhlNnZJOFg1L20rREh3QXlFVUVTdzEreUovaUdCeHQwZ1loRE1yT2RBQ0NsVmFxV1M3aUN0VmlPRndtRDl0bERBV3pDOTd3ZC82VUZjaXFOQXdPZUZEL1FLSCtoMUw3Vmd6ZmFyOTU4VUdxcDZCc2Y4ZW82bGN3YTJkU0VzeHpmQjQzSmlGaHRtaDNmSGR2Ykh0azJjTXpsQUh6TTA4ZS9xL01zL3huOUU0OHhFUzJGbWNnVDNiamVGeHVxSkpoM2IyWC8rWVpDZTVYcTFsUnpjT0s2VHAvYTlSWXpoOGJpTFovV1BpdXhuMk1zYUNuTWFWbXl0QlhSV1Q5NW01Z1MvYzllZU0xNjhzQkx4Zi94Nk5QVUVPVUxvNll1U2d5Y2UzbnFRbTE5Y0paTXJKTGFXWGJ6YURCdlFZVUo0RjB2S3p1YmpLYjB5YzhwL1BadktySHJHdzV4NmptVnpnNG1ySjFyaGNqZ3gwV0dNaDRQb3lIN0VnV3pML2x1ajVodzZlT0poV21aSlpYV2RRcUVxTHExSnZQdHl4ZFlybytZY2ZwWlZTdjMycFI4UGRETG9pUmlEWURaeURBbHFQeUZjaHlmWVpyUjNFK3M2ZDltQVZDeWFNc3FYT21iUDBmdGJEOXpCN1JQTnpDMlAvUHZKY3NvMUhWdHJ3UWMwdGtPYkdQT1FRMndqWFBjWmt3RkZrL2ZIOXVqbjU2N3J1eWFFZDZHWU1rY0lsVmZKTis4akhPVE1LYWpjOCsvNzFER1RSblRWNlNTZkNUQVBPVmJNRDlHLzErVncwRGRSWWRZaXFoTVBiOVBQbitEVCtXdlBhMmhNekorNG1FWWRJQldMZkF4OXc2c25aaUJIUkxEWDJERENlcHRhalQ1WmUvWlZHV0ZadjYyejdaZHpCdXBVdWw5bkorcUErNDhKRzBnYnlNd3RweDVaRUVJOU94SEtNakZzbDBNcUZxMWVNSmdZOXErNGxOTlhuaTJuY2RSZ3lzaHU5SSt2OGJnY2lSMWhVempSeUNaS3l3bDdFeDFZZGsvS2RqbFdMd2doemxKbjVwYkg3cjZCRURwM0xTT090R3NMSWJUKzgxQmJhMW9IWDIxcGJBNVYwODRtUXp6YVpHZGpyT080ekdDMUhLTkRmWVlQNmtnZG8xS3J2OWo0WnZWazFmZFhpY2NiWFJ4c2FCNXNWOUZJdmlPbHZjSkN0RnlwWkZldUgvYks0U2kxV2psL0VERnM3OUVIbWh1QUs2cmtTNzRsSEl4R0NFMEk3eExXejVNWVZpMnJKMzdkL2JzUWRoYzM0RUZqanpIeEVKZUpZYThjYXhlR0VzZjdqT3l5VFh0K2IvYmkxVHRaaDA4UlVpb2doTlorR2lvaEhSZFFLbFg1UllSK2FOaUFEblNtMThiUzJNT1duVStWSThUMHNGU084Y002RCszdlNSMmpWS2tYeDhiTDY3UXN1cTdiZVMwN24zQU14RWxxdFdKK0NMRW1xYytLcVFNa2RwWUxQZ2lram5GM3RwMDVnWnhESmpXRFVKYUpZYU1jemc3V2RPNEpLTkpFMWNqcUYyOGtwSEZDQ0kwWjRoTVI3RVVkYytNZTRUdzNRbWoyeElDNVUzdmpackE4M01TNzE0NG1qaWxGSlRYRVdYWVR3MFk1MW44MmhIaUdMRDJ6bERyQjNLMEh1WFNPTDY5Wk9GZ3FwcnBQUEhVNW5VNU95RVV6ZzA3OE1IbmFhTitPSHZiV0lqNlB4NVdLUlFON3RWMDVQK1RVenNuZTdRbm45QkZDSnk4UlpzbE1EK3RXWlNlUDdFYmNKYVZVcXFKanlha3BOLzc0ZTBpZ2h4ZGxjaCtwV0xSNlFjajhOV2R4QVlVbE5TY3ZwdEhKMzlMRnF3MmRLUm10S0pXcS9YSGtOQTBtaGwwOWg3dXo3VklhTTVnN0RpZWxQQ1Z2b0txVks2Smo0b25mKytHRE9sS2ZlUGgyNzAwNkUrVDZzTzk0eXNzOE9DdUxoOE5CM3l3aXIzMDh6bmkxOWNBZG10ZTgvN2hnMXkvWTFGQk5ySmdmUXBGRE1xZWdjdmwzdE5LOE1PTlJldkczZThscDhrd1BpK1I0YjB6My9xUlZMb1ZDRlIwYnI5RGxvTWVXL2JlZVBIOUZIU094RmE3N05KUWlJQzcrNmZyL3Y4NHNzelkxejdKS1p5MDdTVXl3MlNLd1JRNFBOL0VYTlBaYmZQL1RIZUt6WlRQcUZhcW9HTEpQWWYwOHh3L3JUQkd3KzhpOWhWK2ZxNncyNUR4VndzMFhrejQ5eXV5a2xnbGdoUnhjRG1kRFZCaDEra0NFMEIvcFJkdC9abkxnT1BWWjhiYUQ1SkZvK2J4QkxnNVVPODFPWFU0Zk1mdlFzZk5QaU5PbVJMSUxLaGQ5YytHajVhZUlTN1V0Q0N2aytIQjh6OER1aEZ4NjlRcFZkRXc4L1VNSnpmamhVTklEMGlFQVcydkIrczlEcVdQeWk2dWlZK1BEWmh6Y2NTanBSUTc1OXhXYVVWZXZ2SGd6ODVPMVo0ZCtlREF1Z2J4RzJMSndyRVROZDBlbW41dlg5R2Z2OE8ybXJZK1owZlI3SzU3dUVsZEhHNmxFWkd2RkYvQjVYQzVYb1ZUVnloVmxGYlhGcFRWWmVSWHBXYVgzSHhja3B4YklhbzM3NEtNVDFHM051bmtPOHlJcnR6d3J0L3pZZVhJeVUzT0VGY01Ld0U1QURnQUx5QUZnQVRrQUxDQUhnQVhrQUxDQUhBQVdrQVBBQW5JQVdFQU9BQXZJQVdBQk9RQXNJQWVBQmVRQXNJQWNBQmFRQThBQ2NnQllRQTRBaXhsc0U3UVI4Y1lGTy9UdmJ1ZmhaR2x0eVpYWHEydmt5b3BxWmQ0cmVXNXgzVThYQ2tvcnRSejZjSGNRSGxqZVZmT1ZtZXNmdjhqWGtuZ3Bmck5mMDIrNnp2ajZjVllCTmptVFpxUldac2M4U2M5NWt3V0tXYzNaQTl2bGFPOWl1V2xleHpiaU42Y1dSRUtPU01odFk4ZnY0R3FKRURwN3EwVHJSeHpSdDNsbXZvaSswcDIvNVJxMXRwb3dyamw3WUxVY0hBNWFPZE96NGZNdHIxWnNPdlR5L3JOcWVaM0szVkVZNGljZUYrd2dzZEZlZnc0SGhRYzJQOWcrckkvOXJwTjVkREk1MFlHNmoyRmNjMWJCNmlwMjg3VDJkR2xNN3ZQVCtjS3JEeHJQaVdUa3lqSnlaVC9IRi81dHBLdlc4MFgrM2piTzBzYmthL1VLTmQrQ2d4QnFJK2IzN21Seis3RXBzdWN3cmptcllQVU5xWWZ6bXl3ZE5mTG1DUmZrZGFydHgzTXljclY4ZlRYSGxGMG5jclcrYmxRWTE1eFZzRm9PemEvV3RIZWNmVHRZMDNtWHBZQWI0aWRwK0hOaGFkMlJ5MFU1eFkxSERvTjdpcTFGQnZqdEZTTE1hczQyV0Qyc1BNNThjOExZdFkxZzI2YysrU1YxZnp5dlRzMnN1WjllcGZsY29FbUluMFFrYkpRK0lhbE1yVVlKZDh1bVJ6Z2poSVI4YnFpLzVEODNDSWZ1VzZybWJJUFZjcnpJcjcxMHJ5elVYOUwwaW90VTRDSVZETzF0anhCNldTai84VlRlcGVTeVp1OGFyakYyWExoYmloQ0tUeXB0a0FNaEZORlhhaEE1OWkxdC9oTU9Eek9xUDltU3BrL04yUWFyaHhXRTBQb0RXVWV2RkduTnp0UE9TYmppUTg5M1F4MDFYM1NTOFAxOUdrL0taeGJVUHN1UklZUXk4MnN6Y2h1L3JEMjhyTjBjeUhtSjlVZlhtck1RVnZjY0NLRzZldFhXZitjY1BGODRxS2ZZMzl1bWg1ZTE1c3dCUWloeXBHdGNZbkc5b3JFTnd2dEttN0w2eGQ5OWs1d3YvbTZabDF0allyaUlRUHM5cC9YOTVVN3FSMWtHTldjaGJKZWpnWktLK3JqRTRyakVZb1NRdDd0bzZqdE9ZYjBhcHpGRVFtNTdaOHVtVVR3aThNMllFam5TTlhLa2xzd080WDJsZTgva20rWkJrbjdOV1FqYmg1VzNTYytScmQyZm1mZnFUWWFkcHE3QzE5TzZyUk41eUhDUkNucDJaUEp6WUhwQ1VYTjJ3dXFlSTZDVFRWQlh1MytkSzZpVy9jOVVnVnI5Sm9lOFVxWE9mZjF4YTA1alRGK1htbDM0UDBselhLU0NuMWQwYTRxOG4yN0lYNlhYcytic2hOVnk4SG5jeVdGT1l3YzZuTHRkY3YxaHhkUHNtcW9hcFlPWS8yNm9ZMU1QY1MybHZLRUIrQmFjSWIwa0RTKytLcTl2WmdaQ0tMK2tMcitremtVcVFBaUYra3UySE1tVzF6SE1FMlRZbXJNV1ZzdlJnRWpJSFJmc01DN1k0ZTEvZXA1WCs0OWZHOU5QRCt3aHRuazl3WldjcHIxWFNFNnJHaEVrYmJobVNFL3grVHZOMDBtLy9ZQ0tFUHJ1U1BheHE4MnoxTkdKcEZsejFzSnFPVkl6cTJOK3p2SjJGM203aXh6RWZHc1J6OXFTcDFhamltckZzMXhaWWtyNTZkOUxGSzk3YWMzcGpYdVlJZVBlYXprUVFzT0RwRy9MMFNJMVp5MlFFK3hQRFhWYm05L1RDbUF5UUE0QUM4Z0JZQUU1QUN3Z0I0QUY1QUN3Z0J3QUZwQUR3QUp5QUZoQURnQUx5QUZnQVRrQUxGcmswRnlBMFZ5WUFWb1p4QlZXNkRrQUxDQUhnSVVzQjR3c3JSSTZ6YXBkRHRqajg2Y0MxOXd3ckFCWXNITEFNMHNyaHVaT1VPZzVBQ3gwNVlET285VkF2eW1wNUdqVzRZQWZyWUJtalVqOTVFSG9PZUN4cFJWRGJGemQ3am1nOHpCcmRHMCtzaHd3dUxRT2RCcFFHcURWYzRBZjVnNERNeEQ5WVFYOE1GK1ltWUYwdXVjQVA4d1J4bVlnclFlcGRTcE0xL0lBazZGL1MrazhRL3AyQWRDRnNCQ0RmSWQxN2psd1pUTXJIakE0Qm13YWhuTGdLcUZQVlFCOU1FWnpNSmVqQWVveEJTd3hOa2I5L1BXVkE4RTlCMXZSLzV0cEFEbWFBRXZZZ0FGN2EwUEswUUFvMGxJWWZCQTN2QnlhZ0NqR3hxaDNkY2FWQXpCcllKc2dnQVhrQUxDQUhBQVdrQVBBQW5JQVdQNExlVVNDUGw4Mk5FVUFBQUFBU1VWT1JLNUNZSUk9IiwgInNpemVzIjogIjE4MHgxODAiLCAidHlwZSI6ICJpbWFnZS9wbmcifV19">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a090e; --card:#14121a; --card2:#1b1822; --line:rgba(230,195,120,.22);
+  --gold:#e6c378; --gold2:#c99a3e; --text:#f3eee2; --dim:#9b94a6;
+  --pos:#38caa0; --neg:#e5535a; --silver:#c9ccd4; --bronze:#d08a52;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; background:var(--bg); color:var(--text); font-family:'Noto Sans JP',-apple-system,'Hiragino Sans',sans-serif; font-size:15px; line-height:1.55;}
+body{min-height:100vh; padding-bottom:calc(76px + env(safe-area-inset-bottom));}
+button{font-family:inherit; color:inherit;}
+.wrap{max-width:560px; margin:0 auto; padding:0 16px;}
+header.top{position:sticky; top:0; z-index:20; background:rgba(10,9,14,.94); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); padding:calc(10px + env(safe-area-inset-top)) 0 10px;}
+.top-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.brand{font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:2px; color:var(--gold); font-size:20px;}
+.brand small{font-family:'Noto Sans JP'; font-weight:500; letter-spacing:0; color:var(--dim); font-size:12px; margin-left:8px;}
+.iconbtn{background:none; border:1px solid var(--line); border-radius:10px; padding:6px 10px; font-size:13px; color:var(--dim);}
+.monthbar{display:flex; align-items:center; justify-content:center; gap:14px; padding-top:8px;}
+.monthbar .m{font-family:'Oswald','Noto Sans JP'; font-size:18px; color:var(--text); min-width:140px; text-align:center;}
+.monthbar button{background:var(--card); border:1px solid var(--line); border-radius:10px; width:38px; height:34px; font-size:16px; color:var(--gold);}
+.monthbar button:disabled{opacity:.25;}
+.banner{background:#3a1d22; color:#ffd6da; border-bottom:1px solid #6a2c35; text-align:center; font-size:13px; padding:6px 10px;}
+main{padding-top:14px;}
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px;}
+.card h2{margin:0 0 10px; font-size:13px; font-weight:500; color:var(--dim); letter-spacing:1px;}
+.big{font-family:'Oswald','Noto Sans JP'; font-weight:700; font-size:34px; white-space:nowrap; line-height:1.15; color:var(--gold); letter-spacing:.5px;}
+.big.sm{font-size:24px;}
+.pair .sl{display:flex; justify-content:space-between; align-items:baseline; margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,.07);}
+.pair .sl b{font-family:'Oswald','Noto Sans JP'; font-size:22px; font-weight:700; color:var(--text); white-space:nowrap;}
+.lbl{font-size:12px; color:var(--dim);}
+.row2{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px;}
+.kpis{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px;}
+.kpi{background:var(--card2); border:1px solid var(--line); border-radius:12px; padding:10px 8px; text-align:center;}
+.kpi .v{font-family:'Oswald'; font-weight:700; font-size:24px; color:var(--text);}
+.kpi .l{font-size:11px; color:var(--dim);}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px}
+.chip small{color:var(--dim);font-size:10px;margin-left:4px}
+.kpi .kd{font-size:12px; margin-top:4px;}
+.kpi .kp{font-size:10px; color:var(--dim);}
+.bar{height:10px; background:#27232f; border-radius:6px; overflow:hidden; margin-top:8px;}
+.bar > i{display:block; height:100%; background:linear-gradient(90deg,var(--gold2),var(--gold)); border-radius:6px;}
+.pos{color:var(--pos);} .neg{color:var(--neg);} .dim{color:var(--dim);}
+.note{font-size:12px; color:var(--dim); margin:6px 2px;}
+.seg{display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin:0 -16px 8px; padding-left:16px; padding-right:16px; scrollbar-width:none;}
+.seg::-webkit-scrollbar{display:none;}
+.seg button{flex:0 0 auto; background:var(--card); border:1px solid var(--line); border-radius:999px; padding:7px 14px; font-size:13px; color:var(--dim);}
+.seg button.on{background:linear-gradient(180deg,#3a2f17,#2a2212); color:var(--gold); border-color:var(--gold2); font-weight:700;}
+.seg2{display:flex; gap:6px; margin-bottom:10px;}
+.seg2 button{flex:1; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:8px; font-size:13px; color:var(--dim);}
+.seg2 button.on{color:var(--gold); border-color:var(--gold2); font-weight:700;}
+.rk{display:flex; align-items:center; gap:12px; padding:11px 4px; border-bottom:1px solid rgba(255,255,255,.06);}
+.rk:last-child{border-bottom:none;}
+.rk .no{width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Oswald'; font-weight:700; font-size:16px; background:#23202b; color:var(--dim); flex:0 0 auto;}
+.rk.r1 .no{background:linear-gradient(135deg,#f3d58a,#b8872b); color:#2a1c00;}
+.rk.r2 .no{background:linear-gradient(135deg,#e4e6ec,#9a9ea9); color:#1d2026;}
+.rk.r3 .no{background:linear-gradient(135deg,#e4a877,#a2602f); color:#2a1400;}
+.rk .nm{flex:1; min-width:0; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.rk .nm small{display:block; font-weight:400; font-size:11px; color:var(--dim);}
+.rk .vl{text-align:right; font-family:'Oswald'; font-weight:700; font-size:20px; color:var(--gold);}
+.rk .vl small{display:block; font-family:'Noto Sans JP'; font-weight:400; font-size:11px;}
+.rk.tap{cursor:pointer;}
+.cal{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px;}
+.cal .dw{text-align:center; font-size:11px; color:var(--dim); padding:2px 0;}
+.cal .d{aspect-ratio:1/1.05; border-radius:10px; background:var(--card2); border:1px solid transparent; padding:4px 3px; display:flex; flex-direction:column; align-items:center; justify-content:space-between; font-size:11px; color:var(--dim);}
+.cal .d b{font-family:'Oswald'; font-size:13px; font-weight:500; color:var(--text);}
+.cal .d span{font-size:10px; white-space:nowrap; color:var(--gold); font-weight:700;}
+.cal .d.has{border-color:var(--line); cursor:pointer; background:#1f1b27;}
+.cal .d.sel{border-color:var(--gold); background:#2b2414;}
+.cal .d.none{opacity:.38;}
+.tbl{width:100%; border-collapse:collapse; font-size:13px;}
+.tbl th{font-weight:500; color:var(--dim); font-size:11px; text-align:right; padding:6px 4px; border-bottom:1px solid var(--line); white-space:nowrap;}
+.tbl th:first-child,.tbl td:first-child{text-align:left;}
+.tbl td{padding:8px 4px; text-align:right; border-bottom:1px solid rgba(255,255,255,.05); font-variant-numeric:tabular-nums; white-space:nowrap;}
+.tbl tr.tap{cursor:pointer;}
+.tbl td.z{color:#5d576a;}
+.tbl tr.total td{border-top:1px solid var(--gold2); font-weight:700; color:var(--gold);}
+.gridwrap{overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain; touch-action:pan-x pan-y; margin:0 -16px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+.grid{border-collapse:separate; border-spacing:0; font-size:12px; font-variant-numeric:tabular-nums;}
+.grid th,.grid td{padding:7px 6px; text-align:right; white-space:nowrap; border-right:1px solid rgba(255,255,255,.06); border-bottom:1px solid rgba(255,255,255,.06); background:var(--bg);}
+.grid thead th{ background:#1d1925; color:var(--dim); font-weight:600; font-size:11px;}
+.grid tr.gt td{background:#2a2212; color:var(--gold); font-weight:700; border-bottom:1px solid var(--gold2);}
+.grid .c1{position:sticky; left:0; z-index:2; text-align:center; min-width:38px; font-weight:700; color:var(--text); background:#1d1925; cursor:pointer;}
+.grid .c2{position:sticky; left:38px; z-index:2; min-width:58px; color:var(--gold); font-weight:700; background:#1d1925; border-right:1px solid var(--gold2);}
+.grid thead .c1,.grid thead .c2,.grid tr.gt .c1,.grid tr.gt .c2{z-index:4;}
+.grid td.z{color:#4b4658;}
+.grid td.hi{color:var(--gold); font-weight:700;}
+.scrollx{overflow-x:auto; margin:0 -6px; padding:0 6px;}
+input[type=text],input[type=password],input[type=number],select{width:100%; background:#0f0d14; border:1px solid var(--line); color:var(--text); border-radius:10px; padding:12px; font-size:16px; font-family:inherit;}
+.btn{display:block; width:100%; background:linear-gradient(180deg,#e9c97f,#c99a3e); color:#2a1c00; font-weight:700; border:none; border-radius:12px; padding:14px; font-size:16px;}
+.btn.ghost{background:transparent; color:var(--gold); border:1px solid var(--gold2);}
+.btn.danger{background:#5a2229; color:#ffd6da;}
+.btn:disabled{opacity:.45;}
+.btn.small{padding:9px 12px; font-size:14px; display:inline-block; width:auto;}
+.tabs{position:fixed; left:0; right:0; bottom:0; z-index:30; background:rgba(14,12,19,.97); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom);}
+.tabs .in{max-width:560px; margin:0 auto; display:flex;}
+.tabs button{flex:1; background:none; border:none; padding:9px 2px 8px; font-size:11px; color:var(--dim); display:flex; flex-direction:column; align-items:center; gap:2px;}
+.tabs button .ic{font-size:20px; line-height:1;}
+.tabs button.on{color:var(--gold); font-weight:700;}
+.login{max-width:420px; margin:0 auto; padding:calc(60px + env(safe-area-inset-top)) 20px 20px; text-align:center;}
+.login .logo{font-family:'Oswald'; font-weight:700; font-size:54px; letter-spacing:4px; color:var(--gold); line-height:1;}
+.login .sub{color:var(--dim); margin:6px 0 30px; font-size:13px; letter-spacing:2px;}
+.login .f{text-align:left; margin-bottom:12px;}
+.err{color:#ff9aa3; font-size:13px; min-height:20px; margin:6px 0;}
+.toast{position:fixed; left:50%; bottom:calc(90px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:#2b2414; color:var(--gold); border:1px solid var(--gold2); padding:10px 16px; border-radius:12px; font-size:14px; z-index:60; opacity:0; pointer-events:none; transition:opacity .2s; max-width:90%; text-align:center;}
+.toast.show{opacity:1;}
+.loading{text-align:center; color:var(--dim); padding:60px 0;}
+.pill{display:inline-block; font-size:11px; padding:2px 8px; border-radius:999px; border:1px solid var(--line); color:var(--dim);}
+.pill.warn{border-color:#8a6a2a; color:#e9c97f;} .pill.bad{border-color:#8a2a35; color:#ff9aa3;} .pill.ok{border-color:#2a6a55; color:#38caa0;}
+.list{margin:6px 0 0; padding-left:18px; font-size:13px;}
+.hr{height:1px; background:var(--line); margin:14px 0;}
+.empty{text-align:center; color:var(--dim); padding:40px 10px;}
+.who{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;}
+.who button{background:var(--card2); border:1px solid var(--line); border-radius:10px; padding:11px 4px; font-size:14px; color:var(--text);}
+.who button small{display:block; font-size:10.5px; color:var(--dim);}
+label.chk{display:flex; gap:10px; align-items:flex-start; font-size:13px; margin:8px 0;}
+label.chk input{width:20px; height:20px; margin-top:2px;}
+</style>
+</head>
+<body>
+<div id="offline" class="banner" style="display:none">オフラインです。表示中の数字は最新とは限りません。</div>
+<div id="root"></div>
+<div id="toast" class="toast"></div>
+
+<script>
+/* X8 売上管理 — Excel取り込みロジック (ブラウザ/Node 共通)
+ *
+ * 読むのは「設定」シートと、日別シート「1」〜「31」だけ。
+ * 他のシート(ランキング・売上・新・飲…)はExcel内で日別シートから数式計算された
+ * 派生物なので読まない。キャスト行は日別シートの3〜42行目、運営行は46〜65行目。
+ * 列は固定せず、見出し文字で探す。見つからない見出しがあれば推測せずエラーにする。
+ */
+(function (root) {
+  var METRICS = [
+    { key: 'sub',   label: '小計',     header: '売上' },
+    { key: 'gross', label: '総売',     header: '総売上' },
+    { key: 'shimei',label: '本数(指名)', header: '指' },
+    { key: 'douhan',label: '同伴',     header: '同' },
+    { key: 'shinki',label: '新規',     header: '新' },
+    { key: 'nomi',  label: '飲み直し',  header: '飲' },
+    { key: 'help',  label: 'ヘルプ指名', header: 'へ' },
+    { key: 'okuri', label: '送り',     header: '送' }
+  ];
+  var ATT_HEADER = '出勤';
+  // 運営メンバーのうち、一覧・ランキングに載せる人(しんさんの指定)
+  var OPS_SHOWN = ['るか', 'りお', 'かなた'];
+
+  // 名前の表記ゆれをそろえる（「（運営）」の注記を外し、全角半角をそろえる）
+  function cleanName(s) { return String(s == null ? '' : s).normalize('NFKC').replace(/\(運営\)\s*$/, '').trim(); }
+  function nameId(name) { var s = cleanName(name), h = 'u'; for (var i = 0; i < s.length; i++) { var c = s.charCodeAt(i).toString(16); h += ('0000' + c).slice(-4); } return h; }
+
+  function colLetter(n) { var s = ''; while (n > 0) { var m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; }
+  function cell(ws, r, c) { return ws[colLetter(c) + r]; }
+  function val(ws, r, c) { var x = cell(ws, r, c); return x ? x.v : undefined; }
+  function num(v) {
+    if (typeof v === 'number') return isFinite(v) ? v : null;
+    if (typeof v === 'string') {
+      var t = v.replace(/[,，円¥￥\s]/g, '');
+      if (t !== '' && !isNaN(Number(t))) return Number(t);
+    }
+    return null;
+  }
+  function str(v) { return v == null ? '' : String(v).trim(); }
+
+  function findHeaderCols(ws, headerRow, wanted, maxCol) {
+    var found = {};
+    for (var c = 1; c <= maxCol; c++) {
+      var h = str(val(ws, headerRow, c));
+      for (var i = 0; i < wanted.length; i++) {
+        if (h === wanted[i] && found[wanted[i]] === undefined) found[wanted[i]] = c;
+      }
+    }
+    return found;
+  }
+
+  // 日別シート1枚を読む
+  function parseDaySheet(ws, dd, errors) {
+    var maxCol = 60;
+    var out = { rows: [], excelTotals: { cast: {}, ops: {} }, nameCol: 3 };
+
+    // --- キャスト見出し行(2行目)
+    var hdr = 2;
+    var want = METRICS.map(function (m) { return m.header; }).concat([ATT_HEADER, '名前']);
+    var cols = findHeaderCols(ws, hdr, want, maxCol);
+    var missing = want.filter(function (w) { return cols[w] === undefined; });
+    if (missing.length) {
+      errors.push({ level: 'error', day: dd, msg: '見出しが見つかりません: ' + missing.join(', ') });
+      return null;
+    }
+    var nameCol = cols['名前'], noCol = nameCol - 1;
+
+    function readBlock(startRow, kind) {
+      var r = startRow, rows = [];
+      for (; r < startRow + 80; r++) {
+        var b = str(val(ws, r, noCol));
+        if (b === '合計') break;
+        var no = num(val(ws, r, noCol));
+        if (no === null) continue;
+        var name = cleanName(val(ws, r, nameCol));
+        var rec = { no: no, name: name, kind: kind, m: {}, att: str(val(ws, r, cols[ATT_HEADER])) };
+        METRICS.forEach(function (m) {
+          var v = val(ws, r, cols[m.header]);
+          var n = num(v);
+          rec.m[m.key] = n === null ? 0 : n;
+          if (n === null && v !== undefined && v !== '' && v !== null) {
+            errors.push({ level: 'warn', day: dd, msg: 'セル ' + colLetter(cols[m.header]) + r + ' の値を数値として読めません: ' + JSON.stringify(v) });
+          }
+        });
+        rows.push(rec);
+      }
+      // Excelの合計行(突き合わせ用)
+      var tot = {};
+      METRICS.forEach(function (m) { var n = num(val(ws, r, cols[m.header])); tot[m.key] = n === null ? null : n; });
+      return { rows: rows, totals: tot, endRow: r };
+    }
+
+    var cast = readBlock(hdr + 1, 'cast');
+    out.rows = out.rows.concat(cast.rows);
+    out.excelTotals.cast = cast.totals;
+
+    // --- 運営ブロック: 名前列が '運営' の見出し行を探す
+    var opsHdr = null;
+    for (var r = cast.endRow + 1; r < cast.endRow + 12; r++) {
+      if (str(val(ws, r, nameCol)) === '運営') { opsHdr = r; break; }
+    }
+    if (opsHdr === null) {
+      errors.push({ level: 'error', day: dd, msg: '運営ブロックの見出し(「運営」)が見つかりません' });
+    } else {
+      // 運営見出し行も列が同じか確認
+      var cols2 = findHeaderCols(ws, opsHdr, want.filter(function (w) { return w !== '名前'; }), maxCol);
+      var bad = Object.keys(cols2).filter(function (k) { return cols2[k] !== cols[k]; });
+      var miss2 = want.filter(function (w) { return w !== '名前' && cols2[w] === undefined; });
+      if (bad.length || miss2.length) {
+        errors.push({ level: 'error', day: dd, msg: '運営ブロックの列配置がキャストと違います: ' + bad.concat(miss2).join(', ') });
+      } else {
+        var ops = readBlock(opsHdr + 1, 'ops');
+        out.rows = out.rows.concat(ops.rows);
+        out.excelTotals.ops = ops.totals;
+      }
+    }
+    return out;
+  }
+
+  // 日別シート右側の「総売上(カード込み)」(Excelの月間合計の元)を探す
+  var DAY_TOTAL_LABEL = '総売上(カード込み)';
+  function findDayTotal(ws) {
+    for (var r = 1; r <= 20; r++) {
+      for (var c = 1; c <= 60; c++) {
+        var t = str(val(ws, r, c)).replace(/[（]/g, '(').replace(/[）]/g, ')');
+        if (t === DAY_TOTAL_LABEL) {
+          for (var k = 1; k <= 4; k++) { var n = num(val(ws, r, c + k)); if (n !== null) return n; }
+        }
+      }
+    }
+    return null;
+  }
+
+  // 日別シートの右側「【来客】」などの「ラベル → 右の数字」を読む
+  function findLabeled(ws, label) {
+    for (var r = 1; r <= 60; r++) {
+      for (var c = 20; c <= 45; c++) {
+        if (str(val(ws, r, c)) === label) {
+          for (var k = 1; k <= 4; k++) { var n = num(val(ws, r, c + k)); if (n !== null) return n; }
+          return 0;
+        }
+      }
+    }
+    return null;
+  }
+
+  function isEmptyDay(rows) {
+    return !rows.some(function (r) {
+      return METRICS.some(function (m) { return r.m[m.key] !== 0; });
+    });
+  }
+
+  // メイン
+  function parseWorkbook(XLSX, data, fileName) {
+    var report = { fileName: fileName || '', errors: [], warnings: [], emptyDays: [], checks: [], hidden: [] };
+    var wb0 = XLSX.read(data, { type: 'array', bookSheets: true });
+    var names = wb0.SheetNames;
+    var need = ['設定'];
+    for (var d = 1; d <= 31; d++) need.push(String(d));
+    var missingSheets = need.filter(function (n) { return names.indexOf(n) < 0; });
+    if (missingSheets.indexOf('設定') >= 0) {
+      report.errors.push({ level: 'error', msg: '「設定」シートがありません。売上管理のExcelではない可能性があります。' });
+      return { month: null, report: report };
+    }
+    var wb = XLSX.read(data, { type: 'array', sheets: need.filter(function (n) { return names.indexOf(n) >= 0; }) });
+    var set = wb.Sheets['設定'];
+
+    var year = num(val(set, 1, 2)), mon = num(val(set, 2, 2));
+    if (!year || !mon || mon < 1 || mon > 12) {
+      report.errors.push({ level: 'error', msg: '「設定」シートの年(B1)・月(B2)を読めません。' });
+      return { month: null, report: report };
+    }
+    var ym = year + '-' + (mon < 10 ? '0' : '') + mon;
+    var daysInMonth = new Date(year, mon, 0).getDate();
+
+    var days = {}, empMap = {}, hiddenTotals = {};
+    var validate = [];
+
+    for (var dn = 1; dn <= 31; dn++) {
+      var dd = (dn < 10 ? '0' : '') + dn;
+      var ws = wb.Sheets[String(dn)];
+      if (!ws) { report.warnings.push({ level: 'warn', day: dd, msg: 'シート「' + dn + '」がありません' }); continue; }
+      if (dn > daysInMonth) {
+        // 31日シートは月によっては存在するだけで日付が無い
+        var tmp0 = parseDaySheet(ws, dd, report.errors);
+        if (tmp0 && !isEmptyDay(tmp0.rows)) report.errors.push({ level: 'error', day: dd, msg: ym + ' に存在しない日付ですが数字が入っています' });
+        continue;
+      }
+      var p = parseDaySheet(ws, dd, report.errors);
+      if (!p) continue;
+      if (isEmptyDay(p.rows)) { report.emptyDays.push(dd); continue; }
+
+      var day = { rows: {}, store: {}, hidden: {} };
+      METRICS.forEach(function (m) { day.store[m.key] = 0; day.hidden[m.key] = 0; });
+      var sums = { cast: {}, ops: {} };
+      METRICS.forEach(function (m) { sums.cast[m.key] = 0; sums.ops[m.key] = 0; });
+
+      p.rows.forEach(function (r) {
+        METRICS.forEach(function (m) { day.store[m.key] += r.m[m.key]; sums[r.kind][m.key] += r.m[m.key]; });
+        var realName = r.name && r.name !== '0' && num(r.name) === null;
+        var shown = realName && (r.kind === 'cast' || OPS_SHOWN.indexOf(r.name) >= 0);
+        if (!shown) {
+          METRICS.forEach(function (m) { day.hidden[m.key] += r.m[m.key]; });
+          return;
+        }
+        var id = nameId(r.name);
+        if (!empMap[id]) empMap[id] = { id: id, name: r.name, kind: r.kind, no: r.no };
+        var any = METRICS.some(function (m) { return r.m[m.key] !== 0; });
+        if (any || r.att) {
+          var arr = METRICS.map(function (m) { return r.m[m.key]; });
+          arr.push(r.att || '');
+          if (day.rows[id]) {
+            report.warnings.push({ level: 'warn', day: dd, msg: '同じ名前「' + r.name + '」が同じ日に2行あります。数字を足し合わせました' });
+            for (var q = 0; q < 8; q++) arr[q] += day.rows[id][q];
+            if (!arr[8]) arr[8] = day.rows[id][8];
+          }
+          day.rows[id] = arr;
+        }
+      });
+
+      // Excelの合計行との突き合わせ
+      ['cast', 'ops'].forEach(function (k) {
+        METRICS.forEach(function (m) {
+          var ex = p.excelTotals[k][m.key];
+          if (ex === null || ex === undefined) return;
+          if (ex !== sums[k][m.key]) {
+            report.checks.push({ day: dd, kind: k, metric: m.label, excel: ex, computed: sums[k][m.key] });
+          }
+        });
+      });
+      // 店の総売: Excelの日別集計(総売上(カード込み))を採用。個人の合計との差は「担当なし」
+      var personGross = day.store.gross;
+      var exGross = findDayTotal(ws);
+      if (exGross === null) {
+        report.warnings.push({ level: 'warn', day: dd, msg: '「総売上(カード込み)」が見つかりません。個人別の合計を使います' });
+        day.unas = 0;
+      } else {
+        day.store.gross = exGross;
+        day.unas = exGross - personGross;
+      }
+      // 初回（管理者だけに見せる）: 組数=初回フリー / 人数=初回人数 / 売上=うち初回
+      var shK = findLabeled(ws, '初回フリー'), shN = findLabeled(ws, '初回人数'), shS = findLabeled(ws, 'うち初回');
+      day.shokai = { kumi: shK || 0, nin: shN || 0, sales: shS || 0 };
+      days[dd] = day;
+    }
+
+    var employees = Object.keys(empMap).map(function (k) { return empMap[k]; })
+      .sort(function (a, b) { return a.no - b.no; });
+    var monthObj = {
+      ym: ym, year: year, month: mon, daysInMonth: daysInMonth,
+      employees: employees.map(function (e) { return { id: e.id, name: e.name, kind: e.kind }; }),
+      days: days,
+      metrics: METRICS.map(function (m) { return { key: m.key, label: m.label }; })
+    };
+    return { month: monthObj, report: report };
+  }
+
+  var api = { parseWorkbook: parseWorkbook, METRICS: METRICS, OPS_SHOWN: OPS_SHOWN };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.X8Parse = api;
+})(typeof window !== 'undefined' ? window : this);
+
+</script>
+<script type="module">
+/* =====================================================================
+   X8 本店 売上管理 — 閲覧・取り込みアプリ
+   データ: Firebase (プロジェクト x8open) の Firestore。1か月=1ドキュメント。
+   ログイン: Firebase Authentication (メール/パスワード)。
+     admin@x8sales.app = 管理者 / staff@x8sales.app = 従業員共通
+   アクセス制限は Firestore のセキュリティルール(サーバー側)で行う。
+   ===================================================================== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBMkuBSZ75otzTCNT2fdFsxcHaTGk86Lz4",
+  authDomain: "x8open.firebaseapp.com",
+  projectId: "x8open",
+  storageBucket: "x8open.firebasestorage.app",
+  messagingSenderId: "222731309583",
+  appId: "1:222731309583:web:3df818ef2166159d77097a"
+};
+const ME_MODE = true;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
+const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
+const FB_VER = '12.19.0';
+const BUILD = 'sales-20 - 2026-10-24';
+
+const MET = [
+  { k:'sub',    i:0, label:'小計',       unit:'yen' },
+  { k:'gross',  i:1, label:'総売',       unit:'yen' },
+  { k:'shimei', i:2, label:'本数',       unit:'n' },
+  { k:'shinki', i:4, label:'新規',       unit:'n' },
+  { k:'nomi',   i:5, label:'飲み直し',   unit:'n' },
+  { k:'okuri',  i:7, label:'送り',       unit:'n' },
+  { k:'help',   i:6, label:'ヘルプ指名', unit:'n' },
+  { k:'douhan', i:3, label:'同伴',       unit:'n' }
+];
+const KEYS8 = ['sub','gross','shimei','douhan','shinki','nomi','help','okuri'];
+
+/* ---------- utils ---------- */
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = (n) => Math.round(n || 0).toLocaleString('ja-JP');
+const yen = (n) => '¥' + fmt(n);
+const man = (n) => n >= 10000 ? (Math.round(n / 1000) / 10) + '万' : fmt(n);
+const manS = (n) => n >= 10000000 ? Math.round(n / 10000) + '万' : man(n);
+const pair = (g, sb, extraG, extraS) => `<div class="pair"><div class="lbl">総売</div><div class="big">${yen(g)}</div>${extraG || ''}<div class="sl"><span class="lbl">小計</span><b>${yen(sb)}</b></div>${extraS || ''}</div>`;
+const val = (m, n) => m.unit === 'yen' ? yen(n) : fmt(n);
+const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2600); }
+function ymLabel(ym){ const [y, m] = ym.split('-'); return y + '年' + Number(m) + '月'; }
+function prevYm(ym){ let [y, m] = ym.split('-').map(Number); m--; if (m < 1) { m = 12; y--; } return y + '-' + (m < 10 ? '0' : '') + m; }
+function dayLabel(ym, dd){ const [y, m] = ym.split('-').map(Number); const w = '日月火水木金土'[new Date(y, m - 1, Number(dd)).getDay()]; return m + '/' + Number(dd) + '(' + w + ')'; }
+
+/* ---------- month data helpers ---------- */
+const dayList = (M) => Object.keys(M.days).sort();
+function storeSum(M, dds){ const t = {}; KEYS8.forEach(k => t[k] = 0); (dds || dayList(M)).forEach(dd => KEYS8.forEach(k => t[k] += (M.days[dd].store[k] || 0))); return t; }
+function shokaiSum(M, dds){ const t = { kumi: 0, nin: 0, sales: 0 }; (dds || dayList(M)).forEach(dd => { const h = M.days[dd] && M.days[dd].shokai; if (h) { t.kumi += h.kumi || 0; t.nin += h.nin || 0; t.sales += h.sales || 0; } }); return t; }
+function hasShokai(M){ return dayList(M).some(dd => M.days[dd].shokai); }
+function unasSum(M){ return dayList(M).reduce((a, dd) => a + (M.days[dd].unas || 0), 0); }
+function hiddenSum(M){ const t = {}; KEYS8.forEach(k => t[k] = 0); dayList(M).forEach(dd => KEYS8.forEach(k => t[k] += (M.days[dd].hidden && M.days[dd].hidden[k]) || 0)); return t; }
+const hexOf = (name) => { const s = String(name == null ? '' : name).normalize('NFKC').trim(); let h = 'u'; for (let i = 0; i < s.length; i++) h += s.charCodeAt(i).toString(16).padStart(4, '0'); return h; };
+// 公開用の月データ（個人の日別は入れない）と、個人ごとの日別データに分ける
+function splitMonth(M){
+  const pub = { ym: M.ym, year: M.year, month: M.month, daysInMonth: M.daysInMonth, employees: M.employees, metrics: M.metrics, days: {}, totals: {} };
+  const privs = {};
+  M.employees.forEach(e => { privs[e.id] = { days: {} }; const t = new Array(9).fill(0); pub.totals[e.id] = t; });
+  Object.keys(M.days).forEach(dd => {
+    const d = M.days[dd];
+    pub.days[dd] = { rows: {} };  // 店舗の数字は公開用に入れない（管理者用のfullにだけある）
+    Object.keys(d.rows).forEach(id => {
+      if (!privs[id]) return;
+      privs[id].days[dd] = d.rows[id];
+      const t = pub.totals[id]; for (let i = 0; i < 8; i++) t[i] += d.rows[id][i] || 0; t[8]++;
+    });
+  });
+  Object.keys(pub.totals).forEach(id => { pub.totals[id][1] = 0; });  // 総売は公開用に入れない（本人用のprivと管理者用のfullにだけある）
+  return { pub, privs };
+}
+function empMonth(M, id){
+  if (M.totals) { const a = M.totals[id] || new Array(9).fill(0); const t = a.slice(0, 8); t.days = a[8] || 0; return t; }
+  const t = new Array(8).fill(0); let n = 0; dayList(M).forEach(dd => { const r = M.days[dd].rows[id]; if (r) { for (let i = 0; i < 8; i++) t[i] += r[i] || 0; n++; } }); t.days = n; return t; }
+function ranking(M, i, dd){
+  const list = M.employees.map((e, idx) => ({ id: e.id, name: e.name, kind: e.kind, idx, v: dd ? (((M.days[dd] && M.days[dd].rows[e.id]) || [])[i] || 0) : empMonth(M, e.id)[i] }));
+  list.sort((a, b) => b.v - a.v || a.idx - b.idx);
+  let rank = 0, prev = null, pos = 0;
+  list.forEach(x => { pos++; if (x.v !== prev) { rank = pos; prev = x.v; } x.rank = rank; });
+  return list;
+}
+
+/* ---------- backends ---------- */
+const TEST = window.__X8_TEST || null;
+let backend = null;
+
+async function makeFirebaseBackend(){
+  const base = 'https://www.gstatic.com/firebasejs/' + FB_VER + '/';
+  const [A, Au, F] = await Promise.all([
+    import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-firestore.js')
+  ]);
+  const app = A.initializeApp(FIREBASE_CONFIG);
+  const auth = Au.getAuth(app);
+  const db = F.getFirestore(app);
+  const infoOf = (u) => {
+    if (!u || !u.email) return null;
+    if (u.email === ADMIN_EMAIL) return { role: 'admin' };
+    if (u.email === STAFF_EMAIL) return { role: 'staff' };
+    const m = /^(u[0-9a-f]+)@x8sales\.app$/.exec(u.email); return m ? { role: 'member', hex: m[1] } : null;
+  };
+  let suppress = false, theCb = null, curRole = null;
+  const memEmail = (name) => hexOf(name) + '@x8sales.app';
+  const monthCol = () => curRole === 'admin' ? 'full' : 'months';
+  async function writeMonth(ym, M, prevPayload){
+    const sp = splitMonth(M); const b = F.writeBatch(db);
+    b.set(F.doc(db, 'months', ym), { ym, payload: JSON.stringify(sp.pub), updatedAt: F.serverTimestamp() });
+    b.set(F.doc(db, 'full', ym), { ym, payload: JSON.stringify(M), prev: prevPayload || null, updatedAt: F.serverTimestamp() });
+    M.employees.forEach(e => { const h = hexOf(e.name); b.set(F.doc(db, 'priv', ym + '_' + h), { ym, owner: h, payload: JSON.stringify(sp.privs[e.id]), updatedAt: F.serverTimestamp() }); });
+    await b.commit();
+  }
+  return {
+    onAuth(cb){ theCb = cb; return Au.onAuthStateChanged(auth, (u) => { if (suppress) return; const i = infoOf(u); curRole = i && i.role; cb(i); }); },
+    async login(role, pw){ await Au.signInWithEmailAndPassword(auth, role === 'admin' ? ADMIN_EMAIL : STAFF_EMAIL, pw); },
+    async loginMember(name, pw){ await Au.signInWithEmailAndPassword(auth, memEmail(name), pw); },
+    async registerMember(name, code, pw){
+      suppress = true; let cred;
+      try { cred = await Au.createUserWithEmailAndPassword(auth, memEmail(name), pw); } catch (e) { suppress = false; throw e; }
+      try { await F.setDoc(F.doc(db, 'members', hexOf(name)), { uid: cred.user.uid, code: String(code).trim().toUpperCase(), name: String(name).trim(), at: F.serverTimestamp() }); }
+      catch (e) { try { await cred.user.delete(); } catch (_) {} try { await Au.signOut(auth); } catch (_) {} suppress = false; const er = new Error('bad-code'); er.code = 'bad-code'; throw er; }
+      suppress = false; const i = infoOf(auth.currentUser); curRole = i && i.role; if (theCb) theCb(i);
+    },
+    async changePassword(pw){ await Au.updatePassword(auth.currentUser, pw); },
+    async changeAdminPassword(cur, pw){
+      const u = auth.currentUser; if (!u || u.email !== ADMIN_EMAIL) throw new Error('not-admin');
+      await Au.reauthenticateWithCredential(u, Au.EmailAuthProvider.credential(ADMIN_EMAIL, cur));
+      await Au.updatePassword(u, pw);
+    },
+    async logout(){ await Au.signOut(auth); },
+    subPriv(ym, hex, cb, err){
+      return F.onSnapshot(F.doc(db, 'priv', ym + '_' + hex), (s) => { if (!s.exists()) return cb(null); try { cb(JSON.parse(s.data().payload)); } catch (e) { cb(null); } }, err);
+    },
+    async listMembers(){
+      const [m, i] = await Promise.all([F.getDocs(F.collection(db, 'members')), F.getDocs(F.collection(db, 'invites'))]);
+      const out = { members: {}, invites: {} };
+      m.docs.forEach(d => out.members[d.id] = d.data()); i.docs.forEach(d => out.invites[d.id] = d.data());
+      return out;
+    },
+    async issueInvite(name){
+      const al = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; const a = new Uint8Array(8); crypto.getRandomValues(a);
+      const code = Array.from(a).map(x => al[x % al.length]).join('');
+      await F.setDoc(F.doc(db, 'invites', hexOf(name)), { code, name, at: F.serverTimestamp() });
+      return code;
+    },
+    async unregister(name){ await F.deleteDoc(F.doc(db, 'members', hexOf(name))); },
+    subMeta(cb, err){ return F.onSnapshot(F.doc(db, 'meta', 'app'), (s) => cb(s.exists() ? s.data() : { months: [], targets: {} }), err); },
+    subMonth(ym, cb, err){
+      return F.onSnapshot(F.doc(db, monthCol(), ym), (s) => {
+        if (!s.exists()) return cb(null, null);
+        const d = s.data(); let M = null; try { M = JSON.parse(d.payload); } catch (e) {}
+        const ts = d.updatedAt && d.updatedAt.toMillis ? d.updatedAt.toMillis() : null;
+        cb(M, ts);
+      }, err);
+    },
+    async getMonthOnce(ym){
+      const s = await F.getDoc(F.doc(db, monthCol(), ym));
+      if (!s.exists()) return null;
+      const d = s.data(); try { return JSON.parse(d.payload); } catch (e) { return null; }
+    },
+    async saveMonth(ym, M, rec, monthsList){
+      const cur = await F.getDoc(F.doc(db, 'full', ym));
+      const prev = cur.exists() ? (cur.data().payload || null) : null;
+      await writeMonth(ym, M, prev);
+      await F.setDoc(F.doc(db, 'meta', 'app'), { months: monthsList, updatedAt: F.serverTimestamp() }, { merge: true });
+      await F.addDoc(F.collection(db, 'imports'), Object.assign({}, rec, { at: F.serverTimestamp(), by: auth.currentUser ? auth.currentUser.email : '' }));
+    },
+    async setTarget(ym, amount){
+      const t = {}; t[ym] = amount;
+      await F.setDoc(F.doc(db, 'meta', 'app'), { targets: t, updatedAt: F.serverTimestamp() }, { merge: true });
+    },
+    async listImports(){
+      const q = F.query(F.collection(db, 'imports'), F.orderBy('at', 'desc'), F.limit(12));
+      const s = await F.getDocs(q);
+      return s.docs.map(d => { const x = d.data(); x.id = d.id; x.atMs = x.at && x.at.toMillis ? x.at.toMillis() : null; return x; });
+    },
+    async restorePrev(ym){
+      const s = await F.getDoc(F.doc(db, 'full', ym));
+      if (!s.exists() || !s.data().prev) throw new Error('戻せる履歴がありません');
+      const d = s.data();
+      await writeMonth(ym, JSON.parse(d.prev), d.payload);
+      await F.addDoc(F.collection(db, 'imports'), { kind: 'restore', ym, at: F.serverTimestamp(), by: auth.currentUser ? auth.currentUser.email : '' });
+    }
+  };
+}
+
+function makeTestBackend(){
+  const T = TEST; let cbAuth = null;
+  return {
+    onAuth(cb){ cbAuth = cb; setTimeout(() => cb(T.role === 'none' ? null : { role: T.role || 'staff', hex: T.hex }), 0); return () => {}; },
+    async login(){}, async loginMember(){}, async registerMember(){}, async changePassword(){}, async changeAdminPassword(c){ if (c !== 'old') { const e = new Error('x'); e.code = 'auth/invalid-credential'; throw e; } }, async logout(){},
+    subPriv(ym, hex, cb){ setTimeout(() => cb(T.priv ? JSON.parse(JSON.stringify(T.priv)) : null), 0); return () => {}; },
+    async listMembers(){ return T.members || { members: {}, invites: {} }; },
+    async issueInvite(){ return 'TEST2345'; }, async unregister(){},
+    subMeta(cb){ setTimeout(() => cb(T.meta), 0); return () => {}; },
+    subMonth(ym, cb){ setTimeout(() => cb(T.months[ym] ? JSON.parse(JSON.stringify(T.months[ym])) : null, T.updatedAt || Date.now()), 0); return () => {}; },
+    async getMonthOnce(ym){ return T.months[ym] ? JSON.parse(JSON.stringify(T.months[ym])) : null; },
+    async saveMonth(ym, M, rec, monthsList){ T.saved = { ym, M, rec, monthsList }; T.months[ym] = M; T.meta.months = monthsList; },
+    async setTarget(ym, a){ T.meta.targets = T.meta.targets || {}; T.meta.targets[ym] = a; },
+    async listImports(){ return T.imports || []; },
+    async restorePrev(){ throw new Error('テストでは使えません'); }
+  };
+}
+
+/* ---------- state ---------- */
+const S = {
+  phase: 'boot',          // boot | login | app | fatal
+  role: null, tab: 'home',
+  meta: { months: [], targets: {} },
+  ym: null, M: null, prevM: null, updatedAt: null,
+  dd: null,               // 選択中の日
+  rankMetric: 'sub', rankScope: 'month', rankView: 'rank', dayView: 'cal', gridMetric: 'gross',
+  empId: lsGet('x8s_emp') || null, empQuery: '',
+  dayDetail: null,        // 日別画面で詳細表示中のdd
+  loginRole: ME_MODE ? 'member' : 'admin', regMode: false, hex: null, priv: null, memberInfo: null, loginErr: '', loginBusy: false,
+  imp: null, importsList: null, targetDraft: ''
+};
+let unsubMonth = null, unsubMeta = null, unsubPriv = null, unsubPrivPrev = null;
+
+function pickDefaultDay(){
+  if (!S.M) { S.dd = null; return; }
+  const l = dayList(S.M);
+  if (!S.dd || !S.M.days[S.dd]) S.dd = l.length ? l[l.length - 1] : null;
+}
+
+function selectMonth(ym){
+  if (unsubMonth) { unsubMonth(); unsubMonth = null; }
+  if (unsubPriv) { unsubPriv(); unsubPriv = null; } S.priv = null;
+  if (unsubPrivPrev) { unsubPrivPrev(); unsubPrivPrev = null; } S.privPrev = null;
+  S.ym = ym; S.M = null; S.prevM = null; S.dd = null; S.dayDetail = null; S.loading = true; render();
+  unsubMonth = backend.subMonth(ym, (M, ts) => {
+    S.loading = false; S.M = M; S.updatedAt = ts; pickDefaultDay();
+    loadPrev(); render();
+  }, (e) => { S.loading = false; S.err = '読み込みに失敗しました'; render(); });
+  if (S.role === 'member' && S.hex) {
+    unsubPriv = backend.subPriv(ym, S.hex, (P) => { S.priv = P; render(); }, () => {});
+    unsubPrivPrev = backend.subPriv(prevYm(ym), S.hex, (P) => { S.privPrev = P; render(); }, () => {});
+  }
+}
+async function loadPrev(){
+  const p = prevYm(S.ym);
+  if (!S.meta.months.includes(p)) { S.prevM = null; return; }
+  try { const m = await backend.getMonthOnce(p); S.prevM = m; render(); } catch (e) { S.prevM = null; }
+}
+function startApp(role){
+  S.role = role; S.phase = 'app'; render();
+  unsubMeta = backend.subMeta((meta) => {
+    S.meta = { months: (meta.months || []).slice().sort(), targets: meta.targets || {}, updatedAt: meta.updatedAt };
+    const latest = S.meta.months[S.meta.months.length - 1];
+    if (!S.ym || (latest && !S.meta.months.includes(S.ym))) { if (latest) selectMonth(latest); else { S.loading = false; render(); } }
+    else render();
+  }, () => { S.err = '読み込みに失敗しました'; render(); });
+}
+
+/* ---------- views ---------- */
+function monthBar(){
+  const ms = S.meta.months, i = ms.indexOf(S.ym);
+  return `<div class="monthbar">
+    <button data-a="mprev" ${i <= 0 ? 'disabled' : ''} aria-label="前の月">◀</button>
+    <div class="m">${S.ym ? ymLabel(S.ym) : '—'}</div>
+    <button data-a="mnext" ${i < 0 || i >= ms.length - 1 ? 'disabled' : ''} aria-label="次の月">▶</button>
+  </div>`;
+}
+function updatedLine(){
+  if (!S.updatedAt) return '';
+  const d = new Date(S.updatedAt);
+  return `<div class="note" style="text-align:center">データ更新: ${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}</div>`;
+}
+function noData(){
+  if (S.loading) return '<div class="loading">読み込み中…</div>';
+  if (S.err) return `<div class="empty">${esc(S.err)}</div>`;
+  return `<div class="empty">まだデータがありません。<br>管理者がExcelを取り込むと表示されます。</div>`;
+}
+function delta(cur, prev, unit){
+  if (prev == null) return '';
+  const d = cur - prev; if (d === 0) return `<span class="dim">前月と同じ</span>`;
+  const s = (d > 0 ? '+' : '−') + (unit === 'yen' ? '¥' : '') + fmt(Math.abs(d));
+  return `<span class="${d > 0 ? 'pos' : 'neg'}">${d > 0 ? '▲' : '▼'} ${s}</span>`;
+}
+
+function viewHomeLite(){
+  const M = S.M; if (!M) return noData();
+  const days = dayList(M);
+  const rk = ranking(M, 0, null).filter(x => x.v > 0).slice(0, 5);
+  return `
+  <div class="card"><h2>${ymLabel(M.ym)}</h2>
+    <div class="lbl">営業日</div><div class="big sm">${days.length}日</div>
+    <div class="note">お店全体の売上は、管理者だけが見られます。</div>
+  </div>
+  <div class="card">
+    <h2>月間 小計ランキング TOP5</h2>
+    ${rk.length ? rk.map(rkRow(0, false)).join('') : '<div class="dim">データなし</div>'}
+    <div style="margin-top:10px"><button class="btn ghost small" data-a="tab" data-t="rank">ランキングをすべて見る</button></div>
+  </div>
+  ${S.role === 'member' ? '<div class="card"><button class="btn" data-a="tab" data-t="pers">自分の実績を見る</button></div>' : ''}
+  ${updatedLine()}`;
+}
+
+function shokaiCard(M, days, dd, prevTo, lastN, prevToN){
+  if (!hasShokai(M)) return '';
+  const t = shokaiSum(M), td = dd && M.days[dd] ? M.days[dd].shokai : null;
+  const pv = (S.prevM && hasShokai(S.prevM)) ? shokaiSum(S.prevM, dayList(S.prevM).filter(d => Number(d) <= lastN)) : null;
+  const kp = (l, k, v, p, f) => `<div class="kpi"><div class="v" style="font-size:${f ? 17 : 24}px">${(f || fmt)(v)}</div><div class="l">${l}</div>${p ? `<div class="kd">${delta(v, p[k], f ? 'yen' : '')}</div><div class="kp">前月 ${(f || fmt)(p[k])}</div>` : ''}</div>`;
+  return `<div class="card"><h2>初回（${ymLabel(M.ym)} 累計）</h2>
+    <div class="kpis">
+      ${kp('初回組数', 'kumi', t.kumi, pv)}${kp('初回人数', 'nin', t.nin, pv)}${kp('うち初回の売上', 'sales', t.sales, pv, yen)}
+    </div>
+    ${(S.prevM && hasShokai(S.prevM)) ? (() => { const a = shokaiSum(S.prevM); return `<div class="hr"></div><div class="lbl">${ymLabel(S.prevM.ym)} 全体の初回</div><div style="margin-top:4px"><b>${fmt(a.kumi)}</b>組 ／ <b>${fmt(a.nin)}</b>人 ／ 売上 ${yen(a.sales)}</div><div class="note" style="margin-top:6px">上の ◀ で ${ymLabel(S.prevM.ym)} に切り替えると、日別の初回も見られます。</div>`; })() : ''}
+    ${td ? `<div class="note">${dayLabel(M.ym, dd)}: 初回 ${fmt(td.kumi)}組 ／ ${fmt(td.nin)}人 ／ 売上 ${yen(td.sales)}</div>` : ''}
+    ${pv ? `<div class="note">▲▼は前月の同じ日まで（${lastN}日まで・営業${prevToN}日）との差です。組数＝Excelの「初回フリー」、人数＝「初回人数」、売上＝「うち初回」。この表示は管理者だけに出ます。</div>` : '<div class="note">組数＝Excelの「初回フリー」、人数＝「初回人数」、売上＝「うち初回」です。管理者だけに出ます。前月のデータが入ると前月比も出ます。</div>'}
+  </div>`;
+}
+function shokaiDaily(M){
+  if (!hasShokai(M)) return '';
+  const days = dayList(M); const t = shokaiSum(M);
+  return `<div class="card"><h2>${ymLabel(M.ym)} 日別の初回</h2>
+    <table class="tbl"><thead><tr><th>日</th><th>組</th><th>人</th><th>うち初回の売上</th></tr></thead><tbody>
+    ${days.map(d => { const h = M.days[d].shokai || { kumi: 0, nin: 0, sales: 0 }; return `<tr class="tap" data-a="openday" data-d="${d}"><td>${dayLabel(M.ym, d)}</td><td>${fmt(h.kumi)}</td><td>${fmt(h.nin)}</td><td>${h.sales ? yen(h.sales) : '·'}</td></tr>`; }).join('')}
+    <tr class="total"><td>合計</td><td>${fmt(t.kumi)}</td><td>${fmt(t.nin)}</td><td>${yen(t.sales)}</td></tr></tbody></table>
+    <div class="note">日付の行をタップすると、その日の内訳が見られます。管理者だけに出ます。</div>
+  </div>`;
+}
+const STAFF_CARD_SKIP = ['ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう']; // 運営のため増減の集計から外す
+function staffChangeCard(M){
+  const keep = e => STAFF_CARD_SKIP.indexOf(e.name) < 0;
+  const act = (X) => new Set(X.employees.filter(e => keep(e) && empMonth(X, e.id).days > 0).map(e => e.id));
+  const cur = M.employees.filter(e => keep(e) && empMonth(M, e.id).days > 0);
+  if (!S.prevM) return `<div class="card"><h2>従業員の増減</h2><div class="dim">前月のデータが入ると、増えた従業員が表示されます。</div></div>`;
+  const pa = act(S.prevM);
+  const added = cur.filter(e => !pa.has(e.id));
+  const ca = act(M);
+  const left = S.prevM.employees.filter(e => keep(e) && pa.has(e.id) && !ca.has(e.id));
+  const nm = e => `<span class="chip">${esc(e.name)}</span>`;
+  return `<div class="card"><h2>従業員の増減（前月比）</h2>
+    <div class="row2"><div><div class="lbl">今月の出勤者</div><div class="big sm">${cur.length}人</div></div>
+    <div style="text-align:right"><div class="lbl">前月</div><div class="big sm">${pa.size}人</div></div></div>
+    <div class="hr"></div>
+    <div class="lbl">増えた従業員（前月は出勤なし）</div>
+    <div style="margin-top:4px"><span class="pos" style="font-family:Oswald;font-size:22px">+${added.length}人</span></div>
+    <div class="chips">${added.length ? added.map(nm).join('') : '<span class="dim">いません</span>'}</div>
+    ${left.length ? `<div class="lbl" style="margin-top:12px">今月は出勤なし（前月は出勤）</div><div style="margin-top:4px"><span class="neg" style="font-family:Oswald;font-size:18px">−${left.length}人</span></div><div class="chips">${left.map(nm).join('')}</div>` : ''}
+    <div class="note">出勤が1日以上ある人を数えています。るか・りお・かなたはプレイヤーと同じ扱いで数えます。この表示は管理者だけに出ます。</div>
+  </div>`;
+}
+function viewHome(){
+  if (S.role !== 'admin') return viewHomeLite();
+  const M = S.M; if (!M) return noData();
+  const days = dayList(M); const tot = storeSum(M); const hid = hiddenSum(M);
+  const dd = S.dd, today = dd ? M.days[dd].store : null;
+  const target = S.meta.targets && S.meta.targets[S.ym];
+  const pct = target ? Math.min(100, tot.gross / target * 100) : 0;
+  const prevTot = S.prevM ? storeSum(S.prevM) : null;
+  const lastN = days.length ? Number(days[days.length - 1]) : 0;
+  const prevTo = S.prevM ? storeSum(S.prevM, dayList(S.prevM).filter(d => Number(d) <= lastN)) : null;
+  const prevToN = S.prevM ? dayList(S.prevM).filter(d => Number(d) <= lastN).length : 0;
+  // 同じ営業日数までの前月累計で比べるのではなく、前月の月間合計と比較する
+  const bars = trendSvg(M);
+  const rk = ranking(M, 1, null).filter(x => x.v > 0).slice(0, 5);
+  return `
+  <div class="card">
+    <h2>${dd ? dayLabel(M.ym, dd) + ' の店舗売上' : '当日'}</h2>
+    ${today ? pair(today.gross, today.sub) : '<div class="empty">データなし</div>'}
+    ${days.length > 1 ? `<div class="seg" style="margin-top:12px;margin-bottom:0">${days.slice(-7).map(d => `<button class="${d === dd ? 'on' : ''}" data-a="pickday" data-d="${d}">${Number(d)}日</button>`).join('')}</div>` : ''}
+  </div>
+  <div class="card">
+    <h2>${ymLabel(M.ym)} 累計（営業日 ${days.length}日）</h2>
+    ${pair(tot.gross, tot.sub)}
+    <div class="hr"></div>
+    ${target ? `<div class="row2" style="align-items:end"><div><div class="lbl">月間目標（総売）</div><div style="font-family:Oswald;font-size:20px">${yen(target)}</div></div>
+      <div style="text-align:right"><div class="lbl">達成率</div><div class="big sm">${(tot.gross / target * 100).toFixed(1)}%</div></div></div>
+      <div class="bar"><i style="width:${pct}%"></i></div>`
+      : `<div class="lbl">月間目標: 未設定${S.role === 'admin' ? '（管理タブで設定できます）' : ''}</div>`}
+    <div class="hr"></div>
+    <div class="lbl">前月比 ①同じ日まで（前月の${lastN}日まで・営業${prevToN}日）</div>
+    ${prevTo ? `<div style="margin-top:4px">総売 ${delta(tot.gross, prevTo.gross, 'yen')}　<span class="dim">前月 ${yen(prevTo.gross)}</span></div>
+      <div>小計 ${delta(tot.sub, prevTo.sub, 'yen')}　<span class="dim">前月 ${yen(prevTo.sub)}</span></div>
+      <div class="dim" style="margin-top:2px">本数 ${delta(tot.shimei, prevTo.shimei)}　新規 ${delta(tot.shinki, prevTo.shinki)}　送り ${delta(tot.okuri, prevTo.okuri)}　同伴 ${delta(tot.douhan, prevTo.douhan)}</div>`
+      : '<div class="dim" style="margin-top:4px">前月のデータがまだありません</div>'}
+    ${prevTot ? `<div class="lbl" style="margin-top:12px">②前月の月間合計との差</div>
+      <div style="margin-top:4px">総売 ${delta(tot.gross, prevTot.gross, 'yen')}　<span class="dim">前月全体 ${yen(prevTot.gross)}（営業${dayList(S.prevM).length}日）</span></div>` : ''}
+  </div>
+  ${shokaiCard(M, days, dd, prevTo, lastN, prevToN)}
+  ${staffChangeCard(M)}
+  <div class="card">
+    <h2>営業日ごとの総売</h2>${bars}
+  </div>
+  <div class="card">
+    <h2>${ymLabel(M.ym)} 累計の件数</h2>
+    <div class="kpis">
+      ${[['本数', 'shimei'], ['新規', 'shinki'], ['飲み直し', 'nomi'], ['送り', 'okuri'], ['ヘルプ指名', 'help'], ['同伴', 'douhan']].map(([l, k]) => `<div class="kpi"><div class="v">${fmt(tot[k])}</div><div class="l">${l}</div>${prevTo ? `<div class="kd">${delta(tot[k], prevTo[k])}</div><div class="kp">前月 ${fmt(prevTo[k])}</div>` : ''}</div>`).join('')}
+    </div>
+    ${prevTo ? `<div class="note">▲▼は前月の同じ日まで（${lastN}日まで・営業${prevToN}日）との差です。「前月」はその合計です。</div>` : '<div class="note">前月のデータが入ると、前月比が表示されます。</div>'}
+    ${(dd && today) ? `<div class="note">${dayLabel(M.ym, dd)}: 本数 ${fmt(today.shimei)} ／ 新規 ${fmt(today.shinki)} ／ 飲み直し ${fmt(today.nomi)} ／ 送り ${fmt(today.okuri)} ／ ヘルプ ${fmt(today.help)} ／ 同伴 ${fmt(today.douhan)}</div>` : ''}
+    <div class="note">新規は「件数」です。人数はExcelの個人別データにないため表示しません。</div>
+  </div>
+  <div class="card">
+    <h2>月間 総売ランキング TOP5</h2>
+    ${rk.length ? rk.map(rkRow(1, false)).join('') : '<div class="dim">データなし</div>'}
+    <div style="margin-top:10px"><button class="btn ghost small" data-a="tab" data-t="rank">ランキングをすべて見る</button></div>
+  </div>
+  <div class="note" style="text-align:center">店舗合計には、一覧・ランキングに載せていない運営メンバー分（総売 ${yen(hid.gross)}／小計 ${yen(hid.sub)}）を含みます。${unasSum(M) ? `<br>さらに「担当なしの売上」${yen(unasSum(M))}（伝票にあるが個人の欄に入っていない分）を含み、Excelの月間合計と同じ数字です。` : ''}</div>
+  ${updatedLine()}`;
+}
+
+function trendSvg(M){
+  const N = M.daysInMonth || 31; const W = 340, H = 110, pad = 14;
+  const vals = []; let max = 1;
+  for (let i = 1; i <= N; i++) { const dd = (i < 10 ? '0' : '') + i; const v = M.days[dd] ? M.days[dd].store.gross : null; vals.push(v); if (v && v > max) max = v; }
+  const bw = (W - 8) / N;
+  let s = `<svg viewBox="0 0 ${W} ${H + pad}" width="100%" role="img" aria-label="営業日ごとの総売の推移">`;
+  vals.forEach((v, i) => {
+    const dd = (i + 1 < 10 ? '0' : '') + (i + 1); const x = 4 + i * bw;
+    if (v == null) { s += `<rect x="${x + 1}" y="${H - 2}" width="${Math.max(1, bw - 2)}" height="2" fill="#2a2631"/>`; }
+    else { const h = Math.max(2, v / max * (H - 8)); s += `<rect data-a="pickday" data-d="${dd}" x="${x + 1}" y="${H - h}" width="${Math.max(1, bw - 2)}" height="${h}" rx="2" fill="${dd === S.dd ? '#f3d58a' : '#b8872b'}"/>`; }
+    if ((i + 1) % 5 === 0 || i === 0) s += `<text x="${x + bw / 2}" y="${H + 11}" font-size="9" fill="#9b94a6" text-anchor="middle">${i + 1}</text>`;
+  });
+  return s + '</svg>';
+}
+
+function rkRow(i, byDay){
+  return (x) => {
+    const m = MET.find(z => z.i === i);
+    let sub = '';
+    if (S.prevM && !byDay) {
+      const pv = empMonth(S.prevM, x.id)[i];
+      const hasPrev = S.prevM.employees.some(e => e.id === x.id);
+      sub = hasPrev ? `<small>${delta(x.v, pv, m.unit)}</small>` : '<small class="dim">前月なし</small>';
+    }
+    return `<div class="rk tap r${x.rank <= 3 ? x.rank : ''}" data-a="person" data-id="${esc(x.id)}">
+      <div class="no">${x.rank}</div>
+      <div class="nm">${esc(x.name)}${x.kind === 'ops' ? '<small>運営</small>' : ''}</div>
+      <div class="vl">${val(m, x.v)}${sub}</div></div>`;
+  };
+}
+
+const metList = () => S.role === 'admin' ? MET : MET.filter(z => z.k !== 'gross');
+function viewCompare(M, m){
+  if (!S.prevM) return '<div class="card"><div class="empty">前月のデータがまだありません。<br>管理者が前月のExcelを取り込むと表示されます。</div></div>';
+  const P = S.prevM, i = m.i;
+  const ids = {}; M.employees.forEach(e => ids[e.id] = e.name); P.employees.forEach(e => { if (!ids[e.id]) ids[e.id] = e.name; });
+  const inM = {}, inP = {}; M.employees.forEach(e => inM[e.id] = 1); P.employees.forEach(e => inP[e.id] = 1);
+  const rows = Object.keys(ids).map(id => ({ id, name: ids[id], cur: inM[id] ? empMonth(M, id)[i] : 0, prev: inP[id] ? empMonth(P, id)[i] : 0, hasP: !!inP[id], hasM: !!inM[id] }))
+    .filter(r => r.cur || r.prev).sort((a, b) => b.cur - a.cur || b.prev - a.prev);
+  const fv = (n) => m.unit === 'yen' ? fmt(n) : fmt(n);
+  const pct = (r) => !r.hasP ? '<span class="dim">新</span>' : (r.prev === 0 ? '<span class="dim">—</span>' : ((r.cur - r.prev) / r.prev * 100 >= 0 ? '+' : '−') + Math.abs(Math.round((r.cur - r.prev) / r.prev * 100)) + '%');
+  const dl = (r) => { const d = r.cur - r.prev; return `<span class="${d > 0 ? 'pos' : d < 0 ? 'neg' : 'dim'}">${d > 0 ? '+' : d < 0 ? '−' : ''}${fv(Math.abs(d))}</span>`; };
+  const tc = rows.reduce((a, r) => a + r.cur, 0), tp = rows.reduce((a, r) => a + r.prev, 0);
+  return `<div class="card"><h2>${m.label}　${ymLabel(P.ym)} → ${ymLabel(M.ym)}</h2>
+    <div class="scrollx"><table class="tbl"><thead><tr><th>名前</th><th>先月</th><th>今月</th><th>差（率）</th></tr></thead><tbody>
+    ${rows.map(r => `<tr class="tap" data-a="person" data-id="${esc(r.id)}"><td>${esc(r.name)}</td><td class="${r.prev ? '' : 'z'}">${fv(r.prev)}</td><td class="${r.cur ? '' : 'z'}">${fv(r.cur)}</td><td>${dl(r)}<br><small class="dim">${pct(r)}</small></td></tr>`).join('')}
+    <tr class="total"><td>合計</td><td>${fv(tp)}</td><td>${fv(tc)}</td><td>${dl({ cur: tc, prev: tp })}</td></tr>
+    </tbody></table></div>
+    <div class="note">先月は月全体の合計、今月は${dayList(M).length}日分（月の途中）です。「新」は先月の名簿にいなかった人です。${m.k === 'gross' || m.k === 'sub' ? '合計は表に載っている人だけの合計です。' : ''}</div>
+  </div>`;
+}
+
+function viewRank(){
+  const M = S.M; if (!M) return noData();
+  const m = metList().find(z => z.k === S.rankMetric) || MET[0];
+  if (S.rankView === 'cmp') return `<div class="seg2"><button data-a="rview" data-v="rank">ランキング</button><button class="on" data-a="rview" data-v="cmp">前月比一覧</button></div>
+  <div class="seg">${metList().map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="rmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
+  ${viewCompare(M, m)}${updatedLine()}`;
+  const byDay = S.role === 'admin' && S.rankScope === 'day' && S.dd;
+  const list = ranking(M, m.i, byDay ? S.dd : null);
+  const pos = list.filter(x => x.v > 0), zero = list.filter(x => x.v === 0);
+  const days = dayList(M);
+  return `
+  <div class="seg2"><button class="on" data-a="rview" data-v="rank">ランキング</button><button data-a="rview" data-v="cmp">前月比一覧</button></div>
+  <div class="seg">${metList().map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="rmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
+  ${S.role === 'admin' ? `<div class="seg2">
+    <button class="${!byDay ? 'on' : ''}" data-a="rscope" data-s="month">${ymLabel(M.ym)} 月間</button>
+    <button class="${byDay ? 'on' : ''}" data-a="rscope" data-s="day">日別</button>
+  </div>` : ''}
+  ${byDay ? `<div class="seg">${days.map(d => `<button class="${d === S.dd ? 'on' : ''}" data-a="pickday" data-d="${d}">${Number(d)}日</button>`).join('')}</div>` : ''}
+  <div class="card">
+    <h2>${byDay ? dayLabel(M.ym, S.dd) : ymLabel(M.ym) + ' 月間'}　${m.label}ランキング</h2>
+    ${pos.length ? pos.map(rkRow(m.i, byDay)).join('') : '<div class="empty">この項目の実績はまだありません</div>'}
+    ${(!byDay && !S.prevM) ? '<div class="note">前月のデータが入ると、前月比が表示されます。</div>' : ''}
+  </div>
+  <div class="note">同じ数字の人は同じ順位です。同順位の並びは名簿順です。${S.role === 'admin' ? '小計と総売は別々に集計しています。' : '総売は、個人ページで見られます。'}${zero.length ? ` 実績0の ${zero.length}人 は表示していません。` : ''}</div>
+  ${updatedLine()}`;
+}
+
+function viewGrid(M){
+  const m = MET.find(z => z.k === S.gridMetric) || MET[1];
+  const days = dayList(M);
+  const empsAll = M.employees;
+  const colTotAll = empsAll.map(e => days.reduce((a, dd) => { const r = M.days[dd].rows[e.id]; return a + (r ? r[m.i] : 0); }, 0));
+  const emps = empsAll.filter((e, i) => colTotAll[i] !== 0);
+  const hiddenN = empsAll.length - emps.length;
+  const colTot = emps.map(e => days.reduce((a, dd) => { const r = M.days[dd].rows[e.id]; return a + (r ? r[m.i] : 0); }, 0));
+  const all = days.reduce((a, dd) => a + (M.days[dd].store[m.k] || 0), 0);
+  const isY = m.unit === 'yen';
+  const nf = (v) => isY ? (Math.round(v / 100) / 10).toLocaleString('ja-JP', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : fmt(v);
+  const cell = (v) => v ? nf(v) : '·';
+  const head = `<tr><th class="c1">日</th><th class="c2">店合計</th>${emps.map((e, i) => `<th>${esc(e.name)}</th>`).join('')}</tr>`;
+  const tot = `<tr class="gt"><td class="c1">計</td><td class="c2">${nf(all)}</td>${colTot.map(v => `<td>${cell(v)}</td>`).join('')}</tr>`;
+  const body = days.map(dd => { const d = M.days[dd];
+    return `<tr><td class="c1" data-a="openday" data-d="${dd}">${Number(dd)}</td><td class="c2">${nf(d.store[m.k] || 0)}</td>${emps.map(e => { const r = d.rows[e.id]; const v = r ? r[m.i] : 0; return `<td class="${v ? '' : 'z'}">${cell(v)}</td>`; }).join('')}</tr>`; }).join('');
+  return `<div class="seg">${MET.map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="gmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
+  <div class="card" style="padding-left:16px;padding-right:16px"><h2>${ymLabel(M.ym)} 日別 × 人別（${m.label}${isY ? '・単位:千円' : ''}）</h2>
+    <div class="gridwrap"><table class="grid"><thead>${head}</thead><tbody>${tot}${body}</tbody></table></div>
+    <div class="note">左の日付をタップすると、その日の内訳が見られます。横にスワイプすると全員が見られます。この月に数字がない人（${hiddenN}人）は表から省いています。「店合計」は一覧に載せていない運営メンバー${m.k === 'gross' ? 'と担当なしの売上' : ''}を含みます。「·」は0です。</div>
+  </div>`;
+}
+
+function viewDays(){
+  const M = S.M; if (!M) return noData();
+  if (S.dayDetail && M.days[S.dayDetail]) return viewDayDetail(S.dayDetail);
+  const [y, mo] = M.ym.split('-').map(Number); const first = new Date(y, mo - 1, 1).getDay(); const N = M.daysInMonth;
+  let cells = '';
+  for (let i = 0; i < first; i++) cells += '<div></div>';
+  for (let i = 1; i <= N; i++) {
+    const dd = (i < 10 ? '0' : '') + i; const d = M.days[dd];
+    cells += d ? `<div class="d has ${dd === S.dd ? 'sel' : ''}" data-a="openday" data-d="${dd}"><b>${i}</b><span>${manS(d.store.gross)}</span></div>`
+               : `<div class="d none"><b>${i}</b><span style="color:#5d576a">—</span></div>`;
+  }
+  const toggle = `<div class="seg2"><button class="${S.dayView === 'cal' ? 'on' : ''}" data-a="dview" data-v="cal">カレンダー</button><button class="${S.dayView === 'grid' ? 'on' : ''}" data-a="dview" data-v="grid">一覧表（日×人）</button></div>`;
+  if (S.role === 'admin' && S.dayView === 'grid') return toggle + viewGrid(M) + shokaiDaily(M) + updatedLine();
+  return (S.role === 'admin' ? toggle : '') + `
+  <div class="card"><h2>${ymLabel(M.ym)} カレンダー（総売）</h2>
+    <div class="cal">${'日月火水木金土'.split('').map(w => `<div class="dw">${w}</div>`).join('')}${cells}</div>
+    <div class="note">日付をタップすると、その日の内訳が見られます。「—」はデータ未入力（または営業なし）の日で、集計には含めていません。</div>
+  </div>
+  ${S.role === 'admin' ? shokaiDaily(M) : ''}
+  ${updatedLine()}`;
+}
+
+function viewDayDetail(dd){
+  const M = S.M, d = M.days[dd];
+  const rows = M.employees.map(e => ({ e, r: d.rows[e.id] })).filter(x => x.r && x.r.slice(0, 8).some(n => n !== 0));
+  rows.sort((a, b) => b.r[1] - a.r[1] || b.r[0] - a.r[0]);
+  const hid = d.hidden || {};
+  return `
+  <button class="btn ghost small" data-a="backdays" style="margin-bottom:10px">← カレンダーに戻る</button>
+  <div class="card">
+    <h2>${dayLabel(M.ym, dd)} の店舗合計</h2>
+    ${pair(d.store.gross, d.store.sub)}
+    ${(S.role === 'admin' && d.shokai) ? `<div class="hr"></div><div class="lbl">初回</div><div style="margin-top:4px"><b>${fmt(d.shokai.kumi)}</b>組 ／ <b>${fmt(d.shokai.nin)}</b>人 ／ 売上 ${yen(d.shokai.sales)}</div>` : ''}
+    <div class="kpis" style="margin-top:12px">${[['本数', 'shimei'], ['新規', 'shinki'], ['飲み直し', 'nomi'], ['送り', 'okuri'], ['ヘルプ', 'help'], ['同伴', 'douhan']].map(([l, k]) => `<div class="kpi"><div class="v">${fmt(d.store[k])}</div><div class="l">${l}</div></div>`).join('')}</div>
+  </div>
+  ${S.role !== 'admin' ? `<div class="card"><h2>🔒 個人別</h2><div class="dim">個人の日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div><div class="note">店舗合計には、一覧に載せていない運営メンバー分（総売 ${yen(hid.gross || 0)}）${d.unas ? `と「担当なしの売上」${yen(d.unas)}` : ''}を含みます。</div></div>` : `<div class="card"><h2>個人別</h2>
+    <div class="scrollx"><table class="tbl"><thead><tr><th>名前</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
+    ${rows.map(({ e, r }) => `<tr class="tap" data-a="person" data-id="${esc(e.id)}"><td>${esc(e.name)}</td><td>${fmt(r[0])}</td><td>${fmt(r[1])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" class="dim">実績のある人がいません</td></tr>'}
+    </tbody></table></div>
+    <div class="note">飲=飲み直し／送=送り／ヘ=ヘルプ指名／同=同伴。店舗合計には、一覧に載せていない運営メンバー分（総売 ${yen(hid.gross || 0)}）を含みます。${d.unas ? `<br>さらに「担当なしの売上」${yen(d.unas)}を含みます。` : ''}</div>
+  </div>`}`;
+}
+
+function rowOf(e, dd){
+  const d = S.M && S.M.days[dd]; if (!d) return null;
+  if (S.role === 'admin') return d.rows[e.id] || null;
+  if (S.role === 'member' && hexOf(e.name) === S.hex && S.priv && S.priv.days) return S.priv.days[dd] || null;
+  return null;
+}
+function privGross(P){ if (!P || !P.days) return null; let g = 0; Object.keys(P.days).forEach(dd => { g += (P.days[dd] && P.days[dd][1]) || 0; }); return g; }
+function canDetail(e){ return S.role === 'admin' || (S.role === 'member' && hexOf(e.name) === S.hex); }
+function viewPerson(){
+  const M = S.M; if (!M) return noData();
+  if (S.role === 'member' && !S.empId) { const me = M.employees.find(x => hexOf(x.name) === S.hex); if (me) S.empId = me.id; else return '<div class="card"><h2>あなたの実績</h2><div class="dim">この月の名簿にあなたの名前がありません。名前が変わった場合は、管理者に伝えてください。</div></div>'; }
+  const e = M.employees.find(x => x.id === S.empId);
+  if (!e && S.role !== 'member') {
+    const q = S.empQuery.trim();
+    const list = M.employees.filter(x => !q || x.name.includes(q));
+    return `<div class="card"><h2>だれの実績を見ますか？</h2>
+      <input type="text" id="empq" placeholder="名前で検索" value="${esc(S.empQuery)}" autocomplete="off" style="margin-bottom:12px">
+      <div class="who">${list.map(x => `<button data-a="person" data-id="${esc(x.id)}">${esc(x.name)}${x.kind === 'ops' ? '<small>運営</small>' : ''}</button>`).join('') || '<div class="dim">見つかりません</div>'}</div></div>`;
+  }
+  const t = empMonth(M, e.id);
+  const days = dayList(M);
+  const rS = ranking(M, 0, null).find(x => x.id === e.id), rG = ranking(M, 1, null).find(x => x.id === e.id);
+  const detail = canDetail(e);
+  const dd = S.dd, td = dd && rowOf(e, dd);
+  const pt = S.prevM && S.prevM.employees.some(x => x.id === e.id) ? empMonth(S.prevM, e.id) : null;
+  const WORK = ['A出勤', 'B出勤', '遅刻'];
+  const hist = days.map(d => ({ d, r: rowOf(e, d) })).filter(x => x.r && (x.r.slice(0, 8).some(n => n !== 0) || WORK.includes(x.r[8])));
+  return `
+  ${ME_MODE ? '' : `<button class="btn ghost small" data-a="persclear" style="margin-bottom:10px">${S.role === 'member' ? '← 自分の画面に戻る' : '← 人を選びなおす'}</button>`}
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:22px;font-weight:700">${esc(e.name)}</div><span class="pill">${e.kind === 'ops' ? '運営' : 'キャスト'}</span></div>
+    ${!detail ? '' : td ? `<div class="hr"></div><div class="lbl">${dayLabel(M.ym, dd)}</div>${pair(td[1], td[0])}` : `<div class="note">${dd ? dayLabel(M.ym, dd) + ' は実績なし' : ''}</div>`}
+  </div>
+  <div class="card"><h2>${ymLabel(M.ym)} 累計</h2>
+    ${(() => {
+      const adm = S.role === 'admin';
+      const subTxt = `<div class="lbl" style="margin-top:4px">小計 順位 ${rS && rS.v > 0 ? rS.rank + '位' : '—'}${pt ? '　' + delta(t[0], pt[0], 'yen') : ''}</div>`;
+      if (adm) return pair(t[1], t[0], `<div class="lbl">総売 順位 ${rG && rG.v > 0 ? rG.rank + '位' : '—'}${pt ? '　' + delta(t[1], pt[1], 'yen') : ''}</div>`, subTxt);
+      if (detail) { const g = privGross(S.priv), gp = privGross(S.privPrev);
+        return pair(g == null ? 0 : g, t[0], g == null ? '<div class="lbl">総売を読み込み中…</div>' : (gp != null && pt ? `<div class="lbl">前月との差　${delta(g, gp, 'yen')}</div>` : ''), subTxt); }
+      return `<div class="pair"><div class="sl"><span class="lbl">小計</span><b>${yen(t[0])}</b></div>${subTxt}<div class="note">総売は、本人と管理者だけが見られます。</div></div>`;
+    })()}
+    <div class="kpis" style="margin-top:14px">${[['本数', 2], ['新規', 4], ['飲み直し', 5], ['送り', 7], ['ヘルプ指名', 6], ['同伴', 3]].map(([l, i]) => `<div class="kpi"><div class="v">${fmt(t[i])}</div><div class="l">${l}</div>${pt ? `<div class="l" style="margin-top:3px">${delta(t[i], pt[i])}</div>` : ''}</div>`).join('')}</div>
+    ${pt ? `<div class="note">前月（${ymLabel(S.prevM.ym)}・${pt.days}日出勤）との差です。前月は月全体の合計です。</div>` : '<div class="note">前月のデータがない（または前月に名簿にいなかった）ため、前月比は表示していません。</div>'}
+    <div class="note">月間目標は店舗全体のみです（個人目標は未設定）。</div>
+  </div>
+  ${!detail ? '<div class="card"><h2>🔒 日別履歴</h2><div class="dim">日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div></div>' : `<div class="card"><h2>日別履歴</h2>
+    <div class="scrollx"><table class="tbl"><thead><tr><th>営業日</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
+    ${hist.slice().reverse().map(({ d, r }) => `<tr ${S.role === 'admin' ? `class="tap" data-a="openday" data-d="${d}"` : ''}><td>${Number(M.ym.split('-')[1])}/${Number(d)}</td><td>${fmt(r[0])}</td><td>${fmt(r[1])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" class="dim">実績なし</td></tr>'}
+    </tbody></table></div>
+    <div class="note">実績のある日と、出勤していて実績が0だった日を表示しています。出勤の記録がない日は表示していません。</div>
+  </div>`}
+  ${S.role === 'member' && detail ? `<div class="card"><h2>パスワードを変える</h2><input type="password" id="newpw" placeholder="新しいパスワード（6文字以上）" autocomplete="new-password"><div style="margin-top:10px"><button class="btn ghost small" data-a="chgpw">変更する</button></div></div>` : ''}
+  ${updatedLine()}`;
+}
+
+/* ---------- admin ---------- */
+function viewAdmin(){
+  if (S.role !== 'admin') return '<div class="empty">管理者のみ使えます</div>';
+  const imp = S.imp;
+  return `
+  <div class="card"><h2>Excelを取り込む</h2>
+    <div class="note" style="margin-top:0">毎日の営業後に、更新したExcel(.xlsx)を選んでください。内容を確認してから確定します。</div>
+    <input type="file" id="xfile" accept=".xlsx,.xls" style="display:none">
+    <button class="btn" data-a="pickfile">Excelファイルを選ぶ</button>
+    ${imp ? impView(imp) : ''}
+  </div>
+  <div class="card"><h2>${S.ym ? ymLabel(S.ym) : ''} の月間目標（総売）</h2>
+    <input type="number" id="tgt" inputmode="numeric" placeholder="例: 30000000" value="${esc(S.targetDraft !== '' ? S.targetDraft : (S.meta.targets && S.meta.targets[S.ym]) || '')}">
+    <div style="margin-top:10px"><button class="btn ghost small" data-a="settarget">目標を保存</button></div>
+    <div class="note">表示中の月（上の ◀ ▶ で切り替え）の目標です。</div>
+  </div>
+  <div class="card"><h2>個人ログイン（招待コード）</h2>
+    <div class="note" style="margin-top:0">本人にコードを伝えてください。本人は<b>個人ページ（アドレスの最後が me.html）</b>を開き、「初めての人は登録」で、名前・コード・新しいパスワードを入れます。個人ページのリンク: <b>${esc(location.origin + location.pathname.replace(/[^/]*$/, '') + 'me.html')}</b></div>
+    ${!S.memberInfo ? '<button class="btn ghost small" data-a="loadmembers">登録の状況を読み込む</button>'
+      : (S.M ? S.M.employees.map(e => { const h = hexOf(e.name), reg = S.memberInfo.members[h], inv = S.memberInfo.invites[h];
+        return `<div class="rk"><div class="nm">${esc(e.name)}<small>${reg ? '登録済み' : (inv ? '招待コード: <b style="color:var(--gold);letter-spacing:1px">' + esc(inv.code) + '</b>' : '未招待')}</small></div>
+          <div class="vl"><button class="btn ghost small" data-a="issueinv" data-n="${esc(e.name)}">${inv ? 'コード作りなおし' : 'コードを作る'}</button>${reg ? `<button class="btn ghost small" data-a="unreg" data-n="${esc(e.name)}" style="margin-top:6px">登録を解除</button>` : ''}</div></div>`; }).join('') : '<div class="dim">先に月のデータを取り込んでください</div>')}
+    <div class="note">パスワードを忘れた人は「登録を解除」を押し、Firebaseの Authentication のユーザー一覧から、その人（u…@x8sales.app）を削除すると、新しいコードで登録しなおせます。</div>
+  </div>
+  <div class="card"><h2>取り込み履歴・変更履歴</h2>
+    ${S.importsList == null ? '<button class="btn ghost small" data-a="loadimports">履歴を読み込む</button>'
+      : (S.importsList.length ? S.importsList.map(importRow).join('') : '<div class="dim">履歴はまだありません</div>')}
+    <div class="hr"></div>
+    <button class="btn ghost small" data-a="restore">${S.ym ? ymLabel(S.ym) : ''} をひとつ前の状態に戻す</button>
+    <div class="note">直前の取り込みを取り消して、その前の状態に戻します（戻したあとにもう一度押すと、元に戻ります）。</div>
+  </div>
+  <div class="card"><h2>管理者パスワードを変える</h2>
+    <input type="password" id="admcur" placeholder="いまの管理者パスワード" autocomplete="current-password">
+    <input type="password" id="admnew" placeholder="新しいパスワード（8文字以上）" autocomplete="new-password" style="margin-top:8px">
+    <input type="password" id="admnew2" placeholder="新しいパスワード（もう一度）" autocomplete="new-password" style="margin-top:8px">
+    <div style="margin-top:10px"><button class="btn ghost small" data-a="chgadm">管理者パスワードを変更</button></div>
+    <div class="note">変えたあとも、いまの画面はそのまま使えます。次にログインするときから、新しいパスワードになります。「みんなで見る」「個人」のパスワードは変わりません。</div>
+  </div>
+  <div class="note" style="text-align:center">ログイン: 管理者 ／ ${BUILD}</div>`;
+}
+function importRow(x){
+  if (x.kind === 'restore') return `<div class="rk"><div class="nm">${ymLabel(x.ym)} を前の状態に復元<small>${x.atMs ? new Date(x.atMs).toLocaleString('ja-JP') : ''}</small></div></div>`;
+  const c = x.changes || {};
+  return `<div class="rk"><div class="nm">${esc(x.ym ? ymLabel(x.ym) : '')} ${esc(x.fileName || '')}<small>${x.atMs ? new Date(x.atMs).toLocaleString('ja-JP') : ''}　追加${c.addedDays || 0}日／変更${c.changed || 0}件／削除候補${c.removedDays || 0}日（${c.keptRemoved ? '保持' : (c.removedDays ? '削除' : '—')}）</small></div></div>`;
+}
+function impView(imp){
+  if (imp.status === 'parsing') return '<div class="loading">Excelを読み込み中…</div>';
+  if (imp.status === 'error') return `<div class="err" style="margin-top:12px">${esc(imp.msg)}</div>`;
+  if (imp.status === 'saving') return '<div class="loading">保存中…</div>';
+  if (imp.status === 'done') return `<div class="card" style="margin-top:12px;background:#10241d"><b class="pos">取り込みました</b><div class="note">${esc(imp.summary)}</div></div>`;
+  const { res, diff } = imp, M = res.month, r = res.report;
+  const tot = storeSum(M);
+  const hasErr = r.errors.length > 0;
+  return `<div class="hr"></div>
+  <div style="font-weight:700">${esc(imp.fileName)}</div>
+  <div class="note">対象月: ${ymLabel(M.ym)}　営業日(データあり): ${dayList(M).length}日　人数: ${M.employees.length}人</div>
+  <div class="row2" style="margin-top:8px"><div><div class="lbl">総売 合計</div><div class="big sm">${yen(tot.gross)}</div></div><div><div class="lbl">小計 合計</div><div class="big sm">${yen(tot.sub)}</div></div></div>
+  <div style="margin-top:12px">
+    ${r.checks.length ? `<span class="pill bad">Excelの合計行と不一致 ${r.checks.length}件</span>` : '<span class="pill ok">Excelの合計行と一致</span>'}
+    ${r.warnings.length ? `<span class="pill warn">注意 ${r.warnings.length}件</span>` : ''}
+    ${hasErr ? `<span class="pill bad">エラー ${r.errors.length}件</span>` : ''}
+  </div>
+  ${r.checks.length ? `<ul class="list">${r.checks.slice(0, 8).map(c => `<li>${Number(c.day)}日 ${c.kind === 'cast' ? 'キャスト' : '運営'} ${esc(c.metric)}: Excel ${fmt(c.excel)} ／ 計算 ${fmt(c.computed)}</li>`).join('')}</ul>` : ''}
+  ${r.warnings.length ? `<ul class="list">${r.warnings.slice(0, 6).map(w => `<li>${esc((w.day ? Number(w.day) + '日: ' : '') + w.msg)}</li>`).join('')}</ul>` : ''}
+  ${hasErr ? `<ul class="list">${r.errors.slice(0, 6).map(w => `<li class="neg">${esc((w.day ? Number(w.day) + '日: ' : '') + w.msg)}</li>`).join('')}</ul>` : ''}
+  <div class="note">未入力の日（集計に含めません）: ${r.emptyDays.length ? r.emptyDays.map(Number).join('、') + '日' : 'なし'}</div>
+  <div class="hr"></div>
+  <div style="font-weight:700">既存データとの比較</div>
+  ${diff.isNew ? '<div class="note">この月は初めての取り込みです。</div>' : `
+    <div class="note">新しく入る日: ${diff.addedDays.length}日 ／ 内容が変わるセル: ${diff.changed}件 ／ Excelで空になった日(削除候補): ${diff.removedDays.length}日</div>
+    ${diff.changed ? `<ul class="list">${diff.list.slice(0, 10).map(c => `<li>${Number(c.day)}日 ${esc(c.name)} ${esc(c.metric)}: ${fmt(c.old)} → ${fmt(c.new)}</li>`).join('')}${diff.changed > 10 ? `<li class="dim">ほか ${diff.changed - 10}件（履歴に記録します）</li>` : ''}</ul>` : '<div class="note pos">数字の変更はありません（同じExcelの再取り込みは二重計上されません）。</div>'}
+    ${diff.removedDays.length ? `<label class="chk"><input type="checkbox" id="allowrm" ${imp.allowRemove ? 'checked' : ''}><span>Excelで空になった日（${diff.removedDays.map(Number).join('、')}日）を削除する。チェックしない場合は、アプリ内のデータを残します。</span></label>` : ''}
+  `}
+  <div style="margin-top:14px;display:grid;gap:10px">
+    <button class="btn" data-a="confirmimp" ${hasErr ? 'disabled' : ''}>この内容で取り込みを確定</button>
+    <button class="btn ghost" data-a="cancelimp">やめる</button>
+  </div>
+  ${hasErr ? '<div class="note neg">エラーがあるため確定できません。Excelの構造が変わった可能性があります。</div>' : ''}`;
+}
+
+/* 差分と、取り込み結果の組み立て */
+function computeDiff(oldM, newM){
+  const out = { isNew: !oldM, addedDays: [], removedDays: [], changed: 0, list: [] };
+  if (!oldM) return out;
+  const nameOf = {}; oldM.employees.concat(newM.employees).forEach(e => nameOf[e.id] = e.name);
+  const labels = ['小計', '総売', '本数', '同伴', '新規', '飲み直し', 'ヘルプ指名', '送り'];
+  const allDays = Array.from(new Set(Object.keys(oldM.days).concat(Object.keys(newM.days)))).sort();
+  allDays.forEach(dd => {
+    const o = oldM.days[dd], n = newM.days[dd];
+    if (n && !o) { out.addedDays.push(dd); return; }
+    if (o && !n) { out.removedDays.push(dd); return; }
+    const ids = Array.from(new Set(Object.keys(o.rows).concat(Object.keys(n.rows))));
+    ids.forEach(id => {
+      const a = o.rows[id] || [], b = n.rows[id] || [];
+      for (let i = 0; i < 8; i++) {
+        const x = a[i] || 0, y = b[i] || 0;
+        if (x !== y) { out.changed++; if (out.list.length < 300) out.list.push({ day: dd, id, name: nameOf[id] || id, metric: labels[i], old: x, new: y }); }
+      }
+    });
+  });
+  return out;
+}
+function mergeMonth(oldM, newM, allowRemove){
+  const days = Object.assign({}, newM.days);
+  if (oldM && !allowRemove) Object.keys(oldM.days).forEach(dd => { if (!days[dd]) days[dd] = oldM.days[dd]; });
+  const used = {}; Object.keys(days).forEach(dd => Object.keys(days[dd].rows).forEach(id => used[id] = 1));
+  const emp = {}; (oldM ? oldM.employees : []).forEach(e => { if (used[e.id]) emp[e.id] = e; }); newM.employees.forEach(e => emp[e.id] = e);
+  const order = {}; newM.employees.forEach((e, i) => order[e.id] = i);
+  const employees = Object.keys(emp).sort((x, y) => (order[x] != null ? order[x] : 1e6) - (order[y] != null ? order[y] : 1e6)).map(k => emp[k]);
+  return Object.assign({}, newM, { days, employees });
+}
+
+/* ---------- login ---------- */
+function viewLogin(){
+  const r = S.loginRole, reg = S.regMode && r === 'member', B = S.loginBusy ? 'disabled' : '';
+  const tabs = [];  // みんなで見る は廃止。全体用は管理者のみ、個人用は me.html
+  const f = (id, lbl, type, ph, ac) => `<div class="f"><label class="lbl">${lbl}</label><input type="${type}" id="${id}" placeholder="${ph}" autocomplete="${ac}" ${B}></div>`;
+  let fields = '';
+  if (r === 'member') fields = f('nm', 'お名前（Excelと同じ表記）', 'text', '例: るい', 'username') + (reg ? f('code', '招待コード（管理者からもらったもの）', 'text', '例: AB12CD34', 'off') + f('pw', '新しいパスワード（6文字以上）', 'password', 'パスワード', 'new-password') + f('pw2', 'もう一度', 'password', 'パスワード（確認）', 'new-password') : f('pw', '個人パスワード', 'password', 'パスワード', 'current-password'));
+  else fields = f('pw', r === 'admin' ? '管理者パスワード' : 'パスワード', 'password', 'パスワード', 'current-password');
+  return `<div class="login">
+    <div class="logo">X8</div><div class="sub">${ME_MODE ? '個人ページ（自分の売上）' : '本店 売上管理（管理者）'}</div>
+    ${ME_MODE ? '' : `<div class="seg2" style="margin-bottom:18px">${tabs.map(([k, l]) => `<button class="${r === k ? 'on' : ''}" data-a="logintab" data-r="${k}">${l}</button>`).join('')}</div>`}
+    ${fields}
+    <div class="err">${esc(S.loginErr)}</div>
+    <button class="btn" data-a="login" ${B}>${S.loginBusy ? '確認中…' : (reg ? '登録してログイン' : 'ログイン')}</button>
+    ${r === 'member' ? `<div style="margin-top:18px"><button class="iconbtn" data-a="regtoggle">${reg ? 'ログインに戻る' : '初めての人は登録（招待コードが必要）'}</button></div>` : ''}
+    ${ME_MODE ? `<div class="note" style="margin-top:14px">管理者のページは<a href="./" style="color:var(--gold)">こちら</a></div>` : `<div class="note" style="margin-top:14px">自分の売上を見る人は、<a href="./me.html" style="color:var(--gold)">個人ページ</a>から入ってください</div>`}
+    <div class="note" style="margin-top:18px">${r === 'member' ? '個人ログインでは、自分の日別の売上も見られます。' : r === 'staff' ? 'お店の合計とランキングが見られます。個人の日別は個人ログインで見られます。' : ''}</div>
+  </div>`;
+}
+
+/* ---------- render ---------- */
+function render(){
+  const root = $('#root');
+  if (S.phase === 'boot') { root.innerHTML = '<div class="loading">読み込み中…</div>'; return; }
+  if (S.phase === 'fatal') { root.innerHTML = `<div class="login"><div class="logo">X8</div><div class="err" style="margin-top:20px">${esc(S.fatal || '接続できません')}</div><button class="btn ghost" onclick="location.reload()">再読み込み</button></div>`; return; }
+  if (S.phase === 'login') { const ids = ['nm', 'code', 'pw', 'pw2']; const keep = {}; ids.forEach(k => { if ($('#' + k)) keep[k] = $('#' + k).value; }); root.innerHTML = viewLogin(); ids.forEach(k => { if (keep[k] && $('#' + k)) $('#' + k).value = keep[k]; }); return; }
+  if (ME_MODE !== (S.role === 'member')) {
+    const msg = ME_MODE ? 'ここは個人用のページです。管理者の人は、こちらを開いてください。' : '個人ログインの人は、個人ページから入ってください。';
+    root.innerHTML = `<div class="login"><div class="logo">X8</div><div class="note" style="margin:18px 0">${msg}</div><a class="btn" href="${ME_MODE ? './' : './me.html'}" style="display:block;text-align:center;text-decoration:none">${ME_MODE ? '全体用のページへ' : '個人ページへ'}</a><div style="margin-top:14px"><button class="btn ghost" data-a="logout">ログアウト</button></div></div>`; return;
+  }
+  const tabs = ME_MODE ? [['pers', '👤', '自分の実績']] : [['home', '🏠', 'ホーム'], ['rank', '🏆', 'ランキング']];
+  if (!ME_MODE) { if (S.role === 'admin') tabs.push(['days', '📅', '日別']); tabs.push(['pers', '👤', '個人']); }
+  if (S.role === 'admin') tabs.push(['admin', '⚙️', '管理']);
+  if (ME_MODE) S.tab = 'pers';
+  if (S.role !== 'admin' && (S.tab === 'days' || S.tab === 'admin')) S.tab = 'home';
+  let body = '';
+  if (S.tab === 'home') body = viewHome();
+  else if (S.tab === 'rank') body = viewRank();
+  else if (S.tab === 'days') body = viewDays();
+  else if (S.tab === 'pers') body = viewPerson();
+  else if (S.tab === 'admin') body = viewAdmin();
+  const active = document.activeElement; const keepId = active && active.id; const keepSel = active && active.selectionStart;
+  const sx = window.scrollX, sy = window.scrollY;
+  root.innerHTML = `
+  <header class="top"><div class="wrap">
+    <div class="top-row"><div class="brand">X8<small>本店 売上</small></div><button class="iconbtn" data-a="logout">ログアウト</button></div>
+    ${S.meta.months.length ? monthBar() : ''}
+  </div></header>
+  <main><div class="wrap">${body}</div></main>
+  <nav class="tabs"><div class="in">${tabs.map(([k, ic, l]) => `<button class="${S.tab === k ? 'on' : ''}" data-a="tab" data-t="${k}"><span class="ic">${ic}</span>${l}</button>`).join('')}</div></nav>`;
+  window.scrollTo(sx, sy);
+  if (keepId) { const el = document.getElementById(keepId); if (el && el.focus) { el.focus(); try { el.setSelectionRange(keepSel, keepSel); } catch (e) {} } }
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', async (ev) => {
+  const el = ev.target.closest('[data-a]'); if (!el) return;
+  const a = el.dataset.a;
+  if (a === 'tab') { S.tab = el.dataset.t; if (S.tab === 'days') S.dayDetail = null; render(); window.scrollTo(0, 0); }
+  else if (a === 'mprev' || a === 'mnext') { const ms = S.meta.months, i = ms.indexOf(S.ym) + (a === 'mnext' ? 1 : -1); if (ms[i]) { S.targetDraft = ''; selectMonth(ms[i]); } }
+  else if (a === 'pickday') { S.dd = el.dataset.d; render(); }
+  else if (a === 'dview') { S.dayView = el.dataset.v; render(); }
+  else if (a === 'gmetric') { S.gridMetric = el.dataset.k; render(); }
+  else if (a === 'rview') { S.rankView = el.dataset.v; render(); }
+  else if (a === 'rmetric') { S.rankMetric = el.dataset.k; render(); }
+  else if (a === 'rscope') { S.rankScope = el.dataset.s; render(); }
+  else if (a === 'openday') { S.dd = el.dataset.d; S.dayDetail = el.dataset.d; S.tab = 'days'; render(); window.scrollTo(0, 0); }
+  else if (a === 'backdays') { S.dayDetail = null; render(); }
+  else if (a === 'person') { S.empId = el.dataset.id; if (S.role !== 'member') lsSet('x8s_emp', S.empId); S.tab = 'pers'; render(); window.scrollTo(0, 0); }
+  else if (a === 'persclear') { S.empId = null; S.empQuery = ''; render(); }
+  else if (a === 'logintab') { S.loginRole = el.dataset.r; S.regMode = false; S.loginErr = ''; render(); }
+  else if (a === 'regtoggle') { S.regMode = !S.regMode; S.loginErr = ''; render(); }
+  else if (a === 'chgpw') doChangePw();
+  else if (a === 'chgadm') doChangeAdminPw();
+  else if (a === 'loadmembers') loadMembers();
+  else if (a === 'issueinv') doIssue(el.dataset.n);
+  else if (a === 'unreg') doUnreg(el.dataset.n);
+  else if (a === 'logout') { try { await backend.logout(); } catch (e) {} if (TEST) return; }
+  else if (a === 'login') doLogin();
+  else if (a === 'pickfile') $('#xfile').click();
+  else if (a === 'cancelimp') { S.imp = null; render(); }
+  else if (a === 'confirmimp') doConfirmImport();
+  else if (a === 'settarget') doSetTarget();
+  else if (a === 'loadimports') { try { S.importsList = await backend.listImports(); } catch (e) { toast('履歴を読み込めませんでした'); } render(); }
+  else if (a === 'restore') doRestore();
+});
+document.addEventListener('input', (ev) => {
+  if (ev.target.id === 'empq') { S.empQuery = ev.target.value; render(); }
+  if (ev.target.id === 'tgt') S.targetDraft = ev.target.value;
+});
+document.addEventListener('change', (ev) => {
+  if (ev.target.id === 'xfile' && ev.target.files && ev.target.files[0]) { const f = ev.target.files[0]; ev.target.value = ''; doParse(f); }
+  if (ev.target.id === 'allowrm' && S.imp) S.imp.allowRemove = ev.target.checked;
+});
+document.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && ['pw', 'pw2', 'nm', 'code'].includes(ev.target.id)) doLogin(); });
+window.addEventListener('online', () => { $('#offline').style.display = 'none'; });
+window.addEventListener('offline', () => { $('#offline').style.display = 'block'; });
+
+async function doLogin(){
+  const v = (id) => ($('#' + id) ? $('#' + id).value : '');
+  const pw = v('pw'), r = S.loginRole, reg = S.regMode && r === 'member', nm = v('nm').trim();
+  if (r === 'member' && !nm) { S.loginErr = 'お名前を入力してください'; render(); return; }
+  if (!pw) { S.loginErr = 'パスワードを入力してください'; render(); return; }
+  if (reg) {
+    if (!v('code').trim()) { S.loginErr = '招待コードを入力してください'; render(); return; }
+    if (pw.length < 6) { S.loginErr = 'パスワードは6文字以上にしてください'; render(); return; }
+    if (pw !== v('pw2')) { S.loginErr = '確認用のパスワードが一致しません'; render(); return; }
+  }
+  S.loginBusy = true; S.loginErr = ''; render();
+  try {
+    if (reg) await backend.registerMember(nm, v('code'), pw);
+    else if (r === 'member') await backend.loginMember(nm, pw);
+    else await backend.login(r, pw);
+  } catch (e) {
+    const c = e && e.code || '';
+    S.loginErr = c === 'bad-code' ? '招待コードが違うか、まだ招待されていません。管理者に確認してください'
+      : c.includes('email-already-in-use') ? 'この名前はすでに登録されています。パスワードを忘れた場合は管理者に連絡してください'
+      : c.includes('weak-password') ? 'パスワードは6文字以上にしてください'
+      : (c.includes('invalid-credential') || c.includes('wrong-password') || c.includes('user-not-found') || c.includes('invalid-login')) ? (r === 'member' ? '名前かパスワードが違います' : 'パスワードが違います')
+      : c.includes('too-many-requests') ? '試行回数が多すぎます。しばらくしてからやり直してください'
+      : c.includes('network') ? '通信できません。電波を確認してください' : 'ログインできませんでした';
+  }
+  S.loginBusy = false; render();
+}
+async function doChangeAdminPw(){
+  const cur = $('#admcur').value, n1 = $('#admnew').value, n2 = $('#admnew2').value;
+  if (!cur) { toast('いまのパスワードを入れてください'); return; }
+  if (n1.length < 8) { toast('新しいパスワードは8文字以上にしてください'); return; }
+  if (n1 !== n2) { toast('新しいパスワードが2回で合っていません'); return; }
+  if (n1 === cur) { toast('いまと同じパスワードです'); return; }
+  try { await backend.changeAdminPassword(cur, n1); ['#admcur', '#admnew', '#admnew2'].forEach(q => $(q).value = ''); toast('管理者パスワードを変えました'); }
+  catch (e) { const c = (e && e.code) || ''; toast(/invalid-credential|wrong-password/.test(c) ? 'いまのパスワードが違います' : /weak-password/.test(c) ? 'パスワードが弱すぎます' : /too-many/.test(c) ? '回数が多すぎます。しばらくしてから' : '変更できませんでした'); }
+}
+async function doChangePw(){
+  const pw = $('#newpw') ? $('#newpw').value : '';
+  if (pw.length < 6) { toast('パスワードは6文字以上にしてください'); return; }
+  try { await backend.changePassword(pw); $('#newpw').value = ''; toast('パスワードを変えました'); }
+  catch (e) { toast((e && e.code || '').includes('requires-recent-login') ? '一度ログアウトして、入りなおしてからやり直してください' : '変更できませんでした'); }
+}
+async function loadMembers(){ try { S.memberInfo = await backend.listMembers(); } catch (e) { toast('読み込めませんでした'); } render(); }
+async function doIssue(name){
+  if (S.memberInfo && S.memberInfo.members[hexOf(name)] && !confirm(name + ' さんはすでに登録済みです。新しい招待コードを作ります（今のパスワードはそのまま使えます）。')) return;
+  try { await backend.issueInvite(name); toast('招待コードを作りました'); await loadMembers(); } catch (e) { toast('作れませんでした'); }
+}
+async function doUnreg(name){
+  if (!confirm(name + ' さんの個人登録を解除します。本人はもう一度、新しい招待コードで登録しなおす必要があります。よろしいですか？')) return;
+  try { await backend.unregister(name); await backend.issueInvite(name); toast('登録を解除しました'); await loadMembers(); } catch (e) { toast('解除できませんでした'); }
+}
+
+function loadXLSX(){
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = () => res(window.XLSX); s.onerror = () => rej(new Error('Excel読み込み部品を取得できませんでした'));
+    document.head.appendChild(s);
+  });
+}
+async function doParse(file){
+  S.imp = { status: 'parsing', fileName: file.name }; render();
+  try {
+    const XLSX = await loadXLSX();
+    const buf = await file.arrayBuffer();
+    const res = window.X8Parse.parseWorkbook(XLSX, new Uint8Array(buf), file.name);
+    if (!res.month) { S.imp = { status: 'error', msg: res.report.errors.map(e => e.msg).join(' ') || '読み込めませんでした' }; render(); return; }
+    const old = await backend.getMonthOnce(res.month.ym);
+    S.imp = { status: 'preview', fileName: file.name, res, old, diff: computeDiff(old, res.month), allowRemove: false };
+  } catch (e) { S.imp = { status: 'error', msg: '読み込みに失敗しました: ' + (e && e.message || e) }; }
+  render();
+}
+async function doConfirmImport(){
+  const imp = S.imp; if (!imp || imp.status !== 'preview') return;
+  const { res, old, diff } = imp; const ym = res.month.ym;
+  const merged = mergeMonth(old, res.month, imp.allowRemove);
+  const months = Array.from(new Set(S.meta.months.concat([ym]))).sort();
+  const tot = storeSum(merged);
+  const rec = { kind: 'import', ym, fileName: imp.fileName, daysWithData: dayList(merged).length,
+    totals: { sub: tot.sub, gross: tot.gross }, warnings: res.report.warnings.length, mismatches: res.report.checks.length,
+    changes: { addedDays: diff.addedDays.length, changed: diff.changed, removedDays: diff.removedDays.length, keptRemoved: !imp.allowRemove && diff.removedDays.length > 0 },
+    changeList: diff.list };
+  S.imp = { status: 'saving' }; render();
+  try {
+    await backend.saveMonth(ym, merged, rec, months);
+    S.imp = { status: 'done', summary: ymLabel(ym) + '：' + dayList(merged).length + '日分、総売 ' + yen(tot.gross) };
+    S.importsList = null; toast('取り込みました');
+    if (S.ym !== ym) selectMonth(ym);
+  } catch (e) { S.imp = { status: 'error', msg: '保存に失敗しました。既存のデータは変更されていません。(' + (e && e.code || e && e.message || '') + ')' }; }
+  render();
+}
+async function doSetTarget(){
+  const raw = ($('#tgt') ? $('#tgt').value : '').replace(/[,\s]/g, ''); const n = Number(raw);
+  if (!raw || !isFinite(n) || n < 0) { toast('金額を入力してください'); return; }
+  try { await backend.setTarget(S.ym, n); S.targetDraft = ''; toast('目標を保存しました'); } catch (e) { toast('保存に失敗しました'); }
+}
+async function doRestore(){
+  if (!S.ym) return;
+  if (!confirm(ymLabel(S.ym) + ' をひとつ前の状態に戻します。よろしいですか？')) return;
+  try { await backend.restorePrev(S.ym); S.importsList = null; toast('戻しました'); } catch (e) { toast(e && e.message || '戻せませんでした'); }
+}
+
+/* ---------- boot ---------- */
+(async function boot(){
+  render();
+  if (!navigator.onLine) $('#offline').style.display = 'block';
+  try { backend = TEST ? makeTestBackend() : await makeFirebaseBackend(); }
+  catch (e) { S.phase = 'fatal'; S.fatal = '接続できませんでした。電波を確認して、再読み込みしてください。'; render(); return; }
+  backend.onAuth((info) => {
+    if (unsubMonth) { unsubMonth(); unsubMonth = null; } if (unsubMeta) { unsubMeta(); unsubMeta = null; } if (unsubPriv) { unsubPriv(); unsubPriv = null; } if (unsubPrivPrev) { unsubPrivPrev(); unsubPrivPrev = null; }
+    S.priv = null; S.privPrev = null; S.empId = null; S.memberInfo = null; S.dayView = 'cal'; S.rankScope = 'month';
+    if (!info) { S.phase = 'login'; S.role = null; S.hex = null; S.M = null; S.ym = null; S.meta = { months: [], targets: {} }; render(); return; }
+    S.hex = info.hex || null; if (info.role !== 'member') S.empId = lsGet('x8s_emp') || null;
+    startApp(info.role);
+  });
+})();
+</script>
+</body>
+</html>
