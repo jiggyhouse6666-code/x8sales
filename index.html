@@ -421,7 +421,7 @@ const FIREBASE_CONFIG = {
 const ME_MODE = /*ME_MODE*/false;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-22 - 2026-10-24';
+const BUILD = 'sales-24 - 2026-10-24';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -442,7 +442,9 @@ const fmt = (n) => Math.round(n || 0).toLocaleString('ja-JP');
 const yen = (n) => '¥' + fmt(n);
 const man = (n) => n >= 10000 ? (Math.round(n / 1000) / 10) + '万' : fmt(n);
 const manS = (n) => n >= 10000000 ? Math.round(n / 10000) + '万' : man(n);
-const pair = (g, sb, extraG, extraS) => `<div class="pair"><div class="lbl">総売</div><div class="big">${yen(g)}</div>${extraG || ''}${ME_MODE ? `<div class="sl"><span class="lbl">小計</span><b>${yen(sb)}</b></div>${extraS || ''}` : ''}</div>`;
+const pair = (g, sb, extraG, extraS) => ME_MODE
+  ? `<div class="pair"><div class="lbl">総売</div><div class="big">${yen(g)}</div>${extraG || ''}<div class="sl"><span class="lbl">小計</span><b>${yen(sb)}</b></div>${extraS || ''}</div>`
+  : `<div class="pair"><div class="lbl">小計</div><div class="big">${yen(sb)}</div>${extraS || ''}</div>`;
 const val = (m, n) => m.unit === 'yen' ? yen(n) : fmt(n);
 const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
@@ -614,7 +616,7 @@ const S = {
   meta: { months: [], targets: {} },
   ym: null, M: null, prevM: null, updatedAt: null,
   dd: null,               // 選択中の日
-  rankMetric: ME_MODE ? 'sub' : 'gross', rankScope: 'month', rankView: 'rank', dayView: 'cal', gridMetric: 'gross',
+  rankMetric: 'sub', rankScope: 'month', rankView: 'rank', dayView: 'cal', gridMetric: 'sub',
   empId: lsGet('x8s_emp') || null, empQuery: '',
   dayDetail: null,        // 日別画面で詳細表示中のdd
   loginRole: ME_MODE ? 'member' : 'admin', regMode: false, hex: null, priv: null, memberInfo: null, loginErr: '', loginBusy: false,
@@ -708,20 +710,20 @@ function shokaiCard(M, days, dd, prevTo, lastN, prevToN){
   const kp = (l, k, v, p, f) => `<div class="kpi"><div class="v" style="font-size:${f ? 17 : 24}px">${(f || fmt)(v)}</div><div class="l">${l}</div>${p ? `<div class="kd">${delta(v, p[k], f ? 'yen' : '')}</div><div class="kp">前月 ${(f || fmt)(p[k])}</div>` : ''}</div>`;
   return `<div class="card"><h2>初回（${ymLabel(M.ym)} 累計）</h2>
     <div class="kpis">
-      ${kp('初回組数', 'kumi', t.kumi, pv)}${kp('初回人数', 'nin', t.nin, pv)}${kp('うち初回の売上', 'sales', t.sales, pv, yen)}
+      ${kp('初回組数', 'kumi', t.kumi, pv)}${kp('初回人数', 'nin', t.nin, pv)}
     </div>
-    ${(S.prevM && hasShokai(S.prevM)) ? (() => { const a = shokaiSum(S.prevM); return `<div class="hr"></div><div class="lbl">${ymLabel(S.prevM.ym)} 全体の初回</div><div style="margin-top:4px"><b>${fmt(a.kumi)}</b>組 ／ <b>${fmt(a.nin)}</b>人 ／ 売上 ${yen(a.sales)}</div><div class="note" style="margin-top:6px">上の ◀ で ${ymLabel(S.prevM.ym)} に切り替えると、日別の初回も見られます。</div>`; })() : ''}
-    ${td ? `<div class="note">${dayLabel(M.ym, dd)}: 初回 ${fmt(td.kumi)}組 ／ ${fmt(td.nin)}人 ／ 売上 ${yen(td.sales)}</div>` : ''}
-    ${pv ? `<div class="note">▲▼は前月の同じ日まで（${lastN}日まで・営業${prevToN}日）との差です。組数＝Excelの「初回フリー」、人数＝「初回人数」、売上＝「うち初回」。この表示は管理者だけに出ます。</div>` : '<div class="note">組数＝Excelの「初回フリー」、人数＝「初回人数」、売上＝「うち初回」です。管理者だけに出ます。前月のデータが入ると前月比も出ます。</div>'}
+    ${(S.prevM && hasShokai(S.prevM)) ? (() => { const a = shokaiSum(S.prevM); return `<div class="hr"></div><div class="lbl">${ymLabel(S.prevM.ym)} 全体の初回</div><div style="margin-top:4px"><b>${fmt(a.kumi)}</b>組 ／ <b>${fmt(a.nin)}</b>人</div><div class="note" style="margin-top:6px">上の ◀ で ${ymLabel(S.prevM.ym)} に切り替えると、日別の初回も見られます。</div>`; })() : ''}
+    ${td ? `<div class="note">${dayLabel(M.ym, dd)}: 初回 ${fmt(td.kumi)}組 ／ ${fmt(td.nin)}人</div>` : ''}
+    ${pv ? `<div class="note">▲▼は前月の同じ日まで（${lastN}日まで・営業${prevToN}日）との差です。組数＝Excelの「初回フリー」、人数＝「初回人数」。この表示は管理者だけに出ます。</div>` : '<div class="note">組数＝Excelの「初回フリー」、人数＝「初回人数」です。管理者だけに出ます。前月のデータが入ると前月比も出ます。</div>'}
   </div>`;
 }
 function shokaiDaily(M){
   if (!hasShokai(M)) return '';
   const days = dayList(M); const t = shokaiSum(M);
   return `<div class="card"><h2>${ymLabel(M.ym)} 日別の初回</h2>
-    <table class="tbl"><thead><tr><th>日</th><th>組</th><th>人</th><th>うち初回の売上</th></tr></thead><tbody>
-    ${days.map(d => { const h = M.days[d].shokai || { kumi: 0, nin: 0, sales: 0 }; return `<tr class="tap" data-a="openday" data-d="${d}"><td>${dayLabel(M.ym, d)}</td><td>${fmt(h.kumi)}</td><td>${fmt(h.nin)}</td><td>${h.sales ? yen(h.sales) : '·'}</td></tr>`; }).join('')}
-    <tr class="total"><td>合計</td><td>${fmt(t.kumi)}</td><td>${fmt(t.nin)}</td><td>${yen(t.sales)}</td></tr></tbody></table>
+    <table class="tbl"><thead><tr><th>日</th><th>組</th><th>人</th></tr></thead><tbody>
+    ${days.map(d => { const h = M.days[d].shokai || { kumi: 0, nin: 0, sales: 0 }; return `<tr class="tap" data-a="openday" data-d="${d}"><td>${dayLabel(M.ym, d)}</td><td>${fmt(h.kumi)}</td><td>${fmt(h.nin)}</td></tr>`; }).join('')}
+    <tr class="total"><td>合計</td><td>${fmt(t.kumi)}</td><td>${fmt(t.nin)}</td></tr></tbody></table>
     <div class="note">日付の行をタップすると、その日の内訳が見られます。管理者だけに出ます。</div>
   </div>`;
 }
@@ -760,7 +762,7 @@ function viewHome(){
   const prevToN = S.prevM ? dayList(S.prevM).filter(d => Number(d) <= lastN).length : 0;
   // 同じ営業日数までの前月累計で比べるのではなく、前月の月間合計と比較する
   const bars = trendSvg(M);
-  const rk = ranking(M, 1, null).filter(x => x.v > 0).slice(0, 5);
+  const rk = ranking(M, 0, null).filter(x => x.v > 0).slice(0, 5);
   return `
   <div class="card">
     <h2>${dd ? dayLabel(M.ym, dd) + ' の店舗売上' : '当日'}</h2>
@@ -771,21 +773,21 @@ function viewHome(){
     <h2>${ymLabel(M.ym)} 累計（営業日 ${days.length}日）</h2>
     ${pair(tot.gross, tot.sub)}
     <div class="hr"></div>
-    ${target ? `<div class="row2" style="align-items:end"><div><div class="lbl">月間目標（総売）</div><div style="font-family:Oswald;font-size:20px">${yen(target)}</div></div>
+    ${target ? `<div class="row2" style="align-items:end"><div><div class="lbl">月間目標（総売）</div><div style="font-family:Oswald;font-size:20px">${yen(target)}</div><div class="dim" style="font-size:12px;margin-top:2px">いまの総売 ${yen(tot.gross)}</div></div>
       <div style="text-align:right"><div class="lbl">達成率</div><div class="big sm">${(tot.gross / target * 100).toFixed(1)}%</div></div></div>
       <div class="bar"><i style="width:${pct}%"></i></div>`
       : `<div class="lbl">月間目標: 未設定${S.role === 'admin' ? '（管理タブで設定できます）' : ''}</div>`}
     <div class="hr"></div>
     <div class="lbl">前月比 ①同じ日まで（前月の${lastN}日まで・営業${prevToN}日）</div>
-    ${prevTo ? `<div style="margin-top:4px">総売 ${delta(tot.gross, prevTo.gross, 'yen')}　<span class="dim">前月 ${yen(prevTo.gross)}</span></div>
+    ${prevTo ? `<div style="margin-top:4px">小計 ${delta(tot.sub, prevTo.sub, 'yen')}　<span class="dim">前月 ${yen(prevTo.sub)}</span></div>
       <div class="dim" style="margin-top:2px">本数 ${delta(tot.shimei, prevTo.shimei)}　新規 ${delta(tot.shinki, prevTo.shinki)}　送り ${delta(tot.okuri, prevTo.okuri)}　同伴 ${delta(tot.douhan, prevTo.douhan)}</div>`
       : '<div class="dim" style="margin-top:4px">前月のデータがまだありません</div>'}
     ${prevTot ? `<div class="lbl" style="margin-top:12px">②前月の月間合計との差</div>
-      <div style="margin-top:4px">総売 ${delta(tot.gross, prevTot.gross, 'yen')}　<span class="dim">前月全体 ${yen(prevTot.gross)}（営業${dayList(S.prevM).length}日）</span></div>` : ''}
+      <div style="margin-top:4px">小計 ${delta(tot.sub, prevTot.sub, 'yen')}　<span class="dim">前月全体 ${yen(prevTot.sub)}（営業${dayList(S.prevM).length}日）</span></div>` : ''}
   </div>
   ${shokaiCard(M, days, dd, prevTo, lastN, prevToN)}
   <div class="card">
-    <h2>営業日ごとの総売</h2>${bars}
+    <h2>営業日ごとの小計</h2>${bars}
   </div>
   <div class="card">
     <h2>${ymLabel(M.ym)} 累計の件数</h2>
@@ -797,20 +799,20 @@ function viewHome(){
     <div class="note">新規は「件数」です。人数はExcelの個人別データにないため表示しません。</div>
   </div>
   <div class="card">
-    <h2>月間 総売ランキング TOP5</h2>
-    ${rk.length ? rk.map(rkRow(1, false)).join('') : '<div class="dim">データなし</div>'}
+    <h2>月間 小計ランキング TOP5</h2>
+    ${rk.length ? rk.map(rkRow(0, false)).join('') : '<div class="dim">データなし</div>'}
     <div style="margin-top:10px"><button class="btn ghost small" data-a="tab" data-t="rank">ランキングをすべて見る</button></div>
   </div>
-  <div class="note" style="text-align:center">店舗合計には、一覧・ランキングに載せていない運営メンバー分（総売 ${yen(hid.gross)}）を含みます。${unasSum(M) ? `<br>さらに「担当なしの売上」${yen(unasSum(M))}（伝票にあるが個人の欄に入っていない分）を含み、Excelの月間合計と同じ数字です。` : ''}</div>
+  <div class="note" style="text-align:center">店舗合計には、一覧・ランキングに載せていない運営メンバー分（小計 ${yen(hid.sub)}）を含みます。${false ? `<br>さらに「担当なしの売上」${yen(unasSum(M))}（伝票にあるが個人の欄に入っていない分）を含み、Excelの月間合計と同じ数字です。` : ''}</div>
   ${updatedLine()}`;
 }
 
 function trendSvg(M){
   const N = M.daysInMonth || 31; const W = 340, H = 110, pad = 14;
   const vals = []; let max = 1;
-  for (let i = 1; i <= N; i++) { const dd = (i < 10 ? '0' : '') + i; const v = M.days[dd] ? M.days[dd].store.gross : null; vals.push(v); if (v && v > max) max = v; }
+  for (let i = 1; i <= N; i++) { const dd = (i < 10 ? '0' : '') + i; const v = M.days[dd] ? M.days[dd].store.sub : null; vals.push(v); if (v && v > max) max = v; }
   const bw = (W - 8) / N;
-  let s = `<svg viewBox="0 0 ${W} ${H + pad}" width="100%" role="img" aria-label="営業日ごとの総売の推移">`;
+  let s = `<svg viewBox="0 0 ${W} ${H + pad}" width="100%" role="img" aria-label="営業日ごとの小計の推移">`;
   vals.forEach((v, i) => {
     const dd = (i + 1 < 10 ? '0' : '') + (i + 1); const x = 4 + i * bw;
     if (v == null) { s += `<rect x="${x + 1}" y="${H - 2}" width="${Math.max(1, bw - 2)}" height="2" fill="#2a2631"/>`; }
@@ -836,7 +838,7 @@ function rkRow(i, byDay){
   };
 }
 
-const metList = () => S.role === 'admin' ? MET.filter(z => ME_MODE || z.k !== 'sub') : MET.filter(z => z.k !== 'gross');
+const metList = () => S.role === 'admin' ? MET.filter(z => ME_MODE || z.k !== 'gross') : MET.filter(z => z.k !== 'gross');
 function viewCompare(M, m){
   if (!S.prevM) return '<div class="card"><div class="empty">前月のデータがまだありません。<br>管理者が前月のExcelを取り込むと表示されます。</div></div>';
   const P = S.prevM, i = m.i;
@@ -903,7 +905,7 @@ function viewGrid(M){
   return `<div class="seg">${metList().map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="gmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
   <div class="card" style="padding-left:16px;padding-right:16px"><h2>${ymLabel(M.ym)} 日別 × 人別（${m.label}${isY ? '・単位:千円' : ''}）</h2>
     <div class="gridwrap"><table class="grid"><thead>${head}</thead><tbody>${tot}${body}</tbody></table></div>
-    <div class="note">左の日付をタップすると、その日の内訳が見られます。横にスワイプすると全員が見られます。この月に数字がない人（${hiddenN}人）は表から省いています。「店合計」は一覧に載せていない運営メンバー${m.k === 'gross' ? 'と担当なしの売上' : ''}を含みます。「·」は0です。</div>
+    <div class="note">左の日付をタップすると、その日の内訳が見られます。横にスワイプすると全員が見られます。この月に数字がない人（${hiddenN}人）は表から省いています。「店合計」は一覧に載せていない運営メンバーを含みます。「·」は0です。</div>
   </div>`;
 }
 
@@ -915,13 +917,13 @@ function viewDays(){
   for (let i = 0; i < first; i++) cells += '<div></div>';
   for (let i = 1; i <= N; i++) {
     const dd = (i < 10 ? '0' : '') + i; const d = M.days[dd];
-    cells += d ? `<div class="d has ${dd === S.dd ? 'sel' : ''}" data-a="openday" data-d="${dd}"><b>${i}</b><span>${manS(d.store.gross)}</span></div>`
+    cells += d ? `<div class="d has ${dd === S.dd ? 'sel' : ''}" data-a="openday" data-d="${dd}"><b>${i}</b><span>${manS(d.store.sub)}</span></div>`
                : `<div class="d none"><b>${i}</b><span style="color:#5d576a">—</span></div>`;
   }
   const toggle = `<div class="seg2"><button class="${S.dayView === 'cal' ? 'on' : ''}" data-a="dview" data-v="cal">カレンダー</button><button class="${S.dayView === 'grid' ? 'on' : ''}" data-a="dview" data-v="grid">一覧表（日×人）</button></div>`;
   if (S.role === 'admin' && S.dayView === 'grid') return toggle + viewGrid(M) + shokaiDaily(M) + updatedLine();
   return (S.role === 'admin' ? toggle : '') + `
-  <div class="card"><h2>${ymLabel(M.ym)} カレンダー（総売）</h2>
+  <div class="card"><h2>${ymLabel(M.ym)} カレンダー（小計）</h2>
     <div class="cal">${'日月火水木金土'.split('').map(w => `<div class="dw">${w}</div>`).join('')}${cells}</div>
     <div class="note">日付をタップすると、その日の内訳が見られます。「—」はデータ未入力（または営業なし）の日で、集計には含めていません。</div>
   </div>
@@ -932,21 +934,21 @@ function viewDays(){
 function viewDayDetail(dd){
   const M = S.M, d = M.days[dd];
   const rows = M.employees.map(e => ({ e, r: d.rows[e.id] })).filter(x => x.r && x.r.slice(0, 8).some(n => n !== 0));
-  rows.sort((a, b) => b.r[1] - a.r[1] || b.r[0] - a.r[0]);
+  rows.sort((a, b) => b.r[0] - a.r[0] || b.r[1] - a.r[1]);
   const hid = d.hidden || {};
   return `
   <button class="btn ghost small" data-a="backdays" style="margin-bottom:10px">← カレンダーに戻る</button>
   <div class="card">
     <h2>${dayLabel(M.ym, dd)} の店舗合計</h2>
     ${pair(d.store.gross, d.store.sub)}
-    ${(S.role === 'admin' && d.shokai) ? `<div class="hr"></div><div class="lbl">初回</div><div style="margin-top:4px"><b>${fmt(d.shokai.kumi)}</b>組 ／ <b>${fmt(d.shokai.nin)}</b>人 ／ 売上 ${yen(d.shokai.sales)}</div>` : ''}
+    ${(S.role === 'admin' && d.shokai) ? `<div class="hr"></div><div class="lbl">初回</div><div style="margin-top:4px"><b>${fmt(d.shokai.kumi)}</b>組 ／ <b>${fmt(d.shokai.nin)}</b>人</div>` : ''}
     <div class="kpis" style="margin-top:12px">${[['本数', 'shimei'], ['新規', 'shinki'], ['飲み直し', 'nomi'], ['送り', 'okuri'], ['ヘルプ', 'help'], ['同伴', 'douhan']].map(([l, k]) => `<div class="kpi"><div class="v">${fmt(d.store[k])}</div><div class="l">${l}</div></div>`).join('')}</div>
   </div>
   ${S.role !== 'admin' ? `<div class="card"><h2>🔒 個人別</h2><div class="dim">個人の日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div><div class="note">店舗合計には、一覧に載せていない運営メンバー分（総売 ${yen(hid.gross || 0)}）${d.unas ? `と「担当なしの売上」${yen(d.unas)}` : ''}を含みます。</div></div>` : `<div class="card"><h2>個人別</h2>
-    <div class="scrollx"><table class="tbl"><thead><tr><th>名前</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
-    ${rows.map(({ e, r }) => `<tr class="tap" data-a="person" data-id="${esc(e.id)}"><td>${esc(e.name)}</td><td>${fmt(r[1])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="8" class="dim">実績のある人がいません</td></tr>'}
+    <div class="scrollx"><table class="tbl"><thead><tr><th>名前</th><th>小計</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
+    ${rows.map(({ e, r }) => `<tr class="tap" data-a="person" data-id="${esc(e.id)}"><td>${esc(e.name)}</td><td>${fmt(r[0])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="8" class="dim">実績のある人がいません</td></tr>'}
     </tbody></table></div>
-    <div class="note">飲=飲み直し／送=送り／ヘ=ヘルプ指名／同=同伴。店舗合計には、一覧に載せていない運営メンバー分（総売 ${yen(hid.gross || 0)}）を含みます。${d.unas ? `<br>さらに「担当なしの売上」${yen(d.unas)}を含みます。` : ''}</div>
+    <div class="note">飲=飲み直し／送=送り／ヘ=ヘルプ指名／同=同伴。店舗合計には、一覧に載せていない運営メンバー分（小計 ${yen(hid.sub || 0)}）を含みます。</div>
   </div>`}`;
 }
 
@@ -997,8 +999,8 @@ function viewPerson(){
     <div class="note">月間目標は店舗全体のみです（個人目標は未設定）。</div>
   </div>
   ${!detail ? '<div class="card"><h2>🔒 日別履歴</h2><div class="dim">日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div></div>' : `<div class="card"><h2>日別履歴</h2>
-    <div class="scrollx"><table class="tbl"><thead><tr><th>営業日</th>${ME_MODE ? '<th>小計</th>' : ''}<th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
-    ${hist.slice().reverse().map(({ d, r }) => `<tr ${S.role === 'admin' ? `class="tap" data-a="openday" data-d="${d}"` : ''}><td>${Number(M.ym.split('-')[1])}/${Number(d)}</td>${ME_MODE ? `<td>${fmt(r[0])}</td>` : ''}<td>${fmt(r[1])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" class="dim">実績なし</td></tr>'}
+    <div class="scrollx"><table class="tbl"><thead><tr><th>営業日</th><th>小計</th>${ME_MODE ? '<th>総売</th>' : ''}<th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
+    ${hist.slice().reverse().map(({ d, r }) => `<tr ${S.role === 'admin' ? `class="tap" data-a="openday" data-d="${d}"` : ''}><td>${Number(M.ym.split('-')[1])}/${Number(d)}</td><td>${fmt(r[0])}</td>${ME_MODE ? `<td>${fmt(r[1])}</td>` : ''}${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" class="dim">実績なし</td></tr>'}
     </tbody></table></div>
     <div class="note">実績のある日と、出勤していて実績が0だった日を表示しています。出勤の記録がない日は表示していません。</div>
   </div>`}
