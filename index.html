@@ -50,6 +50,11 @@ main{padding-top:14px;}
 .kpi{background:var(--card2); border:1px solid var(--line); border-radius:12px; padding:10px 8px; text-align:center;}
 .kpi .v{font-family:'Oswald'; font-weight:700; font-size:24px; color:var(--text);}
 .kpi .l{font-size:11px; color:var(--dim);}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px}
+.chip small{color:var(--dim);font-size:10px;margin-left:4px}
+.kpi .kd{font-size:12px; margin-top:4px;}
+.kpi .kp{font-size:10px; color:var(--dim);}
 .bar{height:10px; background:#27232f; border-radius:6px; overflow:hidden; margin-top:8px;}
 .bar > i{display:block; height:100%; background:linear-gradient(90deg,var(--gold2),var(--gold)); border-radius:6px;}
 .pos{color:var(--pos);} .neg{color:var(--neg);} .dim{color:var(--dim);}
@@ -399,7 +404,7 @@ const FIREBASE_CONFIG = {
 };
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-10 - 2026-10-24';
+const BUILD = 'sales-14 - 2026-10-24';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -667,6 +672,28 @@ function viewHomeLite(){
   ${updatedLine()}`;
 }
 
+const STAFF_CARD_SKIP = ['ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや']; // 運営のため増減の集計から外す
+function staffChangeCard(M){
+  const keep = e => STAFF_CARD_SKIP.indexOf(e.name) < 0;
+  const act = (X) => new Set(X.employees.filter(e => keep(e) && empMonth(X, e.id).days > 0).map(e => e.id));
+  const cur = M.employees.filter(e => keep(e) && empMonth(M, e.id).days > 0);
+  if (!S.prevM) return `<div class="card"><h2>従業員の増減</h2><div class="dim">前月のデータが入ると、増えた従業員が表示されます。</div></div>`;
+  const pa = act(S.prevM);
+  const added = cur.filter(e => !pa.has(e.id));
+  const ca = act(M);
+  const left = S.prevM.employees.filter(e => keep(e) && pa.has(e.id) && !ca.has(e.id));
+  const nm = e => `<span class="chip">${esc(e.name)}</span>`;
+  return `<div class="card"><h2>従業員の増減（前月比）</h2>
+    <div class="row2"><div><div class="lbl">今月の出勤者</div><div class="big sm">${cur.length}人</div></div>
+    <div style="text-align:right"><div class="lbl">前月</div><div class="big sm">${pa.size}人</div></div></div>
+    <div class="hr"></div>
+    <div class="lbl">増えた従業員（前月は出勤なし）</div>
+    <div style="margin-top:4px"><span class="pos" style="font-family:Oswald;font-size:22px">+${added.length}人</span></div>
+    <div class="chips">${added.length ? added.map(nm).join('') : '<span class="dim">いません</span>'}</div>
+    ${left.length ? `<div class="lbl" style="margin-top:12px">今月は出勤なし（前月は出勤）</div><div style="margin-top:4px"><span class="neg" style="font-family:Oswald;font-size:18px">−${left.length}人</span></div><div class="chips">${left.map(nm).join('')}</div>` : ''}
+    <div class="note">出勤が1日以上ある人を数えています。るか・りお・かなたはプレイヤーと同じ扱いで数えます。この表示は管理者だけに出ます。</div>
+  </div>`;
+}
 function viewHome(){
   if (S.role !== 'admin') return viewHomeLite();
   const M = S.M; if (!M) return noData();
@@ -704,14 +731,16 @@ function viewHome(){
     ${prevTot ? `<div class="lbl" style="margin-top:12px">②前月の月間合計との差</div>
       <div style="margin-top:4px">総売 ${delta(tot.gross, prevTot.gross, 'yen')}　<span class="dim">前月全体 ${yen(prevTot.gross)}（営業${dayList(S.prevM).length}日）</span></div>` : ''}
   </div>
+  ${staffChangeCard(M)}
   <div class="card">
     <h2>営業日ごとの総売</h2>${bars}
   </div>
   <div class="card">
     <h2>${ymLabel(M.ym)} 累計の件数</h2>
     <div class="kpis">
-      ${[['本数', 'shimei'], ['新規', 'shinki'], ['飲み直し', 'nomi'], ['送り', 'okuri'], ['ヘルプ指名', 'help'], ['同伴', 'douhan']].map(([l, k]) => `<div class="kpi"><div class="v">${fmt(tot[k])}</div><div class="l">${l}</div></div>`).join('')}
+      ${[['本数', 'shimei'], ['新規', 'shinki'], ['飲み直し', 'nomi'], ['送り', 'okuri'], ['ヘルプ指名', 'help'], ['同伴', 'douhan']].map(([l, k]) => `<div class="kpi"><div class="v">${fmt(tot[k])}</div><div class="l">${l}</div>${prevTo ? `<div class="kd">${delta(tot[k], prevTo[k])}</div><div class="kp">前月 ${fmt(prevTo[k])}</div>` : ''}</div>`).join('')}
     </div>
+    ${prevTo ? `<div class="note">▲▼は前月の同じ日まで（${lastN}日まで・営業${prevToN}日）との差です。「前月」はその合計です。</div>` : '<div class="note">前月のデータが入ると、前月比が表示されます。</div>'}
     ${(dd && today) ? `<div class="note">${dayLabel(M.ym, dd)}: 本数 ${fmt(today.shimei)} ／ 新規 ${fmt(today.shinki)} ／ 飲み直し ${fmt(today.nomi)} ／ 送り ${fmt(today.okuri)} ／ ヘルプ ${fmt(today.help)} ／ 同伴 ${fmt(today.douhan)}</div>` : ''}
     <div class="note">新規は「件数」です。人数はExcelの個人別データにないため表示しません。</div>
   </div>
