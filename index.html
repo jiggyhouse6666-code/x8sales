@@ -404,7 +404,7 @@ const FIREBASE_CONFIG = {
 };
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-14 - 2026-10-24';
+const BUILD = 'sales-15 - 2026-10-24';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -507,6 +507,11 @@ async function makeFirebaseBackend(){
       suppress = false; const i = infoOf(auth.currentUser); curRole = i && i.role; if (theCb) theCb(i);
     },
     async changePassword(pw){ await Au.updatePassword(auth.currentUser, pw); },
+    async changeAdminPassword(cur, pw){
+      const u = auth.currentUser; if (!u || u.email !== ADMIN_EMAIL) throw new Error('not-admin');
+      await Au.reauthenticateWithCredential(u, Au.EmailAuthProvider.credential(ADMIN_EMAIL, cur));
+      await Au.updatePassword(u, pw);
+    },
     async logout(){ await Au.signOut(auth); },
     subPriv(ym, hex, cb, err){
       return F.onSnapshot(F.doc(db, 'priv', ym + '_' + hex), (s) => { if (!s.exists()) return cb(null); try { cb(JSON.parse(s.data().payload)); } catch (e) { cb(null); } }, err);
@@ -568,7 +573,7 @@ function makeTestBackend(){
   const T = TEST; let cbAuth = null;
   return {
     onAuth(cb){ cbAuth = cb; setTimeout(() => cb(T.role === 'none' ? null : { role: T.role || 'staff', hex: T.hex }), 0); return () => {}; },
-    async login(){}, async loginMember(){}, async registerMember(){}, async changePassword(){}, async logout(){},
+    async login(){}, async loginMember(){}, async registerMember(){}, async changePassword(){}, async changeAdminPassword(c){ if (c !== 'old') { const e = new Error('x'); e.code = 'auth/invalid-credential'; throw e; } }, async logout(){},
     subPriv(ym, hex, cb){ setTimeout(() => cb(T.priv ? JSON.parse(JSON.stringify(T.priv)) : null), 0); return () => {}; },
     async listMembers(){ return T.members || { members: {}, invites: {} }; },
     async issueInvite(){ return 'TEST2345'; }, async unregister(){},
@@ -672,7 +677,7 @@ function viewHomeLite(){
   ${updatedLine()}`;
 }
 
-const STAFF_CARD_SKIP = ['ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや']; // 運営のため増減の集計から外す
+const STAFF_CARD_SKIP = ['ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう']; // 運営のため増減の集計から外す
 function staffChangeCard(M){
   const keep = e => STAFF_CARD_SKIP.indexOf(e.name) < 0;
   const act = (X) => new Set(X.employees.filter(e => keep(e) && empMonth(X, e.id).days > 0).map(e => e.id));
@@ -977,6 +982,13 @@ function viewAdmin(){
     <button class="btn ghost small" data-a="restore">${S.ym ? ymLabel(S.ym) : ''} をひとつ前の状態に戻す</button>
     <div class="note">直前の取り込みを取り消して、その前の状態に戻します（戻したあとにもう一度押すと、元に戻ります）。</div>
   </div>
+  <div class="card"><h2>管理者パスワードを変える</h2>
+    <input type="password" id="admcur" placeholder="いまの管理者パスワード" autocomplete="current-password">
+    <input type="password" id="admnew" placeholder="新しいパスワード（8文字以上）" autocomplete="new-password" style="margin-top:8px">
+    <input type="password" id="admnew2" placeholder="新しいパスワード（もう一度）" autocomplete="new-password" style="margin-top:8px">
+    <div style="margin-top:10px"><button class="btn ghost small" data-a="chgadm">管理者パスワードを変更</button></div>
+    <div class="note">変えたあとも、いまの画面はそのまま使えます。次にログインするときから、新しいパスワードになります。「みんなで見る」「個人」のパスワードは変わりません。</div>
+  </div>
   <div class="note" style="text-align:center">ログイン: 管理者 ／ ${BUILD}</div>`;
 }
 function importRow(x){
@@ -1119,6 +1131,7 @@ document.addEventListener('click', async (ev) => {
   else if (a === 'logintab') { S.loginRole = el.dataset.r; S.regMode = false; S.loginErr = ''; render(); }
   else if (a === 'regtoggle') { S.regMode = !S.regMode; S.loginErr = ''; render(); }
   else if (a === 'chgpw') doChangePw();
+  else if (a === 'chgadm') doChangeAdminPw();
   else if (a === 'loadmembers') loadMembers();
   else if (a === 'issueinv') doIssue(el.dataset.n);
   else if (a === 'unreg') doUnreg(el.dataset.n);
@@ -1168,6 +1181,15 @@ async function doLogin(){
       : c.includes('network') ? '通信できません。電波を確認してください' : 'ログインできませんでした';
   }
   S.loginBusy = false; render();
+}
+async function doChangeAdminPw(){
+  const cur = $('#admcur').value, n1 = $('#admnew').value, n2 = $('#admnew2').value;
+  if (!cur) { toast('いまのパスワードを入れてください'); return; }
+  if (n1.length < 8) { toast('新しいパスワードは8文字以上にしてください'); return; }
+  if (n1 !== n2) { toast('新しいパスワードが2回で合っていません'); return; }
+  if (n1 === cur) { toast('いまと同じパスワードです'); return; }
+  try { await backend.changeAdminPassword(cur, n1); ['#admcur', '#admnew', '#admnew2'].forEach(q => $(q).value = ''); toast('管理者パスワードを変えました'); }
+  catch (e) { const c = (e && e.code) || ''; toast(/invalid-credential|wrong-password/.test(c) ? 'いまのパスワードが違います' : /weak-password/.test(c) ? 'パスワードが弱すぎます' : /too-many/.test(c) ? '回数が多すぎます。しばらくしてから' : '変更できませんでした'); }
 }
 async function doChangePw(){
   const pw = $('#newpw') ? $('#newpw').value : '';
