@@ -448,7 +448,7 @@ const FIREBASE_CONFIG = {
 const ME_MODE = /*ME_MODE*/false;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-31 - 2026-10-25';
+const BUILD = 'sales-33 - 2026-10-25';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -943,7 +943,7 @@ function rkRow(i, byDay){
 }
 
 const gridMetList = () => MET;
-const metList = () => S.role === 'admin' ? MET.filter(z => z.k !== 'gross') : MET.filter(z => z.k !== 'gross');
+const metList = () => S.role === 'admin' ? MET : MET.filter(z => z.k !== 'gross');
 function viewCompare(M, m){
   if (!S.prevM) return '<div class="card"><div class="empty">前月のデータがまだありません。<br>管理者が前月のExcelを取り込むと表示されます。</div></div>';
   const P = S.prevM, i = m.i;
@@ -1179,6 +1179,7 @@ function viewAdmin(){
     <div style="margin-top:10px"><button class="btn ghost small" data-a="chgadm">管理者パスワードを変更</button></div>
     <div class="note">変えたあとも、いまの画面はそのまま使えます。次にログインするときから、新しいパスワードになります。「みんなで見る」「個人」のパスワードは変わりません。</div>
   </div>
+  <div class="note" style="text-align:center">5分間さわらない、または5分以上アプリを離れると、自動でログアウトします。</div>
   <div class="note" style="text-align:center">ログイン: 管理者 ／ ${BUILD}</div>`;
 }
 function importRow(x){
@@ -1257,7 +1258,7 @@ function mergeMonth(oldM, newM, allowRemove){
 function lockGate(){
   if (ME_MODE || S.role !== 'admin' || S.unlocked) return '';
   return `<div class="card"><h2>🔒 パスワードを入れてください</h2>
-    <div class="note" style="margin-top:0">「日別」と「個人」は、管理者パスワードをもう一度入れると見られます。</div>
+    <div class="note" style="margin-top:0">「日別」「個人」「管理」は、管理者パスワードをもう一度入れると開けます。</div>
     <input type="password" id="lockpw" placeholder="管理者パスワード" autocomplete="current-password" style="margin-top:10px">
     <div style="margin-top:10px"><button class="btn" data-a="unlock">開く</button></div></div>`;
 }
@@ -1306,7 +1307,7 @@ function render(){
   else if (S.tab === 'rank') body = viewRank();
   else if (S.tab === 'days') body = lockGate() || viewDays();
   else if (S.tab === 'pers') body = lockGate() || viewPerson();
-  else if (S.tab === 'admin') body = viewAdmin();
+  else if (S.tab === 'admin') body = lockGate() || viewAdmin();
   const active = document.activeElement; const keepId = active && active.id; const keepSel = active && active.selectionStart;
   const sx = window.scrollX, sy = window.scrollY;
   root.innerHTML = `
@@ -1481,6 +1482,21 @@ async function doRestore(){
     S.hex = info.hex || null; if (info.role !== 'member') S.empId = lsGet('x8s_emp') || null;
     startApp(info.role);
   });
+  // 管理者の自動ログアウト：5分操作がない／5分以上アプリを離れたらログアウト
+  if (!ME_MODE) {
+    const IDLE_MS = (TEST && window.__X8_IDLE) || 5 * 60 * 1000;
+    let last = Date.now();
+    const bump = () => { last = Date.now(); };
+    ['touchstart', 'click', 'keydown', 'scroll'].forEach(ev => document.addEventListener(ev, bump, { passive: true, capture: true }));
+    const chk = async () => {
+      if (S.role !== 'admin' || Date.now() - last < IDLE_MS) return;
+      last = Date.now();
+      try { await backend.logout(); } catch (e) {}
+      if (TEST) { S.phase = 'login'; S.role = null; render(); }
+    };
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) chk(); });
+    setInterval(chk, Math.min(15000, IDLE_MS));
+  }
 })();
 </script>
 </body>
