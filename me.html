@@ -285,6 +285,29 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
     return null;
   }
 
+  // 初回テーブル（日別シート下部）: 紹介元の名前ごとに 組数・人数 を数える
+  function normSrc(n) {
+    var t = str(n).normalize('NFKC').replace(/\s+/g, '').toLowerCase();
+    t = t.replace(/[\u30a1-\u30f6]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0x60); });
+    return t;
+  }
+  var SRC_ALIAS = { 'えす': 'S', 's': 'S', 'ゆうき': 'ユウキ', 'とおる': 'トオル' };
+  function readShokaiSrc(ws) {
+    var hr = null;
+    for (var r = 100; r <= 140 && !hr; r++) { if (str(val(ws, r, 2)) === 'NO' && str(val(ws, r, 5)) === '紹介') hr = r; }
+    var out = {};
+    if (!hr) return out;
+    for (var r2 = hr + 1; r2 <= hr + 40; r2++) {
+      var no = num(val(ws, r2, 2)); if (no === null) break;
+      var nin = num(val(ws, r2, 4)) || 0, raw = str(val(ws, r2, 5)).trim();
+      if (!raw && !nin) continue;
+      var key = raw ? (SRC_ALIAS[normSrc(raw)] || raw.normalize('NFKC')) : '不明';
+      if (!out[key]) out[key] = [0, 0];
+      out[key][0] += 1; out[key][1] += nin;
+    }
+    return out;
+  }
+
   function isEmptyDay(rows) {
     return !rows.some(function (r) {
       return METRICS.some(function (m) { return r.m[m.key] !== 0; });
@@ -381,7 +404,11 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
       }
       // 初回（管理者だけに見せる）: 組数=初回フリー / 人数=初回人数 / 売上=うち初回
       var shK = findLabeled(ws, '初回フリー'), shN = findLabeled(ws, '初回人数'), shS = findLabeled(ws, 'うち初回');
-      day.shokai = { kumi: shK || 0, nin: shN || 0, sales: shS || 0 };
+      var lab = function (l) { var v = findLabeled(ws, l); return v || 0; };
+      var crash = lab('クラッシュのみ');
+      day.shokai = { kumi: shK || 0, nin: shN || 0, sales: shS || 0, src: readShokaiSrc(ws),
+        cat: { gai: [lab('外販組数'), lab('外販人数')], eda: [lab('枝組数'), lab('枝人数')], intro: [lab('紹介組数'), lab('紹介人数')],
+               other: [lab('その他・フリー組数'), lab('その他・フリー人数')], crash: [crash, crash], dogyo: [lab('同業組数'), lab('同業人数')] } };
       days[dd] = day;
     }
 
@@ -421,7 +448,7 @@ const FIREBASE_CONFIG = {
 const ME_MODE = true;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-20 - 2026-10-24';
+const BUILD = 'sales-29 - 2026-10-25';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -443,6 +470,7 @@ const yen = (n) => '¥' + fmt(n);
 const man = (n) => n >= 10000 ? (Math.round(n / 1000) / 10) + '万' : fmt(n);
 const manS = (n) => n >= 10000000 ? Math.round(n / 10000) + '万' : man(n);
 const pair = (g, sb, extraG, extraS) => `<div class="pair"><div class="lbl">総売</div><div class="big">${yen(g)}</div>${extraG || ''}<div class="sl"><span class="lbl">小計</span><b>${yen(sb)}</b></div>${extraS || ''}</div>`;
+const storePair = (g) => `<div class="pair"><div class="lbl">総売</div><div class="big">${yen(g)}</div></div>`;
 const val = (m, n) => m.unit === 'yen' ? yen(n) : fmt(n);
 const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
@@ -527,6 +555,10 @@ async function makeFirebaseBackend(){
       suppress = false; const i = infoOf(auth.currentUser); curRole = i && i.role; if (theCb) theCb(i);
     },
     async changePassword(pw){ await Au.updatePassword(auth.currentUser, pw); },
+    async verifyAdminPassword(pw){
+      const u = auth.currentUser; if (!u || u.email !== ADMIN_EMAIL) throw new Error('not-admin');
+      await Au.reauthenticateWithCredential(u, Au.EmailAuthProvider.credential(ADMIN_EMAIL, pw));
+    },
     async changeAdminPassword(cur, pw){
       const u = auth.currentUser; if (!u || u.email !== ADMIN_EMAIL) throw new Error('not-admin');
       await Au.reauthenticateWithCredential(u, Au.EmailAuthProvider.credential(ADMIN_EMAIL, cur));
@@ -593,7 +625,7 @@ function makeTestBackend(){
   const T = TEST; let cbAuth = null;
   return {
     onAuth(cb){ cbAuth = cb; setTimeout(() => cb(T.role === 'none' ? null : { role: T.role || 'staff', hex: T.hex }), 0); return () => {}; },
-    async login(){}, async loginMember(){}, async registerMember(){}, async changePassword(){}, async changeAdminPassword(c){ if (c !== 'old') { const e = new Error('x'); e.code = 'auth/invalid-credential'; throw e; } }, async logout(){},
+    async login(){}, async loginMember(){}, async registerMember(){}, async changePassword(){}, async verifyAdminPassword(c){ if (c !== 'old') { const e = new Error('x'); e.code = 'auth/invalid-credential'; throw e; } }, async changeAdminPassword(c){ if (c !== 'old') { const e = new Error('x'); e.code = 'auth/invalid-credential'; throw e; } }, async logout(){},
     subPriv(ym, hex, cb){ setTimeout(() => cb(T.priv ? JSON.parse(JSON.stringify(T.priv)) : null), 0); return () => {}; },
     async listMembers(){ return T.members || { members: {}, invites: {} }; },
     async issueInvite(){ return 'TEST2345'; }, async unregister(){},
@@ -614,7 +646,7 @@ const S = {
   meta: { months: [], targets: {} },
   ym: null, M: null, prevM: null, updatedAt: null,
   dd: null,               // 選択中の日
-  rankMetric: 'sub', rankScope: 'month', rankView: 'rank', dayView: 'cal', gridMetric: 'gross',
+  rankMetric: 'sub', rankScope: 'month', rankView: 'rank', dayView: 'cal', gridMetric: 'sub',
   empId: lsGet('x8s_emp') || null, empQuery: '',
   dayDetail: null,        // 日別画面で詳細表示中のdd
   loginRole: ME_MODE ? 'member' : 'admin', regMode: false, hex: null, priv: null, memberInfo: null, loginErr: '', loginBusy: false,
@@ -708,20 +740,81 @@ function shokaiCard(M, days, dd, prevTo, lastN, prevToN){
   const kp = (l, k, v, p, f) => `<div class="kpi"><div class="v" style="font-size:${f ? 17 : 24}px">${(f || fmt)(v)}</div><div class="l">${l}</div>${p ? `<div class="kd">${delta(v, p[k], f ? 'yen' : '')}</div><div class="kp">前月 ${(f || fmt)(p[k])}</div>` : ''}</div>`;
   return `<div class="card"><h2>初回（${ymLabel(M.ym)} 累計）</h2>
     <div class="kpis">
-      ${kp('初回組数', 'kumi', t.kumi, pv)}${kp('初回人数', 'nin', t.nin, pv)}${kp('うち初回の売上', 'sales', t.sales, pv, yen)}
+      ${kp('初回組数', 'kumi', t.kumi, pv)}${kp('初回人数', 'nin', t.nin, pv)}
     </div>
-    ${(S.prevM && hasShokai(S.prevM)) ? (() => { const a = shokaiSum(S.prevM); return `<div class="hr"></div><div class="lbl">${ymLabel(S.prevM.ym)} 全体の初回</div><div style="margin-top:4px"><b>${fmt(a.kumi)}</b>組 ／ <b>${fmt(a.nin)}</b>人 ／ 売上 ${yen(a.sales)}</div><div class="note" style="margin-top:6px">上の ◀ で ${ymLabel(S.prevM.ym)} に切り替えると、日別の初回も見られます。</div>`; })() : ''}
-    ${td ? `<div class="note">${dayLabel(M.ym, dd)}: 初回 ${fmt(td.kumi)}組 ／ ${fmt(td.nin)}人 ／ 売上 ${yen(td.sales)}</div>` : ''}
-    ${pv ? `<div class="note">▲▼は前月の同じ日まで（${lastN}日まで・営業${prevToN}日）との差です。組数＝Excelの「初回フリー」、人数＝「初回人数」、売上＝「うち初回」。この表示は管理者だけに出ます。</div>` : '<div class="note">組数＝Excelの「初回フリー」、人数＝「初回人数」、売上＝「うち初回」です。管理者だけに出ます。前月のデータが入ると前月比も出ます。</div>'}
+    ${(S.prevM && hasShokai(S.prevM)) ? (() => { const a = shokaiSum(S.prevM); return `<div class="hr"></div><div class="lbl">${ymLabel(S.prevM.ym)} 全体の初回</div><div style="margin-top:4px"><b>${fmt(a.kumi)}</b>組 ／ <b>${fmt(a.nin)}</b>人</div><div class="note" style="margin-top:6px">上の ◀ で ${ymLabel(S.prevM.ym)} に切り替えると、日別の初回も見られます。</div>`; })() : ''}
+    ${td ? `<div class="note">${dayLabel(M.ym, dd)}: 初回 ${fmt(td.kumi)}組 ／ ${fmt(td.nin)}人</div>` : ''}
+    ${pv ? `<div class="note">▲▼は前月の同じ日まで（${lastN}日まで・営業${prevToN}日）との差です。組数＝Excelの「初回フリー」、人数＝「初回人数」。この表示は管理者だけに出ます。</div>` : '<div class="note">組数＝Excelの「初回フリー」、人数＝「初回人数」です。管理者だけに出ます。前月のデータが入ると前月比も出ます。</div>'}
+  </div>`;
+}
+const SRC_OTHER = ['枝', '運営枝', 'SNS初回', '初回紹介', '運営紹介', '体入紹介'];
+const WD = '日月火水木金土';
+function srcOfDay(h){ // 1日分: {名前: [組,人]} と 記入なし分
+  const m = {}; let got = 0;
+  Object.keys((h && h.src) || {}).forEach(k => { m[k] = h.src[k].slice(); got += h.src[k][1]; });
+  return m;
+}
+function srcAgg(M, pred){ // 指定した日の紹介元ごとの合計
+  const t = {};
+  dayList(M).filter(pred || (() => true)).forEach(dd => { const m = srcOfDay(M.days[dd].shokai); Object.keys(m).forEach(k => { if (!t[k]) t[k] = [0, 0]; t[k][0] += m[k][0]; t[k][1] += m[k][1]; }); });
+  return t;
+}
+const isGaihan = (k) => SRC_OTHER.indexOf(k) < 0 && k !== '記入なし' && k !== '不明';
+const CAT = [['gai', '外販'], ['eda', '枝'], ['intro', '紹介'], ['other', 'その他・フリー'], ['crash', 'クラッシュのみ'], ['dogyo', '同業']];
+function dayBreak(h){ // 1日分の「外販名＋区分」の文
+  const c = (h && h.cat) || null; const m = srcOfDay(h);
+  const names = Object.keys(m).filter(isGaihan).sort((x, y) => m[y][1] - m[x][1]).map(k => esc(k) + m[k][1]).join('・');
+  const parts = [];
+  if (c) { if (c.gai[1]) parts.push('<b>外販</b> ' + (names || c.gai[1] + '人')); CAT.slice(1).forEach(([k, l]) => { if (c[k] && c[k][1]) parts.push('<b>' + l + '</b> ' + c[k][1]); }); }
+  else if (names) parts.push('<b>外販</b> ' + names);
+  return parts.join('　');
+}
+function shokaiSrcCard(M){
+  if (!hasShokai(M) || !dayList(M).some(d => M.days[d].shokai && M.days[d].shokai.src)) return '';
+  const all = srcAgg(M);
+  const cat = {}; CAT.forEach(([k]) => cat[k] = [0, 0]);
+  dayList(M).forEach(dd => { const c = M.days[dd].shokai && M.days[dd].shokai.cat; if (c) CAT.forEach(([k]) => { cat[k][0] += (c[k] || [0, 0])[0]; cat[k][1] += (c[k] || [0, 0])[1]; }); });
+  const hasCat = CAT.some(([k]) => cat[k][1] > 0);
+  const gai = Object.keys(all).filter(isGaihan).sort((a, b) => all[b][1] - all[a][1] || all[b][0] - all[a][0]);
+  const gSumK = gai.reduce((a, k) => a + all[k][0], 0), gSumN = gai.reduce((a, k) => a + all[k][1], 0);
+  const tot = hasCat ? CAT.reduce((a, [k]) => a + cat[k][1], 0) : gSumN;
+  const totK = hasCat ? CAT.reduce((a, [k]) => a + cat[k][0], 0) : gSumK;
+  const pc = (n) => tot ? Math.round(n / tot * 100) + '%' : '·';
+  const gTot = hasCat ? cat.gai[1] : gSumN, gK = hasCat ? cat.gai[0] : gSumK;
+  const sns = all['SNS初回'] || [0, 0];
+  const nameRows = gai.map(k => `<tr><td style="padding-left:14px">└ ${esc(k)}</td><td>${fmt(all[k][0])}</td><td>${fmt(all[k][1])}</td><td>${pc(all[k][1])}</td></tr>`).join('') || '<tr><td colspan="4" class="dim">外販名の記録がありません</td></tr>';
+  const otherRows = hasCat ? CAT.slice(1).filter(([k]) => cat[k][1] > 0 || cat[k][0] > 0).map(([k, l]) => `<tr><td>${l}</td><td>${fmt(cat[k][0])}</td><td>${fmt(cat[k][1])}</td><td>${pc(cat[k][1])}</td></tr>`).join('') : '';
+  // 曜日ごと
+  const byW = [1, 2, 3, 4, 5, 6, 0].map(w => {
+    const dds = dayList(M).filter(dd => new Date(M.year, M.month - 1, Number(dd)).getDay() === w);
+    const a = srcAgg(M, dd => dds.indexOf(dd) >= 0); const g = Object.keys(a).filter(isGaihan).sort((x, y) => a[y][1] - a[x][1]);
+    const sum = g.reduce((t, k) => t + a[k][1], 0), tot = Object.keys(a).reduce((t, k) => t + a[k][1], 0);
+    return { w, n: dds.length, sum, tot, top: g.slice(0, 3).map(k => ({ k, v: a[k][1] })) };
+  });
+  const maxAvg = Math.max(1, ...byW.map(x => x.n ? x.sum / x.n : 0));
+  return `<div class="card"><h2>${ymLabel(M.ym)} 初回の内訳（外販名つき）</h2>
+    <table class="tbl"><thead><tr><th>区分</th><th>組</th><th>人</th><th>割合</th></tr></thead><tbody>
+    <tr class="total"><td>外販 合計</td><td>${fmt(gK)}</td><td>${fmt(gTot)}</td><td>${pc(gTot)}</td></tr>
+    ${nameRows}${otherRows}
+    <tr class="total"><td>初回 合計</td><td>${fmt(totK)}</td><td>${fmt(tot)}</td><td>100%</td></tr></tbody></table>
+    ${sns[1] ? `<div class="note">SNS初回 ${fmt(sns[0])}組 ${fmt(sns[1])}人 は、Excelの初回の合計に入らない別枠です。</div>` : ''}
+    <div class="note">区分は、Excelの日別シートの「外販・枝・紹介・その他・フリー・クラッシュのみ・同業」の数字です。外販名は、同じシートの初回の表（「紹介」の列）から集めています。カタカナとひらがなの違いはまとめています。</div>
+  </div>
+  <div class="card"><h2>曜日ごとの外販（${ymLabel(M.ym)}）</h2>
+    <table class="tbl"><thead><tr><th>曜日</th><th>日数</th><th>外販人数</th><th>1日平均</th></tr></thead><tbody>
+    ${byW.map(x => `<tr><td>${WD[x.w]}</td><td>${x.n}</td><td>${fmt(x.sum)}</td><td>${x.n ? (x.sum / x.n).toFixed(1) : '·'}</td></tr>
+      <tr><td colspan="4" style="text-align:left;padding:0 4px 10px"><div class="bar" style="margin:2px 0 6px"><i style="width:${x.n ? Math.round(x.sum / x.n / maxAvg * 100) : 0}%"></i></div><span class="dim" style="font-size:12px">${x.top.length ? x.top.map(t => esc(t.k) + ' ' + t.v + '人').join(' ／ ') : '外販なし'}</span></td></tr>`).join('')}
+    </tbody></table>
+    <div class="note">曜日ごとに、外販から来た初回の人数と、多かった外販を並べています（棒は1日平均の長さ）。</div>
   </div>`;
 }
 function shokaiDaily(M){
   if (!hasShokai(M)) return '';
   const days = dayList(M); const t = shokaiSum(M);
   return `<div class="card"><h2>${ymLabel(M.ym)} 日別の初回</h2>
-    <table class="tbl"><thead><tr><th>日</th><th>組</th><th>人</th><th>うち初回の売上</th></tr></thead><tbody>
-    ${days.map(d => { const h = M.days[d].shokai || { kumi: 0, nin: 0, sales: 0 }; return `<tr class="tap" data-a="openday" data-d="${d}"><td>${dayLabel(M.ym, d)}</td><td>${fmt(h.kumi)}</td><td>${fmt(h.nin)}</td><td>${h.sales ? yen(h.sales) : '·'}</td></tr>`; }).join('')}
-    <tr class="total"><td>合計</td><td>${fmt(t.kumi)}</td><td>${fmt(t.nin)}</td><td>${yen(t.sales)}</td></tr></tbody></table>
+    <table class="tbl"><thead><tr><th>日</th><th>組</th><th>人</th><th style="text-align:left">内訳（外販名）</th></tr></thead><tbody>
+    ${days.map(d => { const h = M.days[d].shokai || { kumi: 0, nin: 0, sales: 0 }; return `<tr class="tap" data-a="openday" data-d="${d}"><td>${dayLabel(M.ym, d)}</td><td>${fmt(h.kumi)}</td><td>${fmt(h.nin)}</td><td style="text-align:left;white-space:normal;font-size:11px;color:var(--dim)">${dayBreak(h)}</td></tr>`; }).join('')}
+    <tr class="total"><td>合計</td><td>${fmt(t.kumi)}</td><td>${fmt(t.nin)}</td><td></td></tr></tbody></table>
     <div class="note">日付の行をタップすると、その日の内訳が見られます。管理者だけに出ます。</div>
   </div>`;
 }
@@ -760,32 +853,30 @@ function viewHome(){
   const prevToN = S.prevM ? dayList(S.prevM).filter(d => Number(d) <= lastN).length : 0;
   // 同じ営業日数までの前月累計で比べるのではなく、前月の月間合計と比較する
   const bars = trendSvg(M);
-  const rk = ranking(M, 1, null).filter(x => x.v > 0).slice(0, 5);
+  const rk = ranking(M, 0, null).filter(x => x.v > 0).slice(0, 5);
   return `
   <div class="card">
     <h2>${dd ? dayLabel(M.ym, dd) + ' の店舗売上' : '当日'}</h2>
-    ${today ? pair(today.gross, today.sub) : '<div class="empty">データなし</div>'}
+    ${today ? storePair(today.gross) : '<div class="empty">データなし</div>'}
     ${days.length > 1 ? `<div class="seg" style="margin-top:12px;margin-bottom:0">${days.slice(-7).map(d => `<button class="${d === dd ? 'on' : ''}" data-a="pickday" data-d="${d}">${Number(d)}日</button>`).join('')}</div>` : ''}
   </div>
   <div class="card">
     <h2>${ymLabel(M.ym)} 累計（営業日 ${days.length}日）</h2>
-    ${pair(tot.gross, tot.sub)}
+    ${storePair(tot.gross)}
     <div class="hr"></div>
-    ${target ? `<div class="row2" style="align-items:end"><div><div class="lbl">月間目標（総売）</div><div style="font-family:Oswald;font-size:20px">${yen(target)}</div></div>
+    ${target ? `<div class="row2" style="align-items:end"><div><div class="lbl">月間目標（総売）</div><div style="font-family:Oswald;font-size:20px">${yen(target)}</div><div class="dim" style="font-size:12px;margin-top:2px">いまの総売 ${yen(tot.gross)}</div></div>
       <div style="text-align:right"><div class="lbl">達成率</div><div class="big sm">${(tot.gross / target * 100).toFixed(1)}%</div></div></div>
       <div class="bar"><i style="width:${pct}%"></i></div>`
       : `<div class="lbl">月間目標: 未設定${S.role === 'admin' ? '（管理タブで設定できます）' : ''}</div>`}
     <div class="hr"></div>
     <div class="lbl">前月比 ①同じ日まで（前月の${lastN}日まで・営業${prevToN}日）</div>
     ${prevTo ? `<div style="margin-top:4px">総売 ${delta(tot.gross, prevTo.gross, 'yen')}　<span class="dim">前月 ${yen(prevTo.gross)}</span></div>
-      <div>小計 ${delta(tot.sub, prevTo.sub, 'yen')}　<span class="dim">前月 ${yen(prevTo.sub)}</span></div>
       <div class="dim" style="margin-top:2px">本数 ${delta(tot.shimei, prevTo.shimei)}　新規 ${delta(tot.shinki, prevTo.shinki)}　送り ${delta(tot.okuri, prevTo.okuri)}　同伴 ${delta(tot.douhan, prevTo.douhan)}</div>`
       : '<div class="dim" style="margin-top:4px">前月のデータがまだありません</div>'}
     ${prevTot ? `<div class="lbl" style="margin-top:12px">②前月の月間合計との差</div>
       <div style="margin-top:4px">総売 ${delta(tot.gross, prevTot.gross, 'yen')}　<span class="dim">前月全体 ${yen(prevTot.gross)}（営業${dayList(S.prevM).length}日）</span></div>` : ''}
   </div>
   ${shokaiCard(M, days, dd, prevTo, lastN, prevToN)}
-  ${staffChangeCard(M)}
   <div class="card">
     <h2>営業日ごとの総売</h2>${bars}
   </div>
@@ -799,11 +890,11 @@ function viewHome(){
     <div class="note">新規は「件数」です。人数はExcelの個人別データにないため表示しません。</div>
   </div>
   <div class="card">
-    <h2>月間 総売ランキング TOP5</h2>
-    ${rk.length ? rk.map(rkRow(1, false)).join('') : '<div class="dim">データなし</div>'}
+    <h2>月間 小計ランキング TOP5</h2>
+    ${rk.length ? rk.map(rkRow(0, false)).join('') : '<div class="dim">データなし</div>'}
     <div style="margin-top:10px"><button class="btn ghost small" data-a="tab" data-t="rank">ランキングをすべて見る</button></div>
   </div>
-  <div class="note" style="text-align:center">店舗合計には、一覧・ランキングに載せていない運営メンバー分（総売 ${yen(hid.gross)}／小計 ${yen(hid.sub)}）を含みます。${unasSum(M) ? `<br>さらに「担当なしの売上」${yen(unasSum(M))}（伝票にあるが個人の欄に入っていない分）を含み、Excelの月間合計と同じ数字です。` : ''}</div>
+  <div class="note" style="text-align:center">店舗合計には、一覧・ランキングに載せていない運営メンバー分（総売 ${yen(hid.gross)}）を含みます。${unasSum(M) ? `<br>さらに「担当なしの売上」${yen(unasSum(M))}（伝票にあるが個人の欄に入っていない分）を含み、Excelの月間合計と同じ数字です。` : ''}</div>
   ${updatedLine()}`;
 }
 
@@ -861,7 +952,7 @@ function viewCompare(M, m){
 
 function viewRank(){
   const M = S.M; if (!M) return noData();
-  const m = metList().find(z => z.k === S.rankMetric) || MET[0];
+  const m = metList().find(z => z.k === S.rankMetric) || metList()[0];
   if (S.rankView === 'cmp') return `<div class="seg2"><button data-a="rview" data-v="rank">ランキング</button><button class="on" data-a="rview" data-v="cmp">前月比一覧</button></div>
   <div class="seg">${metList().map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="rmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
   ${viewCompare(M, m)}${updatedLine()}`;
@@ -882,12 +973,12 @@ function viewRank(){
     ${pos.length ? pos.map(rkRow(m.i, byDay)).join('') : '<div class="empty">この項目の実績はまだありません</div>'}
     ${(!byDay && !S.prevM) ? '<div class="note">前月のデータが入ると、前月比が表示されます。</div>' : ''}
   </div>
-  <div class="note">同じ数字の人は同じ順位です。同順位の並びは名簿順です。${S.role === 'admin' ? '小計と総売は別々に集計しています。' : '総売は、個人ページで見られます。'}${zero.length ? ` 実績0の ${zero.length}人 は表示していません。` : ''}</div>
+  <div class="note">同じ数字の人は同じ順位です。同順位の並びは名簿順です。${zero.length ? ` 実績0の ${zero.length}人 は表示していません。` : ''}</div>
   ${updatedLine()}`;
 }
 
 function viewGrid(M){
-  const m = MET.find(z => z.k === S.gridMetric) || MET[1];
+  const m = metList().find(z => z.k === S.gridMetric) || metList()[0];
   const days = dayList(M);
   const empsAll = M.employees;
   const colTotAll = empsAll.map(e => days.reduce((a, dd) => { const r = M.days[dd].rows[e.id]; return a + (r ? r[m.i] : 0); }, 0));
@@ -902,7 +993,7 @@ function viewGrid(M){
   const tot = `<tr class="gt"><td class="c1">計</td><td class="c2">${nf(all)}</td>${colTot.map(v => `<td>${cell(v)}</td>`).join('')}</tr>`;
   const body = days.map(dd => { const d = M.days[dd];
     return `<tr><td class="c1" data-a="openday" data-d="${dd}">${Number(dd)}</td><td class="c2">${nf(d.store[m.k] || 0)}</td>${emps.map(e => { const r = d.rows[e.id]; const v = r ? r[m.i] : 0; return `<td class="${v ? '' : 'z'}">${cell(v)}</td>`; }).join('')}</tr>`; }).join('');
-  return `<div class="seg">${MET.map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="gmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
+  return `<div class="seg">${metList().map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="gmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
   <div class="card" style="padding-left:16px;padding-right:16px"><h2>${ymLabel(M.ym)} 日別 × 人別（${m.label}${isY ? '・単位:千円' : ''}）</h2>
     <div class="gridwrap"><table class="grid"><thead>${head}</thead><tbody>${tot}${body}</tbody></table></div>
     <div class="note">左の日付をタップすると、その日の内訳が見られます。横にスワイプすると全員が見られます。この月に数字がない人（${hiddenN}人）は表から省いています。「店合計」は一覧に載せていない運営メンバー${m.k === 'gross' ? 'と担当なしの売上' : ''}を含みます。「·」は0です。</div>
@@ -921,27 +1012,27 @@ function viewDays(){
                : `<div class="d none"><b>${i}</b><span style="color:#5d576a">—</span></div>`;
   }
   const toggle = `<div class="seg2"><button class="${S.dayView === 'cal' ? 'on' : ''}" data-a="dview" data-v="cal">カレンダー</button><button class="${S.dayView === 'grid' ? 'on' : ''}" data-a="dview" data-v="grid">一覧表（日×人）</button></div>`;
-  if (S.role === 'admin' && S.dayView === 'grid') return toggle + viewGrid(M) + shokaiDaily(M) + updatedLine();
+  if (S.role === 'admin' && S.dayView === 'grid') return toggle + viewGrid(M) + shokaiDaily(M) + shokaiSrcCard(M) + updatedLine();
   return (S.role === 'admin' ? toggle : '') + `
   <div class="card"><h2>${ymLabel(M.ym)} カレンダー（総売）</h2>
     <div class="cal">${'日月火水木金土'.split('').map(w => `<div class="dw">${w}</div>`).join('')}${cells}</div>
     <div class="note">日付をタップすると、その日の内訳が見られます。「—」はデータ未入力（または営業なし）の日で、集計には含めていません。</div>
   </div>
-  ${S.role === 'admin' ? shokaiDaily(M) : ''}
+  ${S.role === 'admin' ? shokaiDaily(M) + shokaiSrcCard(M) : ''}
   ${updatedLine()}`;
 }
 
 function viewDayDetail(dd){
   const M = S.M, d = M.days[dd];
   const rows = M.employees.map(e => ({ e, r: d.rows[e.id] })).filter(x => x.r && x.r.slice(0, 8).some(n => n !== 0));
-  rows.sort((a, b) => b.r[1] - a.r[1] || b.r[0] - a.r[0]);
+  rows.sort((a, b) => b.r[0] - a.r[0] || b.r[1] - a.r[1]);
   const hid = d.hidden || {};
   return `
   <button class="btn ghost small" data-a="backdays" style="margin-bottom:10px">← カレンダーに戻る</button>
   <div class="card">
     <h2>${dayLabel(M.ym, dd)} の店舗合計</h2>
-    ${pair(d.store.gross, d.store.sub)}
-    ${(S.role === 'admin' && d.shokai) ? `<div class="hr"></div><div class="lbl">初回</div><div style="margin-top:4px"><b>${fmt(d.shokai.kumi)}</b>組 ／ <b>${fmt(d.shokai.nin)}</b>人 ／ 売上 ${yen(d.shokai.sales)}</div>` : ''}
+    ${storePair(d.store.gross)}
+    ${(S.role === 'admin' && d.shokai) ? `<div class="hr"></div><div class="lbl">初回</div><div style="margin-top:4px"><b>${fmt(d.shokai.kumi)}</b>組 ／ <b>${fmt(d.shokai.nin)}</b>人</div>${`<div class="dim" style="margin-top:4px;font-size:13px;line-height:1.7">${dayBreak(d.shokai)}</div>`}` : ''}
     <div class="kpis" style="margin-top:12px">${[['本数', 'shimei'], ['新規', 'shinki'], ['飲み直し', 'nomi'], ['送り', 'okuri'], ['ヘルプ', 'help'], ['同伴', 'douhan']].map(([l, k]) => `<div class="kpi"><div class="v">${fmt(d.store[k])}</div><div class="l">${l}</div></div>`).join('')}</div>
   </div>
   ${S.role !== 'admin' ? `<div class="card"><h2>🔒 個人別</h2><div class="dim">個人の日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div><div class="note">店舗合計には、一覧に載せていない運営メンバー分（総売 ${yen(hid.gross || 0)}）${d.unas ? `と「担当なしの売上」${yen(d.unas)}` : ''}を含みます。</div></div>` : `<div class="card"><h2>個人別</h2>
@@ -960,6 +1051,33 @@ function rowOf(e, dd){
 }
 function privGross(P){ if (!P || !P.days) return null; let g = 0; Object.keys(P.days).forEach(dd => { g += (P.days[dd] && P.days[dd][1]) || 0; }); return g; }
 function canDetail(e){ return S.role === 'admin' || (S.role === 'member' && hexOf(e.name) === S.hex); }
+const ATT_MARK = { 'A出勤': ['A', 'var(--gold)'], 'B出勤': ['B', '#7fd1b9'], '遅刻': ['遅', '#e8b04a'], '当欠': ['欠', '#e0566b'], '無欠': ['欠', '#e0566b'], '欠勤': ['欠', '#e0566b'], '出欠': ['出欠', '#9b94a6'], '休み': ['休', '#6f6a7a'], '有給': ['有', '#8aa4ff'], 'メンバー': ['メ', '#9b94a6'] };
+function attendanceCard(M, e){
+  const days = dayList(M); const [y, mo] = M.ym.split('-').map(Number); const first = new Date(y, mo - 1, 1).getDay(); const N = M.daysInMonth;
+  const cnt = {}; let work = 0;
+  const att = (dd) => { const r = rowOf(e, dd); return r ? (r[8] || '') : null; };
+  days.forEach(dd => { const a = att(dd); if (a) { cnt[a] = (cnt[a] || 0) + 1; if (/出勤|遅刻/.test(a)) work++; } });
+  let cells = '';
+  for (let i = 0; i < first; i++) cells += '<div></div>';
+  for (let i = 1; i <= N; i++) {
+    const dd = (i < 10 ? '0' : '') + i; const inData = !!M.days[dd]; const a = inData ? att(dd) : null; const mk = a && (ATT_MARK[a] || [a.slice(0, 2), '#9b94a6']);
+    cells += `<div class="d ${inData ? 'has' : 'none'}"><b>${i}</b><span style="color:${mk ? mk[1] : '#5d576a'}">${mk ? mk[0] : (inData ? '—' : '')}</span></div>`;
+  }
+  const line = (l, k, c) => cnt[k] ? `<div class="kpi"><div class="v" style="color:${c}">${cnt[k]}</div><div class="l">${l}</div></div>` : '';
+  const late = cnt['遅刻'] || 0, absent = (cnt['当欠'] || 0) + (cnt['無欠'] || 0) + (cnt['欠勤'] || 0), off = (cnt['休み'] || 0) + (cnt['有給'] || 0);
+  return `<div class="card"><h2>${ymLabel(M.ym)} 出勤</h2>
+    <div class="kpis">
+      <div class="kpi"><div class="v" style="color:var(--gold)">${work}</div><div class="l">出勤日数</div></div>
+      <div class="kpi"><div class="v">${late}</div><div class="l">遅刻</div></div>
+      <div class="kpi"><div class="v" style="color:${absent ? '#e0566b' : 'inherit'}">${absent}</div><div class="l">欠勤（当欠など）</div></div>
+      <div class="kpi"><div class="v">${cnt['A出勤'] || 0}</div><div class="l">A出勤</div></div>
+      <div class="kpi"><div class="v">${cnt['B出勤'] || 0}</div><div class="l">B出勤</div></div>
+      <div class="kpi"><div class="v">${off}</div><div class="l">休み・有給</div></div>
+    </div>
+    <div class="cal" style="margin-top:14px">${'日月火水木金土'.split('').map(w => `<div class="dw">${w}</div>`).join('')}${cells}</div>
+    <div class="note">A=A出勤　B=B出勤　遅=遅刻　欠=当欠など　休=休み　有=有給　「—」は記録なし。Excelの「出勤」の列の記録です。営業していない日は薄く表示しています。</div>
+  </div>`;
+}
 function viewPerson(){
   const M = S.M; if (!M) return noData();
   if (S.role === 'member' && !S.empId) { const me = M.employees.find(x => hexOf(x.name) === S.hex); if (me) S.empId = me.id; else return '<div class="card"><h2>あなたの実績</h2><div class="dim">この月の名簿にあなたの名前がありません。名前が変わった場合は、管理者に伝えてください。</div></div>'; }
@@ -998,6 +1116,7 @@ function viewPerson(){
     ${pt ? `<div class="note">前月（${ymLabel(S.prevM.ym)}・${pt.days}日出勤）との差です。前月は月全体の合計です。</div>` : '<div class="note">前月のデータがない（または前月に名簿にいなかった）ため、前月比は表示していません。</div>'}
     <div class="note">月間目標は店舗全体のみです（個人目標は未設定）。</div>
   </div>
+  ${detail ? attendanceCard(M, e) : ''}
   ${!detail ? '<div class="card"><h2>🔒 日別履歴</h2><div class="dim">日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div></div>' : `<div class="card"><h2>日別履歴</h2>
     <div class="scrollx"><table class="tbl"><thead><tr><th>営業日</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
     ${hist.slice().reverse().map(({ d, r }) => `<tr ${S.role === 'admin' ? `class="tap" data-a="openday" data-d="${d}"` : ''}><td>${Number(M.ym.split('-')[1])}/${Number(d)}</td><td>${fmt(r[0])}</td><td>${fmt(r[1])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" class="dim">実績なし</td></tr>'}
@@ -1121,6 +1240,19 @@ function mergeMonth(oldM, newM, allowRemove){
 }
 
 /* ---------- login ---------- */
+function lockGate(){
+  if (ME_MODE || S.role !== 'admin' || S.unlocked) return '';
+  return `<div class="card"><h2>🔒 パスワードを入れてください</h2>
+    <div class="note" style="margin-top:0">「日別」と「個人」は、管理者パスワードをもう一度入れると見られます。</div>
+    <input type="password" id="lockpw" placeholder="管理者パスワード" autocomplete="current-password" style="margin-top:10px">
+    <div style="margin-top:10px"><button class="btn" data-a="unlock">開く</button></div></div>`;
+}
+async function doUnlock(){
+  const pw = $('#lockpw') ? $('#lockpw').value : '';
+  if (!pw) { toast('パスワードを入れてください'); return; }
+  try { await backend.verifyAdminPassword(pw); S.unlocked = true; render(); }
+  catch (e) { const c = (e && e.code) || ''; toast(/invalid-credential|wrong-password/.test(c) ? 'パスワードが違います' : /too-many/.test(c) ? '回数が多すぎます。しばらくしてから' : '確認できませんでした'); }
+}
 function viewLogin(){
   const r = S.loginRole, reg = S.regMode && r === 'member', B = S.loginBusy ? 'disabled' : '';
   const tabs = [];  // みんなで見る は廃止。全体用は管理者のみ、個人用は me.html
@@ -1158,8 +1290,8 @@ function render(){
   let body = '';
   if (S.tab === 'home') body = viewHome();
   else if (S.tab === 'rank') body = viewRank();
-  else if (S.tab === 'days') body = viewDays();
-  else if (S.tab === 'pers') body = viewPerson();
+  else if (S.tab === 'days') body = lockGate() || viewDays();
+  else if (S.tab === 'pers') body = lockGate() || viewPerson();
   else if (S.tab === 'admin') body = viewAdmin();
   const active = document.activeElement; const keepId = active && active.id; const keepSel = active && active.selectionStart;
   const sx = window.scrollX, sy = window.scrollY;
@@ -1194,6 +1326,8 @@ document.addEventListener('click', async (ev) => {
   else if (a === 'regtoggle') { S.regMode = !S.regMode; S.loginErr = ''; render(); }
   else if (a === 'chgpw') doChangePw();
   else if (a === 'chgadm') doChangeAdminPw();
+  else if (a === 'unlock') doUnlock();
+  else if (a === 'relock') { S.unlocked = false; render(); }
   else if (a === 'loadmembers') loadMembers();
   else if (a === 'issueinv') doIssue(el.dataset.n);
   else if (a === 'unreg') doUnreg(el.dataset.n);
@@ -1328,7 +1462,7 @@ async function doRestore(){
   catch (e) { S.phase = 'fatal'; S.fatal = '接続できませんでした。電波を確認して、再読み込みしてください。'; render(); return; }
   backend.onAuth((info) => {
     if (unsubMonth) { unsubMonth(); unsubMonth = null; } if (unsubMeta) { unsubMeta(); unsubMeta = null; } if (unsubPriv) { unsubPriv(); unsubPriv = null; } if (unsubPrivPrev) { unsubPrivPrev(); unsubPrivPrev = null; }
-    S.priv = null; S.privPrev = null; S.empId = null; S.memberInfo = null; S.dayView = 'cal'; S.rankScope = 'month';
+    S.unlocked = false; S.priv = null; S.privPrev = null; S.empId = null; S.memberInfo = null; S.dayView = 'cal'; S.rankScope = 'month';
     if (!info) { S.phase = 'login'; S.role = null; S.hex = null; S.M = null; S.ym = null; S.meta = { months: [], targets: {} }; render(); return; }
     S.hex = info.hex || null; if (info.role !== 'member') S.empId = lsGet('x8s_emp') || null;
     startApp(info.role);
