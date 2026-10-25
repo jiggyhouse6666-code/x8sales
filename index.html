@@ -448,7 +448,7 @@ const FIREBASE_CONFIG = {
 const ME_MODE = /*ME_MODE*/false;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-36 - 2026-10-25';
+const BUILD = 'sales-37 - 2026-10-25';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -1257,7 +1257,7 @@ function mergeMonth(oldM, newM, allowRemove){
 function lockGate(){
   if (ME_MODE || S.role !== 'admin' || S.unlocked) return '';
   return `<div class="card"><h2>🔒 パスワードを入れてください</h2>
-    <div class="note" style="margin-top:0">「個人」「管理」は、管理者パスワードをもう一度入れると開けます。</div>
+    <div class="note" style="margin-top:0">「日別」「個人」「管理」は、管理者パスワードをもう一度入れると開けます。</div>
     <input type="password" id="lockpw" placeholder="管理者パスワード" autocomplete="current-password" style="margin-top:10px">
     <div style="margin-top:10px"><button class="btn" data-a="unlock">開く</button></div></div>`;
 }
@@ -1304,7 +1304,7 @@ function render(){
   let body = '';
   if (S.tab === 'home') body = viewHome();
   else if (S.tab === 'rank') body = viewRank();
-  else if (S.tab === 'days') body = viewDays();
+  else if (S.tab === 'days') body = lockGate() || viewDays();
   else if (S.tab === 'pers') body = lockGate() || viewPerson();
   else if (S.tab === 'admin') body = lockGate() || viewAdmin();
   const active = document.activeElement; const keepId = active && active.id; const keepSel = active && active.selectionStart;
