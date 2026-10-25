@@ -404,7 +404,11 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
       }
       // 初回（管理者だけに見せる）: 組数=初回フリー / 人数=初回人数 / 売上=うち初回
       var shK = findLabeled(ws, '初回フリー'), shN = findLabeled(ws, '初回人数'), shS = findLabeled(ws, 'うち初回');
-      day.shokai = { kumi: shK || 0, nin: shN || 0, sales: shS || 0, src: readShokaiSrc(ws) };
+      var lab = function (l) { var v = findLabeled(ws, l); return v || 0; };
+      var crash = lab('クラッシュのみ');
+      day.shokai = { kumi: shK || 0, nin: shN || 0, sales: shS || 0, src: readShokaiSrc(ws),
+        cat: { gai: [lab('外販組数'), lab('外販人数')], eda: [lab('枝組数'), lab('枝人数')], intro: [lab('紹介組数'), lab('紹介人数')],
+               other: [lab('その他・フリー組数'), lab('その他・フリー人数')], crash: [crash, crash], dogyo: [lab('同業組数'), lab('同業人数')] } };
       days[dd] = day;
     }
 
@@ -444,7 +448,7 @@ const FIREBASE_CONFIG = {
 const ME_MODE = /*ME_MODE*/false;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-27 - 2026-10-25';
+const BUILD = 'sales-28 - 2026-10-25';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -748,8 +752,6 @@ const WD = '日月火水木金土';
 function srcOfDay(h){ // 1日分: {名前: [組,人]} と 記入なし分
   const m = {}; let got = 0;
   Object.keys((h && h.src) || {}).forEach(k => { m[k] = h.src[k].slice(); got += h.src[k][1]; });
-  const miss = Math.max(0, ((h && h.nin) || 0) - got);
-  if (miss) m['記入なし'] = [0, miss];
   return m;
 }
 function srcAgg(M, pred){ // 指定した日の紹介元ごとの合計
@@ -758,13 +760,30 @@ function srcAgg(M, pred){ // 指定した日の紹介元ごとの合計
   return t;
 }
 const isGaihan = (k) => SRC_OTHER.indexOf(k) < 0 && k !== '記入なし' && k !== '不明';
+const CAT = [['gai', '外販'], ['eda', '枝'], ['intro', '紹介'], ['other', 'その他・フリー'], ['crash', 'クラッシュのみ'], ['dogyo', '同業']];
+function dayBreak(h){ // 1日分の「外販名＋区分」の文
+  const c = (h && h.cat) || null; const m = srcOfDay(h);
+  const names = Object.keys(m).filter(isGaihan).sort((x, y) => m[y][1] - m[x][1]).map(k => esc(k) + m[k][1]).join('・');
+  const parts = [];
+  if (c) { if (c.gai[1]) parts.push('<b>外販</b> ' + (names || c.gai[1] + '人')); CAT.slice(1).forEach(([k, l]) => { if (c[k] && c[k][1]) parts.push('<b>' + l + '</b> ' + c[k][1]); }); }
+  else if (names) parts.push('<b>外販</b> ' + names);
+  return parts.join('　');
+}
 function shokaiSrcCard(M){
   if (!hasShokai(M) || !dayList(M).some(d => M.days[d].shokai && M.days[d].shokai.src)) return '';
-  const all = srcAgg(M); const total = Object.keys(all).reduce((a, k) => a + all[k][1], 0) || 1;
+  const all = srcAgg(M);
+  const cat = {}; CAT.forEach(([k]) => cat[k] = [0, 0]);
+  dayList(M).forEach(dd => { const c = M.days[dd].shokai && M.days[dd].shokai.cat; if (c) CAT.forEach(([k]) => { cat[k][0] += (c[k] || [0, 0])[0]; cat[k][1] += (c[k] || [0, 0])[1]; }); });
+  const hasCat = CAT.some(([k]) => cat[k][1] > 0);
   const gai = Object.keys(all).filter(isGaihan).sort((a, b) => all[b][1] - all[a][1] || all[b][0] - all[a][0]);
-  const gTot = gai.reduce((a, k) => a + all[k][1], 0), gKumi = gai.reduce((a, k) => a + all[k][0], 0);
-  const oth = Object.keys(all).filter(k => !isGaihan(k)).sort((a, b) => all[b][1] - all[a][1]);
-  const row = (k, cls) => `<tr class="${cls || ''}"><td>${esc(k)}</td><td>${fmt(all[k][0])}</td><td>${fmt(all[k][1])}</td><td>${Math.round(all[k][1] / total * 100)}%</td></tr>`;
+  const gSumK = gai.reduce((a, k) => a + all[k][0], 0), gSumN = gai.reduce((a, k) => a + all[k][1], 0);
+  const tot = hasCat ? CAT.reduce((a, [k]) => a + cat[k][1], 0) : gSumN;
+  const totK = hasCat ? CAT.reduce((a, [k]) => a + cat[k][0], 0) : gSumK;
+  const pc = (n) => tot ? Math.round(n / tot * 100) + '%' : '·';
+  const gTot = hasCat ? cat.gai[1] : gSumN, gK = hasCat ? cat.gai[0] : gSumK;
+  const sns = all['SNS初回'] || [0, 0];
+  const nameRows = gai.map(k => `<tr><td style="padding-left:14px">└ ${esc(k)}</td><td>${fmt(all[k][0])}</td><td>${fmt(all[k][1])}</td><td>${pc(all[k][1])}</td></tr>`).join('') || '<tr><td colspan="4" class="dim">外販名の記録がありません</td></tr>';
+  const otherRows = hasCat ? CAT.slice(1).filter(([k]) => cat[k][1] > 0 || cat[k][0] > 0).map(([k, l]) => `<tr><td>${l}</td><td>${fmt(cat[k][0])}</td><td>${fmt(cat[k][1])}</td><td>${pc(cat[k][1])}</td></tr>`).join('') : '';
   // 曜日ごと
   const byW = [1, 2, 3, 4, 5, 6, 0].map(w => {
     const dds = dayList(M).filter(dd => new Date(M.year, M.month - 1, Number(dd)).getDay() === w);
@@ -773,12 +792,13 @@ function shokaiSrcCard(M){
     return { w, n: dds.length, sum, tot, top: g.slice(0, 3).map(k => ({ k, v: a[k][1] })) };
   });
   const maxAvg = Math.max(1, ...byW.map(x => x.n ? x.sum / x.n : 0));
-  return `<div class="card"><h2>${ymLabel(M.ym)} 初回の紹介元（外販名）</h2>
-    <table class="tbl"><thead><tr><th>紹介元</th><th>組</th><th>人</th><th>割合</th></tr></thead><tbody>
-    ${gai.map(k => row(k)).join('') || '<tr><td colspan="4" class="dim">外販の記録がありません</td></tr>'}
-    <tr class="total"><td>外販 合計</td><td>${fmt(gKumi)}</td><td>${fmt(gTot)}</td><td>${Math.round(gTot / total * 100)}%</td></tr>
-    ${oth.map(k => row(k)).join('')}</tbody></table>
-    <div class="note">Excelの日別シートの初回の表（「紹介」の列）を集計しています。「枝」「SNS初回」「初回紹介」以外を外販として数えます。同じ名前のカタカナ・ひらがな違いはまとめています。「記入なし」は、初回人数に対して紹介の列が空だった分です。</div>
+  return `<div class="card"><h2>${ymLabel(M.ym)} 初回の内訳（外販名つき）</h2>
+    <table class="tbl"><thead><tr><th>区分</th><th>組</th><th>人</th><th>割合</th></tr></thead><tbody>
+    <tr class="total"><td>外販 合計</td><td>${fmt(gK)}</td><td>${fmt(gTot)}</td><td>${pc(gTot)}</td></tr>
+    ${nameRows}${otherRows}
+    <tr class="total"><td>初回 合計</td><td>${fmt(totK)}</td><td>${fmt(tot)}</td><td>100%</td></tr></tbody></table>
+    ${sns[1] ? `<div class="note">SNS初回 ${fmt(sns[0])}組 ${fmt(sns[1])}人 は、Excelの初回の合計に入らない別枠です。</div>` : ''}
+    <div class="note">区分は、Excelの日別シートの「外販・枝・紹介・その他・フリー・クラッシュのみ・同業」の数字です。外販名は、同じシートの初回の表（「紹介」の列）から集めています。カタカナとひらがなの違いはまとめています。</div>
   </div>
   <div class="card"><h2>曜日ごとの外販（${ymLabel(M.ym)}）</h2>
     <table class="tbl"><thead><tr><th>曜日</th><th>日数</th><th>外販人数</th><th>1日平均</th></tr></thead><tbody>
@@ -792,8 +812,8 @@ function shokaiDaily(M){
   if (!hasShokai(M)) return '';
   const days = dayList(M); const t = shokaiSum(M);
   return `<div class="card"><h2>${ymLabel(M.ym)} 日別の初回</h2>
-    <table class="tbl"><thead><tr><th>日</th><th>組</th><th>人</th><th style="text-align:left">紹介元</th></tr></thead><tbody>
-    ${days.map(d => { const h = M.days[d].shokai || { kumi: 0, nin: 0, sales: 0 }; return `<tr class="tap" data-a="openday" data-d="${d}"><td>${dayLabel(M.ym, d)}</td><td>${fmt(h.kumi)}</td><td>${fmt(h.nin)}</td><td style="text-align:left;white-space:normal;font-size:11px;color:var(--dim)">${(() => { const m = srcOfDay(h); return Object.keys(m).sort((a, b) => m[b][1] - m[a][1]).map(k => esc(k) + m[k][1]).join('・'); })()}</td></tr>`; }).join('')}
+    <table class="tbl"><thead><tr><th>日</th><th>組</th><th>人</th><th style="text-align:left">内訳（外販名）</th></tr></thead><tbody>
+    ${days.map(d => { const h = M.days[d].shokai || { kumi: 0, nin: 0, sales: 0 }; return `<tr class="tap" data-a="openday" data-d="${d}"><td>${dayLabel(M.ym, d)}</td><td>${fmt(h.kumi)}</td><td>${fmt(h.nin)}</td><td style="text-align:left;white-space:normal;font-size:11px;color:var(--dim)">${dayBreak(h)}</td></tr>`; }).join('')}
     <tr class="total"><td>合計</td><td>${fmt(t.kumi)}</td><td>${fmt(t.nin)}</td><td></td></tr></tbody></table>
     <div class="note">日付の行をタップすると、その日の内訳が見られます。管理者だけに出ます。</div>
   </div>`;
@@ -1012,7 +1032,7 @@ function viewDayDetail(dd){
   <div class="card">
     <h2>${dayLabel(M.ym, dd)} の店舗合計</h2>
     ${storePair(d.store.gross)}
-    ${(S.role === 'admin' && d.shokai) ? `<div class="hr"></div><div class="lbl">初回</div><div style="margin-top:4px"><b>${fmt(d.shokai.kumi)}</b>組 ／ <b>${fmt(d.shokai.nin)}</b>人</div>${(() => { const m = srcOfDay(d.shokai); const ks = Object.keys(m).sort((a, b) => m[b][1] - m[a][1]); return ks.length ? `<div class="dim" style="margin-top:4px;font-size:13px">${ks.map(k => esc(k) + ' ' + m[k][1] + '人').join(' ／ ')}</div>` : ''; })()}` : ''}
+    ${(S.role === 'admin' && d.shokai) ? `<div class="hr"></div><div class="lbl">初回</div><div style="margin-top:4px"><b>${fmt(d.shokai.kumi)}</b>組 ／ <b>${fmt(d.shokai.nin)}</b>人</div>${`<div class="dim" style="margin-top:4px;font-size:13px;line-height:1.7">${dayBreak(d.shokai)}</div>`}` : ''}
     <div class="kpis" style="margin-top:12px">${[['本数', 'shimei'], ['新規', 'shinki'], ['飲み直し', 'nomi'], ['送り', 'okuri'], ['ヘルプ', 'help'], ['同伴', 'douhan']].map(([l, k]) => `<div class="kpi"><div class="v">${fmt(d.store[k])}</div><div class="l">${l}</div></div>`).join('')}</div>
   </div>
   ${S.role !== 'admin' ? `<div class="card"><h2>🔒 個人別</h2><div class="dim">個人の日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div><div class="note">店舗合計には、一覧に載せていない運営メンバー分（総売 ${yen(hid.gross || 0)}）${d.unas ? `と「担当なしの売上」${yen(d.unas)}` : ''}を含みます。</div></div>` : `<div class="card"><h2>個人別</h2>
