@@ -448,7 +448,7 @@ const FIREBASE_CONFIG = {
 const ME_MODE = /*ME_MODE*/false;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-28 - 2026-10-25';
+const BUILD = 'sales-29 - 2026-10-25';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -1051,6 +1051,33 @@ function rowOf(e, dd){
 }
 function privGross(P){ if (!P || !P.days) return null; let g = 0; Object.keys(P.days).forEach(dd => { g += (P.days[dd] && P.days[dd][1]) || 0; }); return g; }
 function canDetail(e){ return S.role === 'admin' || (S.role === 'member' && hexOf(e.name) === S.hex); }
+const ATT_MARK = { 'A出勤': ['A', 'var(--gold)'], 'B出勤': ['B', '#7fd1b9'], '遅刻': ['遅', '#e8b04a'], '当欠': ['欠', '#e0566b'], '無欠': ['欠', '#e0566b'], '欠勤': ['欠', '#e0566b'], '出欠': ['出欠', '#9b94a6'], '休み': ['休', '#6f6a7a'], '有給': ['有', '#8aa4ff'], 'メンバー': ['メ', '#9b94a6'] };
+function attendanceCard(M, e){
+  const days = dayList(M); const [y, mo] = M.ym.split('-').map(Number); const first = new Date(y, mo - 1, 1).getDay(); const N = M.daysInMonth;
+  const cnt = {}; let work = 0;
+  const att = (dd) => { const r = rowOf(e, dd); return r ? (r[8] || '') : null; };
+  days.forEach(dd => { const a = att(dd); if (a) { cnt[a] = (cnt[a] || 0) + 1; if (/出勤|遅刻/.test(a)) work++; } });
+  let cells = '';
+  for (let i = 0; i < first; i++) cells += '<div></div>';
+  for (let i = 1; i <= N; i++) {
+    const dd = (i < 10 ? '0' : '') + i; const inData = !!M.days[dd]; const a = inData ? att(dd) : null; const mk = a && (ATT_MARK[a] || [a.slice(0, 2), '#9b94a6']);
+    cells += `<div class="d ${inData ? 'has' : 'none'}"><b>${i}</b><span style="color:${mk ? mk[1] : '#5d576a'}">${mk ? mk[0] : (inData ? '—' : '')}</span></div>`;
+  }
+  const line = (l, k, c) => cnt[k] ? `<div class="kpi"><div class="v" style="color:${c}">${cnt[k]}</div><div class="l">${l}</div></div>` : '';
+  const late = cnt['遅刻'] || 0, absent = (cnt['当欠'] || 0) + (cnt['無欠'] || 0) + (cnt['欠勤'] || 0), off = (cnt['休み'] || 0) + (cnt['有給'] || 0);
+  return `<div class="card"><h2>${ymLabel(M.ym)} 出勤</h2>
+    <div class="kpis">
+      <div class="kpi"><div class="v" style="color:var(--gold)">${work}</div><div class="l">出勤日数</div></div>
+      <div class="kpi"><div class="v">${late}</div><div class="l">遅刻</div></div>
+      <div class="kpi"><div class="v" style="color:${absent ? '#e0566b' : 'inherit'}">${absent}</div><div class="l">欠勤（当欠など）</div></div>
+      <div class="kpi"><div class="v">${cnt['A出勤'] || 0}</div><div class="l">A出勤</div></div>
+      <div class="kpi"><div class="v">${cnt['B出勤'] || 0}</div><div class="l">B出勤</div></div>
+      <div class="kpi"><div class="v">${off}</div><div class="l">休み・有給</div></div>
+    </div>
+    <div class="cal" style="margin-top:14px">${'日月火水木金土'.split('').map(w => `<div class="dw">${w}</div>`).join('')}${cells}</div>
+    <div class="note">A=A出勤　B=B出勤　遅=遅刻　欠=当欠など　休=休み　有=有給　「—」は記録なし。Excelの「出勤」の列の記録です。営業していない日は薄く表示しています。</div>
+  </div>`;
+}
 function viewPerson(){
   const M = S.M; if (!M) return noData();
   if (S.role === 'member' && !S.empId) { const me = M.employees.find(x => hexOf(x.name) === S.hex); if (me) S.empId = me.id; else return '<div class="card"><h2>あなたの実績</h2><div class="dim">この月の名簿にあなたの名前がありません。名前が変わった場合は、管理者に伝えてください。</div></div>'; }
@@ -1089,6 +1116,7 @@ function viewPerson(){
     ${pt ? `<div class="note">前月（${ymLabel(S.prevM.ym)}・${pt.days}日出勤）との差です。前月は月全体の合計です。</div>` : '<div class="note">前月のデータがない（または前月に名簿にいなかった）ため、前月比は表示していません。</div>'}
     <div class="note">月間目標は店舗全体のみです（個人目標は未設定）。</div>
   </div>
+  ${detail ? attendanceCard(M, e) : ''}
   ${!detail ? '<div class="card"><h2>🔒 日別履歴</h2><div class="dim">日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div></div>' : `<div class="card"><h2>日別履歴</h2>
     <div class="scrollx"><table class="tbl"><thead><tr><th>営業日</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
     ${hist.slice().reverse().map(({ d, r }) => `<tr ${S.role === 'admin' ? `class="tap" data-a="openday" data-d="${d}"` : ''}><td>${Number(M.ym.split('-')[1])}/${Number(d)}</td><td>${fmt(r[0])}</td><td>${fmt(r[1])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" class="dim">実績なし</td></tr>'}
