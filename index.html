@@ -448,7 +448,7 @@ const FIREBASE_CONFIG = {
 const ME_MODE = /*ME_MODE*/false;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-30 - 2026-10-25';
+const BUILD = 'sales-31 - 2026-10-25';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -942,7 +942,8 @@ function rkRow(i, byDay){
   };
 }
 
-const metList = () => S.role === 'admin' ? MET : MET.filter(z => z.k !== 'gross');
+const gridMetList = () => MET;
+const metList = () => S.role === 'admin' ? MET.filter(z => z.k !== 'gross') : MET.filter(z => z.k !== 'gross');
 function viewCompare(M, m){
   if (!S.prevM) return '<div class="card"><div class="empty">前月のデータがまだありません。<br>管理者が前月のExcelを取り込むと表示されます。</div></div>';
   const P = S.prevM, i = m.i;
@@ -991,7 +992,7 @@ function viewRank(){
 }
 
 function viewGrid(M){
-  const m = metList().find(z => z.k === S.gridMetric) || metList()[0];
+  const m = gridMetList().find(z => z.k === S.gridMetric) || gridMetList()[0];
   const days = dayList(M);
   const empsAll = M.employees;
   const colTotAll = empsAll.map(e => days.reduce((a, dd) => { const r = M.days[dd].rows[e.id]; return a + (r ? r[m.i] : 0); }, 0));
@@ -1006,7 +1007,7 @@ function viewGrid(M){
   const tot = `<tr class="gt"><td class="c1">計</td><td class="c2">${nf(all)}</td>${colTot.map(v => `<td>${cell(v)}</td>`).join('')}</tr>`;
   const body = days.map(dd => { const d = M.days[dd];
     return `<tr><td class="c1" data-a="openday" data-d="${dd}">${Number(dd)}</td><td class="c2">${nf(d.store[m.k] || 0)}</td>${emps.map(e => { const r = d.rows[e.id]; const v = r ? r[m.i] : 0; return `<td class="${v ? '' : 'z'}">${cell(v)}</td>`; }).join('')}</tr>`; }).join('');
-  return `<div class="seg">${metList().map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="gmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
+  return `<div class="seg">${gridMetList().map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="gmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
   <div class="card" style="padding-left:16px;padding-right:16px"><h2>${ymLabel(M.ym)} 日別 × 人別（${m.label}${isY ? '・単位:千円' : ''}）</h2>
     <div class="gridwrap"><table class="grid"><thead>${head}</thead><tbody>${tot}${body}</tbody></table></div>
     <div class="note">左の日付をタップすると、その日の内訳が見られます。横にスワイプすると全員が見られます。この月に数字がない人（${hiddenN}人）は表から省いています。「店合計」は一覧に載せていない運営メンバー${m.k === 'gross' ? 'と担当なしの売上' : ''}を含みます。「·」は0です。</div>
