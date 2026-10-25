@@ -448,7 +448,7 @@ const FIREBASE_CONFIG = {
 const ME_MODE = /*ME_MODE*/false;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-29 - 2026-10-25';
+const BUILD = 'sales-30 - 2026-10-25';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -784,14 +784,22 @@ function shokaiSrcCard(M){
   const sns = all['SNS初回'] || [0, 0];
   const nameRows = gai.map(k => `<tr><td style="padding-left:14px">└ ${esc(k)}</td><td>${fmt(all[k][0])}</td><td>${fmt(all[k][1])}</td><td>${pc(all[k][1])}</td></tr>`).join('') || '<tr><td colspan="4" class="dim">外販名の記録がありません</td></tr>';
   const otherRows = hasCat ? CAT.slice(1).filter(([k]) => cat[k][1] > 0 || cat[k][0] > 0).map(([k, l]) => `<tr><td>${l}</td><td>${fmt(cat[k][0])}</td><td>${fmt(cat[k][1])}</td><td>${pc(cat[k][1])}</td></tr>`).join('') : '';
-  // 曜日ごと
-  const byW = [1, 2, 3, 4, 5, 6, 0].map(w => {
-    const dds = dayList(M).filter(dd => new Date(M.year, M.month - 1, Number(dd)).getDay() === w);
-    const a = srcAgg(M, dd => dds.indexOf(dd) >= 0); const g = Object.keys(a).filter(isGaihan).sort((x, y) => a[y][1] - a[x][1]);
-    const sum = g.reduce((t, k) => t + a[k][1], 0), tot = Object.keys(a).reduce((t, k) => t + a[k][1], 0);
-    return { w, n: dds.length, sum, tot, top: g.slice(0, 3).map(k => ({ k, v: a[k][1] })) };
-  });
-  const maxAvg = Math.max(1, ...byW.map(x => x.n ? x.sum / x.n : 0));
+  // 曜日ごと（外販名 × 曜日）
+  const WORDER = [1, 2, 3, 4, 5, 6, 0];
+  const wdays = WORDER.map(w => dayList(M).filter(dd => new Date(M.year, M.month - 1, Number(dd)).getDay() === w));
+  const wagg = wdays.map(dds => srcAgg(M, dd => dds.indexOf(dd) >= 0));
+  const rowNames = gai.concat(all['SNS初回'] ? ['SNS初回'] : []);
+  const cellV = (k, wi) => (wagg[wi][k] || [0, 0])[1];
+  const gaiW = wagg.map(a => Object.keys(a).filter(isGaihan).reduce((t, k) => t + a[k][1], 0));
+  const avgW = gaiW.map((v, wi) => wdays[wi].length ? v / wdays[wi].length : 0);
+  const maxCell = Math.max(1, ...rowNames.map(k => Math.max(...WORDER.map((w, wi) => cellV(k, wi)))));
+  const bestW = avgW.indexOf(Math.max(...avgW));
+  const heat = (v) => v ? `background:rgba(216,170,70,${(0.12 + 0.55 * v / maxCell).toFixed(2)});color:#fff;font-weight:700` : 'color:#5d576a';
+  const wdRows = rowNames.map(k => {
+    const vs = WORDER.map((w, wi) => cellV(k, wi)); const mx = Math.max(...vs); const tot = vs.reduce((x, y) => x + y, 0);
+    return `<tr><td style="text-align:left;white-space:nowrap">${esc(k)}</td>${vs.map(v => `<td style="${heat(v)};${v && v === mx ? 'outline:1px solid var(--gold);outline-offset:-2px;' : ''}text-align:center;padding:8px 2px">${v || '·'}</td>`).join('')}<td style="font-weight:700">${tot}</td></tr>`;
+  }).join('');
+  const topSay = gai.slice(0, 3).map(k => { const vs = WORDER.map((w, wi) => cellV(k, wi)); const mx = Math.max(...vs); const ds = WORDER.filter((w, wi) => vs[wi] === mx && mx > 0).map(w => WD[w]).join('・'); return `<div>${esc(k)}：<b>${ds || '—'}曜</b>が多い（${mx}人）</div>`; }).join('');
   return `<div class="card"><h2>${ymLabel(M.ym)} 初回の内訳（外販名つき）</h2>
     <table class="tbl"><thead><tr><th>区分</th><th>組</th><th>人</th><th>割合</th></tr></thead><tbody>
     <tr class="total"><td>外販 合計</td><td>${fmt(gK)}</td><td>${fmt(gTot)}</td><td>${pc(gTot)}</td></tr>
@@ -801,11 +809,16 @@ function shokaiSrcCard(M){
     <div class="note">区分は、Excelの日別シートの「外販・枝・紹介・その他・フリー・クラッシュのみ・同業」の数字です。外販名は、同じシートの初回の表（「紹介」の列）から集めています。カタカナとひらがなの違いはまとめています。</div>
   </div>
   <div class="card"><h2>曜日ごとの外販（${ymLabel(M.ym)}）</h2>
-    <table class="tbl"><thead><tr><th>曜日</th><th>日数</th><th>外販人数</th><th>1日平均</th></tr></thead><tbody>
-    ${byW.map(x => `<tr><td>${WD[x.w]}</td><td>${x.n}</td><td>${fmt(x.sum)}</td><td>${x.n ? (x.sum / x.n).toFixed(1) : '·'}</td></tr>
-      <tr><td colspan="4" style="text-align:left;padding:0 4px 10px"><div class="bar" style="margin:2px 0 6px"><i style="width:${x.n ? Math.round(x.sum / x.n / maxAvg * 100) : 0}%"></i></div><span class="dim" style="font-size:12px">${x.top.length ? x.top.map(t => esc(t.k) + ' ' + t.v + '人').join(' ／ ') : '外販なし'}</span></td></tr>`).join('')}
+    <div class="note" style="margin-top:0">どの曜日に、どの外販から初回が来たか（人数）です。色が濃いほど多く、金の枠がその外販でいちばん多い曜日です。</div>
+    ${bestW >= 0 && avgW[bestW] > 0 ? `<div style="margin:10px 0;font-size:15px">外販がいちばん多い曜日は <b style="color:var(--gold)">${WD[WORDER[bestW]]}曜</b>（1日平均 ${avgW[bestW].toFixed(1)}人）</div>` : ''}
+    <div style="font-size:13px;line-height:1.8;color:var(--dim);margin-bottom:10px">${topSay}</div>
+    <table class="tbl" style="table-layout:fixed"><thead><tr><th style="text-align:left;width:26%">外販名</th>${WORDER.map(w => `<th style="text-align:center">${WD[w]}</th>`).join('')}<th style="width:12%">計</th></tr></thead><tbody>
+    <tr><td style="text-align:left;color:var(--dim);font-size:11px">営業日数</td>${wdays.map(d => `<td style="text-align:center;color:var(--dim);font-size:11px">${d.length}日</td>`).join('')}<td></td></tr>
+    ${wdRows}
+    <tr class="total"><td style="text-align:left">外販 合計</td>${gaiW.map(v => `<td style="text-align:center">${v}</td>`).join('')}<td>${gaiW.reduce((x, y) => x + y, 0)}</td></tr>
+    <tr><td style="text-align:left;color:var(--dim);font-size:12px">1日平均</td>${avgW.map((v, i) => `<td style="text-align:center;color:${i === bestW && v ? 'var(--gold)' : 'var(--dim)'};font-size:12px">${wdays[i].length ? v.toFixed(1) : '·'}</td>`).join('')}<td></td></tr>
     </tbody></table>
-    <div class="note">曜日ごとに、外販から来た初回の人数と、多かった外販を並べています（棒は1日平均の長さ）。</div>
+    <div class="note">SNS初回は外販ではなく、別枠の行です（「外販 合計」には入りません）。</div>
   </div>`;
 }
 function shokaiDaily(M){
