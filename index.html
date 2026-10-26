@@ -448,7 +448,7 @@ const FIREBASE_CONFIG = {
 const ME_MODE = /*ME_MODE*/false;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-40 - 2026-10-26';
+const BUILD = 'sales-41 - 2026-10-26';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -875,11 +875,6 @@ function viewHome(){
   </div>
   <div class="card">
     <h2>${ymLabel(M.ym)} 累計（営業日 ${days.length}日）</h2>
-    ${target ? `<div class="row2" style="align-items:end"><div><div class="lbl">月間目標（総売）</div><div style="font-family:Oswald;font-size:20px">${yen(target)}</div></div>
-      <div style="text-align:right"><div class="lbl">達成率</div><div class="big sm">${(tot.gross / target * 100).toFixed(1)}%</div></div></div>
-      <div class="bar"><i style="width:${pct}%"></i></div>`
-      : `<div class="lbl">月間目標: 未設定${S.role === 'admin' ? '（管理タブで設定できます）' : ''}</div>`}
-    <div class="hr"></div>
     <div class="lbl">前月比 ①同じ日まで（前月の${lastN}日まで・営業${prevToN}日）</div>
     ${prevTo ? `<div class="dim" style="margin-top:4px">本数 ${delta(tot.shimei, prevTo.shimei)}　新規 ${delta(tot.shinki, prevTo.shinki)}　送り ${delta(tot.okuri, prevTo.okuri)}　同伴 ${delta(tot.douhan, prevTo.douhan)}</div>`
       : '<div class="dim" style="margin-top:4px">前月のデータがまだありません</div>'}
@@ -917,7 +912,10 @@ function storeGrossCard(M){
     <div class="hr"></div>
     <div class="lbl">${ymLabel(M.ym)} 累計（営業日 ${days.length}日）</div>
     ${storePair(tot.gross)}
-    ${target ? `<div class="dim" style="font-size:12px;margin-top:2px">月間目標 ${yen(target)}（${(tot.gross / target * 100).toFixed(1)}%）</div>` : ''}
+    <div class="hr"></div>
+    ${target ? `<div class="row2" style="align-items:end"><div><div class="lbl">月間目標（総売）</div><div style="font-family:Oswald;font-size:20px">${yen(target)}</div></div>
+      <div style="text-align:right"><div class="lbl">達成率</div><div class="big sm">${(tot.gross / target * 100).toFixed(1)}%</div></div></div>
+      <div class="bar"><i style="width:${Math.min(100, tot.gross / target * 100)}%"></i></div>` : '<div class="lbl">月間目標: 未設定（管理タブで設定できます）</div>'}
     <div class="hr"></div>
     <div class="lbl">前月比 ①同じ日まで（前月の${lastN}日まで・営業${prevToN}日）</div>
     ${prevTo ? `<div style="margin-top:4px">総売 ${delta(tot.gross, prevTo.gross, 'yen')}　<span class="dim">前月 ${yen(prevTo.gross)}</span></div>` : '<div class="dim" style="margin-top:4px">前月のデータがまだありません</div>'}
