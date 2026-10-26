@@ -315,6 +315,51 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
   }
 
   // メイン
+  /* ---------- 給料明細（各自のシート） ---------- */
+  function pNum(v) { return typeof v === 'number' && isFinite(v) ? v : 0; }
+  function pRound(v) { return Math.round(v); }
+  function payCast(rows, label, name, report) {
+    var g = function (r, c) { var rw = rows[r - 1]; return rw ? rw[c] : null; };   // r は1始まり、c は0始まり(A=0)
+    var pay = [], ded = [];
+    var base = pNum(g(7, 2));
+    if (base) pay.push({ k: '基本給', v: pRound(base), note: 'A出勤 ' + pNum(g(8, 2)) + '日' + (pNum(g(9, 2)) ? ' ／ B出勤 ' + pNum(g(9, 2)) + '日' : '') });
+    for (var r0 = 8; r0 <= 9; r0++) { var l0 = g(r0, 0), v0 = pNum(g(r0, 2)); if (typeof l0 === 'string' && l0.trim() && ['A出勤', 'B出勤'].indexOf(l0.trim()) < 0 && v0) pay.push({ k: l0.trim(), v: pRound(v0) }); }
+    for (var r = 11; r <= 22; r++) { var l = g(r, 0), v = pNum(g(r, 2)); if (typeof l === 'string' && l.trim() && v) pay.push({ k: l.trim(), v: pRound(v) }); }
+    var bk = pNum(g(25, 2));
+    if (bk) { var bl = g(23, 0) || '売上'; pay.push({ k: '売上バック', v: pRound(bk), note: bl + ' ' + pRound(pNum(g(23, 2))).toLocaleString('ja-JP') + '円 × ' + Math.round(pNum(g(24, 2)) * 1000) / 10 + '%' }); }
+    for (var q = 28; q <= 30; q++) { var ql = g(q, 0), cnt = pNum(g(q, 1)), unit = pNum(g(q, 2)); if (typeof ql === 'string' && cnt && unit) pay.push({ k: ql.trim() + 'ポイント', v: pRound(cnt * unit), note: cnt + '件 × ' + unit.toLocaleString('ja-JP') + '円' }); }
+    for (var d = 7; d <= 33; d++) { var dl = g(d, 3), dv = pNum(g(d, 5)); if (typeof dl === 'string' && dv && ['支出 小計', '合計', '給料/総売'].indexOf(dl.trim()) < 0) ded.push({ k: dl.trim(), v: pRound(dv) }); }
+    var gross = pNum(g(33, 2)), dedT = pNum(g(35, 5)), net = pNum(g(5, 2));
+    var sp = pay.reduce(function (a, x) { return a + x.v; }, 0);
+    if (Math.abs(sp - gross) > 20) report.warnings.push({ level: 'warn', msg: name + ' さんの給料明細：支給の合計が、シートの合計と合いません（' + sp + ' / ' + pRound(gross) + '）' });
+    return { label: label, net: pRound(net), gross: pRound(gross), dedTotal: pRound(dedT), pay: pay, ded: ded };
+  }
+  function payOps(rows, label, name, report) {
+    var g = function (r, c) { var rw = rows[r - 1]; return rw ? rw[c] : null; };
+    var pay = [], ded = [];
+    var kyu = pNum(g(8, 10)); if (kyu) pay.push({ k: '給与', v: pRound(kyu), note: '総売の50%' });
+    for (var r = 11; r <= 16; r++) { var l = g(r, 8), v = pNum(g(r, 10)); if (typeof l === 'string' && l.trim() && v) pay.push({ k: l.trim(), v: pRound(v) }); }
+    for (var d = 22; d <= 26; d++) { var dl = g(d, 8), dv = pNum(g(d, 10)); if (typeof dl === 'string' && dl.trim() && dv) ded.push({ k: dl.trim(), v: -pRound(dv) }); }
+    var gross = kyu + pNum(g(9, 10)), dedT = -pNum(g(20, 10)), net = pNum(g(6, 9));
+    var sp = pay.reduce(function (a, x) { return a + x.v; }, 0);
+    if (Math.abs(sp - gross) > 20) report.warnings.push({ level: 'warn', msg: name + ' さんの給料明細：支給の合計が、シートの合計と合いません（' + sp + ' / ' + pRound(gross) + '）' });
+    return { label: label, net: pRound(net), gross: pRound(gross), dedTotal: pRound(dedT), pay: pay, ded: ded };
+  }
+  function parsePayslips(XLSX, data, allNames, employees, mon, report) {
+    var want = employees.filter(function (e) { return allNames.indexOf(e.name) >= 0; });
+    if (!want.length) return {};
+    var wb = XLSX.read(data, { type: 'array', sheets: want.map(function (e) { return e.name; }) });
+    var out = {}; var label = mon + '月';
+    want.forEach(function (e) {
+      var ws = wb.Sheets[e.name]; if (!ws) return;
+      var rows = xRows(XLSX, ws);
+      var isOps = e.kind === 'ops';
+      var rec = isOps ? payOps(rows, label, e.name, report) : payCast(rows, label, e.name, report);
+      if (rec.pay.length || rec.net) out[e.id] = rec;
+    });
+    return out;
+  }
+
   function parseWorkbook(XLSX, data, fileName) {
     var report = { fileName: fileName || '', errors: [], warnings: [], emptyDays: [], checks: [], hidden: [] };
     var wb0 = XLSX.read(data, { type: 'array', bookSheets: true });
@@ -414,7 +459,10 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
 
     var employees = Object.keys(empMap).map(function (k) { return empMap[k]; })
       .sort(function (a, b) { return a.no - b.no; });
+    var payMap = {};
+    try { payMap = parsePayslips(XLSX, data, names, employees, mon, report); } catch (e) { report.warnings.push({ level: 'warn', msg: '給料明細を読み込めませんでした: ' + (e && e.message || e) }); }
     var monthObj = {
+      pay: payMap,
       ym: ym, year: year, month: mon, daysInMonth: daysInMonth,
       employees: employees.map(function (e) { return { id: e.id, name: e.name, kind: e.kind }; }),
       days: days,
@@ -562,7 +610,7 @@ const ME_MODE = true;  // true: 個人専用ページ（me.html）。false: 全�
 const EXTRA_NAMES = ['るか'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-43 - 2026-10-27';
+const BUILD = 'sales-44 - 2026-10-27';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -605,7 +653,7 @@ const hexOf = (name) => { const s = String(name == null ? '' : name).normalize('
 function splitMonth(M){
   const pub = { ym: M.ym, year: M.year, month: M.month, daysInMonth: M.daysInMonth, employees: M.employees, metrics: M.metrics, days: {}, totals: {} };
   const privs = {};
-  M.employees.forEach(e => { privs[e.id] = { days: {} }; const t = new Array(9).fill(0); pub.totals[e.id] = t; });
+  M.employees.forEach(e => { privs[e.id] = { days: {} }; if (M.pay && M.pay[e.id]) privs[e.id].pay = M.pay[e.id]; const t = new Array(9).fill(0); pub.totals[e.id] = t; });
   Object.keys(M.days).forEach(dd => {
     const d = M.days[dd];
     pub.days[dd] = { rows: {} };  // 店舗の数字は公開用に入れない（管理者用のfullにだけある）
@@ -1257,15 +1305,19 @@ function extraCards(x){
   }
   return h;
 }
-function hoshuCard(x){
-  if (!x || !x.hoshu || !x.hoshu.length) return '';
-  const ms = x.hoshu.slice().sort((a, b) => b.n - a.n);
+function payslipCard(rec, ym){
+  if (!rec) return '';
   const sg = (v) => (v < 0 ? '−' : '') + yen(Math.abs(v));
-  return `<div class="card"><h2>給料（報酬）</h2>
-    ${ms.map((m, i) => `${i ? '<div class="hr"></div>' : ''}<div class="lbl">${esc(m.label)}　実質報酬</div><div class="big ${i ? 'sm' : ''}${m.net < 0 ? ' neg' : ''}">${sg(m.net)}</div>
-      <div style="display:flex;justify-content:space-between;margin-top:6px"><span class="dim">報酬</span><b>${yen(m.hoshu)}</b></div>
-      <div style="display:flex;justify-content:space-between;margin-top:4px"><span class="dim">売掛（引かれる分）</span><b>${yen(m.uri)}</b></div>`).join('')}
-    <div class="note">実質報酬 ＝ 報酬 − 売掛 です。</div>
+  const row = (k, v, note) => `<div style="display:flex;justify-content:space-between;gap:10px;margin-top:8px"><div>${esc(k)}${note ? `<div class="dim" style="font-size:12px">${esc(note)}</div>` : ''}</div><b style="white-space:nowrap">${sg(v)}</b></div>`;
+  return `<div class="card"><h2>${ymLabel(ym)} 給料明細</h2>
+    <div class="lbl">お給料（差引支給額）</div><div class="big">${yen(rec.net)}</div>
+    <div class="hr"></div><div class="lbl">支給</div>
+    ${rec.pay.map(x => row(x.k, x.v, x.note)).join('') || '<div class="dim">なし</div>'}
+    <div class="hr"></div>${row('支給の合計', rec.gross)}
+    <div class="hr"></div><div class="lbl">引かれるもの</div>
+    ${rec.ded.map(x => row(x.k, x.v)).join('') || '<div class="dim" style="margin-top:6px">なし</div>'}
+    <div class="hr"></div>${row('引かれる合計', rec.dedTotal)}
+    <div class="note">お給料は、10円未満を切り捨てた金額です。内容は、Excelの各自のシートの数字です。</div>
   </div>`;
 }
 function extraFor(e){
@@ -1317,7 +1369,7 @@ function viewPerson(){
     <div class="note">月間目標は店舗全体のみです（個人目標は未設定）。</div>
   </div>
   ${detail ? (() => { const x = extraFor(e); return extraCards(x); })() : ''}
-  ${detail ? attendanceCard(M, e) + hoshuCard(extraFor(e)) : ''}
+  ${detail ? attendanceCard(M, e) + payslipCard(S.role === 'admin' ? (M.pay && M.pay[e.id]) : (S.priv && S.priv.pay), M.ym) : ''}
   ${!detail ? '<div class="card"><h2>🔒 日別履歴</h2><div class="dim">日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div></div>' : `<div class="card"><h2>日別履歴</h2>
     <div class="scrollx"><table class="tbl"><thead><tr><th>営業日</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
     ${hist.slice().reverse().map(({ d, r }) => `<tr ${S.role === 'admin' ? `class="tap" data-a="openday" data-d="${d}"` : ''}><td>${Number(M.ym.split('-')[1])}/${Number(d)}</td><td>${fmt(r[0])}</td><td>${fmt(r[1])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" class="dim">実績なし</td></tr>'}
@@ -1339,8 +1391,8 @@ function viewAdmin(){
     <button class="btn" data-a="pickfile">Excelファイルを選ぶ</button>
     ${imp ? impView(imp) : ''}
   </div>
-  <div class="card"><h2>給料・売掛・前入金を取り込む</h2>
-    <div class="note" style="margin-top:0">「報酬一覧」のExcelと、「前入金管理シート」のExcelを選んでください。2つ同時でも、1つずつでも大丈夫です。<br>・報酬一覧：全員の給料（報酬）が、各自の個人ページに出ます。売掛のお客様別は${esc(EXTRA_NAMES.join('・'))}さんだけです。<br>・前入金：${esc(EXTRA_NAMES.join('・'))}さんだけに出ます。</div>
+  <div class="card"><h2>売掛・前入金を取り込む</h2>
+    <div class="note" style="margin-top:0">「報酬一覧」のExcelと、「前入金管理シート」のExcelを選んでください。2つ同時でも、1つずつでも大丈夫です。${esc(EXTRA_NAMES.join('・'))}さんの個人ページにだけ出ます。<br>（給料明細は、毎月のExcelを取り込むと、全員の分が自動で入ります。）</div>
     <input type="file" id="efile" accept=".xlsx,.xls" multiple style="display:none">
     <button class="btn" data-a="pickextra">Excelファイルを選ぶ</button>
     ${S.ex ? exView(S.ex) : ''}
@@ -1390,7 +1442,6 @@ function exView(ex){
     const lines = Object.keys(it.people).map(nm => { const p = it.people[nm];
       return it.kind === 'mae' ? `${esc(nm)}さん：前入金の残り ${yen(p.total)}（お客様 ${p.customers.map(c => esc(c.name)).join('・')}）`
         : `${esc(nm)}さん：売掛 ` + p.months.map(m => `${esc(m.label)} ${yen(m.total)}`).join(' ／ '); });
-    if (it.kind === 'uri' && it.hoshu) lines.push(`全員の給料（報酬）：${Object.keys(it.hoshu).length}人分（${Array.from(new Set(Object.values(it.hoshu).flatMap(a => a.map(m => m.label)))).join('・')}）`);
     return `<div class="card" style="margin:8px 0"><div class="lbl">${it.kind === 'mae' ? '前入金' : '売掛'}　${esc(it.fileName)}</div>${lines.length ? lines.map(l => `<div style="margin-top:4px">${l}</div>`).join('') : '<div class="err">対象の人が見つかりません</div>'}${it.report.warnings.map(w => `<div class="note">⚠ ${esc(w)}</div>`).join('')}</div>`; }).join('')}
     <div style="display:flex;gap:8px;margin-top:10px"><button class="btn" data-a="saveextra">この内容で保存</button><button class="btn ghost" data-a="cancelextra">やめる</button></div></div>`;
 }
@@ -1458,7 +1509,8 @@ function mergeMonth(oldM, newM, allowRemove){
   const emp = {}; (oldM ? oldM.employees : []).forEach(e => { if (used[e.id]) emp[e.id] = e; }); newM.employees.forEach(e => emp[e.id] = e);
   const order = {}; newM.employees.forEach((e, i) => order[e.id] = i);
   const employees = Object.keys(emp).sort((x, y) => (order[x] != null ? order[x] : 1e6) - (order[y] != null ? order[y] : 1e6)).map(k => emp[k]);
-  return Object.assign({}, newM, { days, employees });
+  const pay = Object.assign({}, oldM && oldM.pay || {}, newM.pay || {});
+  return Object.assign({}, newM, { days, employees, pay });
 }
 
 /* ---------- login ---------- */
@@ -1673,7 +1725,7 @@ async function doParseExtra(files){
   S.ex = { status: 'parsing' }; render();
   try {
     const XLSX = await loadXLSX(); const items = [];
-    for (const f of files) { const buf = await f.arrayBuffer(); const r = window.X8Parse.parseExtra(XLSX, new Uint8Array(buf), f.name, EXTRA_NAMES); items.push({ fileName: f.name, kind: r.kind, people: r.people, hoshu: r.hoshu, report: r.report }); }
+    for (const f of files) { const buf = await f.arrayBuffer(); const r = window.X8Parse.parseExtra(XLSX, new Uint8Array(buf), f.name, EXTRA_NAMES); items.push({ fileName: f.name, kind: r.kind, people: r.people, report: r.report }); }
     S.ex = { status: 'preview', items };
   } catch (e) { S.ex = { status: 'error', msg: '読み込みに失敗しました: ' + (e && e.message || e) }; }
   render();
@@ -1685,7 +1737,7 @@ async function doSaveExtra(){
     let n = 0;
     for (const it of ex.items) { if (!it.kind) continue;
       for (const nm of Object.keys(it.people)) { await backend.saveExtra(nm, it.kind === 'mae' ? { mae: it.people[nm] } : { uri: it.people[nm] }); n++; }
-      if (it.kind === 'uri' && it.hoshu) for (const nm of Object.keys(it.hoshu)) { await backend.saveExtra(nm, { hoshu: it.hoshu[nm] }); n++; } }
+    }
     S.extraCache = {}; S.ex = { status: 'done', summary: n + '件を保存しました。' }; toast('取り込みました');
   } catch (e) { S.ex = { status: 'error', msg: '保存に失敗しました。(' + (e && e.code || e && e.message || '') + ')' }; }
   render();
