@@ -423,7 +423,120 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
     return { month: monthObj, report: report };
   }
 
-  var api = { parseWorkbook: parseWorkbook, METRICS: METRICS, OPS_SHOWN: OPS_SHOWN };
+
+  /* ---------- 売掛・前入金（個人ページ用・指定した人だけ） ---------- */
+  function xIso(v) {
+    if (v == null || v === '') return '';
+    if (typeof v === 'number') { var dt = new Date(Math.round((v - 25569) * 86400000)); return dt.getUTCFullYear() + '-' + ('0' + (dt.getUTCMonth() + 1)).slice(-2) + '-' + ('0' + dt.getUTCDate()).slice(-2); }
+    var m = /(\d{4})[./\-](\d{1,2})[./\-](\d{1,2})/.exec(String(v));
+    return m ? m[1] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[3]).slice(-2) : '';
+  }
+  function xNum(v) { return typeof v === 'number' && isFinite(v) ? v : null; }
+  function xRows(XLSX, ws) { return XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null, blankrows: true }); }
+  function zen2n(t) { return Number(String(t).replace(/[０-９]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 65248); }).replace(/月/g, '')); }
+
+  // 前入金管理シート：担当名／お客様名／出入金日／金額／備考 の表がいくつも並んでいる
+  function parseMae(XLSX, wb, names, report) {
+    var ws = wb.Sheets[wb.SheetNames[0]]; var rows = xRows(XLSX, ws);
+    var all = []; var tot = {};
+    for (var r = 0; r < rows.length; r++) {
+      var row = rows[r] || [];
+      for (var c = 0; c < row.length; c++) {
+        if (row[c] !== '担当名' || row[c + 1] !== 'お客様名') continue;
+        var who = '', cust = '', ents = [], sheetTot = null;
+        for (var r2 = r + 1; r2 < rows.length; r2++) {
+          var rw = rows[r2] || [];
+          if (rw[c] === '担当名' && rw[c + 1] === 'お客様名') break;
+          if (rw[c + 2] === '合計') { sheetTot = xNum(rw[c + 3]); break; }
+          if (rw[c] != null && String(rw[c]).trim() !== '') { who = String(rw[c]).trim(); }
+          if (rw[c + 1] != null && String(rw[c + 1]).trim() !== '') { cust = String(rw[c + 1]).trim(); }
+          var amt = xNum(rw[c + 3]);
+          if (amt != null && who) ents.push({ who: who, cust: cust, d: xIso(rw[c + 2]), amt: amt, memo: rw[c + 4] ? String(rw[c + 4]) : '' });
+        }
+        ents.forEach(function (e) { all.push(e); });
+        if (sheetTot != null) tot[ents.length ? ents[0].who : ''] = sheetTot;
+      }
+    }
+    var people = {};
+    names.forEach(function (nm) {
+      var mine = all.filter(function (e) { return e.who === nm; });
+      if (!mine.length) { report.warnings.push(nm + ' さんの前入金が見つかりません'); return; }
+      var by = {};
+      mine.forEach(function (e) { var k = e.cust || '（お客様名なし）'; (by[k] = by[k] || []).push(e); });
+      var customers = Object.keys(by).map(function (k) {
+        var es = by[k].slice().sort(function (a, b) { return a.d < b.d ? -1 : a.d > b.d ? 1 : 0; });
+        return { name: k, balance: es.reduce(function (a, e) { return a + e.amt; }, 0), entries: es.map(function (e) { return { d: e.d, amt: e.amt, memo: e.memo }; }) };
+      }).sort(function (a, b) { return b.balance - a.balance; });
+      var total = customers.reduce(function (a, c) { return a + c.balance; }, 0);
+      var last = mine.map(function (e) { return e.d; }).filter(Boolean).sort().pop() || '';
+      if (tot[nm] != null && tot[nm] !== total) report.warnings.push(nm + ' さんの前入金：明細の合計 ' + total + ' と、シートの合計 ' + tot[nm] + ' が違います');
+      people[nm] = { customers: customers, total: total, sheetTotal: tot[nm] == null ? null : tot[nm], asOf: last };
+    });
+    return people;
+  }
+
+  // 報酬一覧のExcel：人ごとのシートに、月ごとの「日付／お客様名／金額」の売掛の表がある
+  function parseUri(XLSX, data, names, report) {
+    var people = {};
+    names.forEach(function (nm) {
+      var wb = XLSX.read(data, { type: 'array', sheets: [nm] });
+      var ws = wb.Sheets[nm]; if (!ws) { report.warnings.push(nm + ' さんのシートがありません'); return; }
+      var rows = xRows(XLSX, ws); var head = rows[1] || []; var months = [];
+      for (var c = 0; c < head.length; c++) {
+        if (typeof head[c] !== 'string' || !/^[0-9０-９]+月$/.test(head[c].trim())) continue;
+        var lst = [], sheetTot = null;
+        for (var r = 3; r < rows.length; r++) {
+          var rw = rows[r] || [];
+          if (rw[c] === '合計') { sheetTot = xNum(rw[c + 2]); break; }
+          var cu = rw[c + 1], am = xNum(rw[c + 2]);
+          if (typeof cu === 'string' && cu.trim() && am != null && am !== 0) lst.push({ d: xIso(rw[c]), name: cu.trim(), amt: am });
+        }
+        var by = {}; lst.forEach(function (e) { by[e.name] = (by[e.name] || 0) + e.amt; });
+        var total = lst.reduce(function (a, e) { return a + e.amt; }, 0);
+        if (sheetTot != null && sheetTot !== total) report.warnings.push(nm + ' さん ' + head[c] + '：明細の合計 ' + total + ' と、シートの合計 ' + sheetTot + ' が違います');
+        months.push({ label: String(head[c]).trim().replace(/[０-９]/g, function (x) { return String.fromCharCode(x.charCodeAt(0) - 65248); }), n: zen2n(head[c]), total: total, sheetTotal: sheetTot,
+          byCustomer: Object.keys(by).map(function (k) { return { name: k, amt: by[k] }; }).sort(function (a, b) { return b.amt - a.amt; }), rows: lst });
+      }
+      if (!months.length) report.warnings.push(nm + ' さんの売掛の表が見つかりません');
+      else people[nm] = { months: months };
+    });
+    return people;
+  }
+
+  // 報酬一覧：キャスト名／報酬／売掛／実質報酬 の表が、月ごとに横に並んでいる
+  function parseHoshu(XLSX, data, report) {
+    var wb = XLSX.read(data, { type: 'array', sheets: ['報酬一覧'] }); var ws = wb.Sheets['報酬一覧'];
+    var out = {}; if (!ws) return out;
+    var rows = xRows(XLSX, ws); var lab = rows[1] || [], hd = rows[2] || [];
+    for (var c = 0; c < hd.length; c++) {
+      if (hd[c] !== 'キャスト名') continue;
+      var label = '';
+      for (var k = c; k <= c + 4; k++) if (typeof lab[k] === 'string' && /^[0-9０-９]+月$/.test(lab[k].trim())) label = lab[k].trim().replace(/[０-９]/g, function (x) { return String.fromCharCode(x.charCodeAt(0) - 65248); });
+      if (!label) { report.warnings.push('報酬一覧：月の表示が読めない表があります'); continue; }
+      for (var r = 3; r < rows.length; r++) {
+        var rw = rows[r] || []; var nm = rw[c];
+        if (typeof nm !== 'string' || !nm.trim() || nm.trim() === '運営' || nm.trim() === '合計') continue;
+        var a = xNum(rw[c + 1]), b = xNum(rw[c + 2]), n = xNum(rw[c + 3]);
+        if (a == null && b == null && n == null) continue;
+        nm = nm.trim();
+        (out[nm] = out[nm] || []).push({ label: label, n: zen2n(label), hoshu: a || 0, uri: b || 0, net: n == null ? (a || 0) - (b || 0) : n });
+      }
+    }
+    Object.keys(out).forEach(function (k) { out[k].sort(function (x, y) { return x.n - y.n; }); });
+    return out;
+  }
+
+  function parseExtra(XLSX, data, fileName, names) {
+    var report = { fileName: fileName || '', errors: [], warnings: [] };
+    var b = XLSX.read(data, { type: 'array', bookSheets: true }); var sn = b.SheetNames;
+    if (sn.indexOf('報酬一覧') >= 0) return { kind: 'uri', people: parseUri(XLSX, data, names, report), hoshu: parseHoshu(XLSX, data, report), report: report };
+    var wb = XLSX.read(data, { type: 'array', sheets: [sn[0]] }); var f = wb.Sheets[sn[0]];
+    if (f && f.B1 && String(f.B1.v).indexOf('前入金') >= 0) return { kind: 'mae', people: parseMae(XLSX, wb, names, report), report: report };
+    report.errors.push('売掛（報酬一覧）か、前入金管理シートのExcelではないようです。');
+    return { kind: null, people: {}, report: report };
+  }
+
+  var api = { parseExtra: parseExtra, parseWorkbook: parseWorkbook, METRICS: METRICS, OPS_SHOWN: OPS_SHOWN };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.X8Parse = api;
 })(typeof window !== 'undefined' ? window : this);
@@ -446,9 +559,10 @@ const FIREBASE_CONFIG = {
   appId: "1:222731309583:web:3df818ef2166159d77097a"
 };
 const ME_MODE = /*ME_MODE*/false;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
+const EXTRA_NAMES = ['るか'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-41 - 2026-10-26';
+const BUILD = 'sales-43 - 2026-10-27';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -581,6 +695,14 @@ async function makeFirebaseBackend(){
       return code;
     },
     async unregister(name){ await F.deleteDoc(F.doc(db, 'members', hexOf(name))); },
+    async saveExtra(name, part){
+      const ref = F.doc(db, 'priv', 'extra_' + hexOf(name)); const cur = await F.getDoc(ref); let o = {};
+      if (cur.exists()) { try { o = JSON.parse(cur.data().payload) || {}; } catch (e) {} }
+      Object.assign(o, part, { name });
+      await F.setDoc(ref, { ym: 'extra', owner: hexOf(name), payload: JSON.stringify(o), updatedAt: F.serverTimestamp() });
+    },
+    async getExtra(hex){ const sn = await F.getDoc(F.doc(db, 'priv', 'extra_' + hex)); if (!sn.exists()) return null; try { return JSON.parse(sn.data().payload); } catch (e) { return null; } },
+    subExtra(hex, cb){ return F.onSnapshot(F.doc(db, 'priv', 'extra_' + hex), (sn) => { if (!sn.exists()) return cb(null); try { cb(JSON.parse(sn.data().payload)); } catch (e) { cb(null); } }, () => cb(null)); },
     subMeta(cb, err){ return F.onSnapshot(F.doc(db, 'meta', 'app'), (s) => cb(s.exists() ? s.data() : { months: [], targets: {} }), err); },
     subMonth(ym, cb, err){
       return F.onSnapshot(F.doc(db, monthCol(), ym), (s) => {
@@ -629,6 +751,8 @@ function makeTestBackend(){
     subPriv(ym, hex, cb){ setTimeout(() => cb(T.priv ? JSON.parse(JSON.stringify(T.priv)) : null), 0); return () => {}; },
     async listMembers(){ return T.members || { members: {}, invites: {} }; },
     async issueInvite(){ return 'TEST2345'; }, async unregister(){},
+    async saveExtra(name, part){ T.extraSaved = T.extraSaved || {}; T.extraSaved[name] = Object.assign(T.extraSaved[name] || {}, part); },
+    async getExtra(){ return T.extra || null; }, subExtra(hex, cb){ setTimeout(() => cb(T.extra || null), 0); return () => {}; },
     subMeta(cb){ setTimeout(() => cb(T.meta), 0); return () => {}; },
     subMonth(ym, cb){ setTimeout(() => cb(T.months[ym] ? JSON.parse(JSON.stringify(T.months[ym])) : null, T.updatedAt || Date.now()), 0); return () => {}; },
     async getMonthOnce(ym){ return T.months[ym] ? JSON.parse(JSON.stringify(T.months[ym])) : null; },
@@ -650,9 +774,9 @@ const S = {
   empId: lsGet('x8s_emp') || null, empQuery: '',
   dayDetail: null,        // 日別画面で詳細表示中のdd
   loginRole: ME_MODE ? 'member' : 'admin', regMode: false, hex: null, priv: null, memberInfo: null, loginErr: '', loginBusy: false,
-  imp: null, importsList: null, targetDraft: ''
+  imp: null, ex: null, extra: null, extraCache: {}, importsList: null, targetDraft: ''
 };
-let unsubMonth = null, unsubMeta = null, unsubPriv = null, unsubPrivPrev = null;
+let unsubMonth = null, unsubMeta = null, unsubPriv = null, unsubPrivPrev = null, unsubExtra = null;
 
 function pickDefaultDay(){
   if (!S.M) { S.dd = null; return; }
@@ -681,6 +805,7 @@ async function loadPrev(){
 }
 function startApp(role){
   S.role = role; S.phase = 'app'; render();
+  if (role === 'member' && S.hex) unsubExtra = backend.subExtra(S.hex, (x) => { S.extra = x; render(); });
   unsubMeta = backend.subMeta((meta) => {
     S.meta = { months: (meta.months || []).slice().sort(), targets: meta.targets || {}, updatedAt: meta.updatedAt };
     const latest = S.meta.months[S.meta.months.length - 1];
@@ -1108,6 +1233,51 @@ function attendanceCard(M, e){
     <div class="note">A=A出勤　B=B出勤　遅=遅刻　欠=当欠など　休=休み　有=有給　「—」は記録なし。Excelの「出勤」の列の記録です。営業していない日は薄く表示しています。</div>
   </div>`;
 }
+function mdOf(d){ return d ? Number(d.slice(5, 7)) + '/' + Number(d.slice(8, 10)) : ''; }
+function extraCards(x){
+  if (!x || !EXTRA_NAMES.includes(x.name)) return '';
+  let h = '';
+  if (x.mae) {
+    const m = x.mae;
+    h += `<div class="card"><h2>前入金</h2><div class="lbl">いまの残り</div><div class="big">${yen(m.total)}</div>
+      ${m.asOf ? `<div class="dim" style="font-size:12px;margin-top:2px">${mdOf(m.asOf)} までの記録</div>` : ''}
+      ${m.customers.map(c => `<div class="hr"></div><div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(c.name)} 様</b><b>${yen(c.balance)}</b></div>
+        <details style="margin-top:6px"><summary class="dim" style="font-size:13px">履歴を見る（${c.entries.length}件）</summary>
+        <div class="scrollx"><table class="tbl"><thead><tr><th>日付</th><th>金額</th><th>備考</th></tr></thead><tbody>${c.entries.slice().reverse().map(e => `<tr><td>${mdOf(e.d)}</td><td class="${e.amt < 0 ? 'neg' : ''}">${e.amt < 0 ? '−' : ''}${yen(Math.abs(e.amt))}</td><td>${esc(e.memo || '')}</td></tr>`).join('')}</tbody></table></div></details>`).join('')}
+    </div>`;
+  }
+  if (x.uri) {
+    const ms = x.uri.months.slice().reverse();
+    h += `<div class="card"><h2>現状の掛け</h2>
+      ${ms.map((m, i) => `${i ? '<div class="hr"></div>' : ''}<div class="lbl">${esc(m.label)}</div><div class="big ${i ? 'sm' : ''}">${yen(m.total)}</div>
+        ${m.byCustomer.map(c => `<div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px"><span>${esc(c.name)} 様</span><b>${yen(c.amt)}</b></div>`).join('')}
+        <details style="margin-top:8px"${i ? '' : ''}><summary class="dim" style="font-size:13px">日ごとの明細（${m.rows.length}件）</summary>
+        <div class="scrollx"><table class="tbl"><thead><tr><th>日付</th><th>お客様</th><th>金額</th></tr></thead><tbody>${m.rows.map(e => `<tr><td>${mdOf(e.d)}</td><td>${esc(e.name)}</td><td>${yen(e.amt)}</td></tr>`).join('')}</tbody></table></div></details>`).join('')}
+    </div>`;
+  }
+  return h;
+}
+function hoshuCard(x){
+  if (!x || !x.hoshu || !x.hoshu.length) return '';
+  const ms = x.hoshu.slice().sort((a, b) => b.n - a.n);
+  const sg = (v) => (v < 0 ? '−' : '') + yen(Math.abs(v));
+  return `<div class="card"><h2>給料（報酬）</h2>
+    ${ms.map((m, i) => `${i ? '<div class="hr"></div>' : ''}<div class="lbl">${esc(m.label)}　実質報酬</div><div class="big ${i ? 'sm' : ''}${m.net < 0 ? ' neg' : ''}">${sg(m.net)}</div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px"><span class="dim">報酬</span><b>${yen(m.hoshu)}</b></div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px"><span class="dim">売掛（引かれる分）</span><b>${yen(m.uri)}</b></div>`).join('')}
+    <div class="note">実質報酬 ＝ 報酬 − 売掛 です。</div>
+  </div>`;
+}
+function extraFor(e){
+  if (!e) return null;
+  if (S.role === 'member') return S.extra;
+  if (S.role === 'admin') {
+    const hx = hexOf(e.name);
+    if (!(hx in S.extraCache)) { S.extraCache[hx] = null; backend.getExtra(hx).then(x => { S.extraCache[hx] = x; render(); }).catch(() => {}); }
+    return S.extraCache[hx];
+  }
+  return null;
+}
 function viewPerson(){
   const M = S.M; if (!M) return noData();
   if (S.role === 'member' && !S.empId) { const me = M.employees.find(x => hexOf(x.name) === S.hex); if (me) S.empId = me.id; else return '<div class="card"><h2>あなたの実績</h2><div class="dim">この月の名簿にあなたの名前がありません。名前が変わった場合は、管理者に伝えてください。</div></div>'; }
@@ -1146,7 +1316,8 @@ function viewPerson(){
     ${pt ? `<div class="note">前月（${ymLabel(S.prevM.ym)}・${pt.days}日出勤）との差です。前月は月全体の合計です。</div>` : '<div class="note">前月のデータがない（または前月に名簿にいなかった）ため、前月比は表示していません。</div>'}
     <div class="note">月間目標は店舗全体のみです（個人目標は未設定）。</div>
   </div>
-  ${detail ? attendanceCard(M, e) : ''}
+  ${detail ? (() => { const x = extraFor(e); return extraCards(x); })() : ''}
+  ${detail ? attendanceCard(M, e) + hoshuCard(extraFor(e)) : ''}
   ${!detail ? '<div class="card"><h2>🔒 日別履歴</h2><div class="dim">日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div></div>' : `<div class="card"><h2>日別履歴</h2>
     <div class="scrollx"><table class="tbl"><thead><tr><th>営業日</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
     ${hist.slice().reverse().map(({ d, r }) => `<tr ${S.role === 'admin' ? `class="tap" data-a="openday" data-d="${d}"` : ''}><td>${Number(M.ym.split('-')[1])}/${Number(d)}</td><td>${fmt(r[0])}</td><td>${fmt(r[1])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" class="dim">実績なし</td></tr>'}
@@ -1167,6 +1338,12 @@ function viewAdmin(){
     <input type="file" id="xfile" accept=".xlsx,.xls" style="display:none">
     <button class="btn" data-a="pickfile">Excelファイルを選ぶ</button>
     ${imp ? impView(imp) : ''}
+  </div>
+  <div class="card"><h2>給料・売掛・前入金を取り込む</h2>
+    <div class="note" style="margin-top:0">「報酬一覧」のExcelと、「前入金管理シート」のExcelを選んでください。2つ同時でも、1つずつでも大丈夫です。<br>・報酬一覧：全員の給料（報酬）が、各自の個人ページに出ます。売掛のお客様別は${esc(EXTRA_NAMES.join('・'))}さんだけです。<br>・前入金：${esc(EXTRA_NAMES.join('・'))}さんだけに出ます。</div>
+    <input type="file" id="efile" accept=".xlsx,.xls" multiple style="display:none">
+    <button class="btn" data-a="pickextra">Excelファイルを選ぶ</button>
+    ${S.ex ? exView(S.ex) : ''}
   </div>
   <div class="card"><h2>${S.ym ? ymLabel(S.ym) : ''} の月間目標（総売）</h2>
     <input type="number" id="tgt" inputmode="numeric" placeholder="例: 30000000" value="${esc(S.targetDraft !== '' ? S.targetDraft : (S.meta.targets && S.meta.targets[S.ym]) || '')}">
@@ -1201,6 +1378,21 @@ function importRow(x){
   if (x.kind === 'restore') return `<div class="rk"><div class="nm">${ymLabel(x.ym)} を前の状態に復元<small>${x.atMs ? new Date(x.atMs).toLocaleString('ja-JP') : ''}</small></div></div>`;
   const c = x.changes || {};
   return `<div class="rk"><div class="nm">${esc(x.ym ? ymLabel(x.ym) : '')} ${esc(x.fileName || '')}<small>${x.atMs ? new Date(x.atMs).toLocaleString('ja-JP') : ''}　追加${c.addedDays || 0}日／変更${c.changed || 0}件／削除候補${c.removedDays || 0}日（${c.keptRemoved ? '保持' : (c.removedDays ? '削除' : '—')}）</small></div></div>`;
+}
+function exView(ex){
+  if (ex.status === 'parsing') return '<div class="loading" style="padding:14px">読み込み中…</div>';
+  if (ex.status === 'saving') return '<div class="loading" style="padding:14px">保存中…</div>';
+  if (ex.status === 'done') return `<div class="note" style="color:var(--green,#4fd1a5)">取り込みました。${esc(ex.summary || '')}</div>`;
+  if (ex.status === 'error') return `<div class="err" style="margin-top:10px">${esc(ex.msg)}</div>`;
+  const items = ex.items || [];
+  return `<div style="margin-top:12px">${items.map(it => {
+    if (!it.kind) return `<div class="err">${esc(it.fileName)}：${esc(it.report.errors.join(' '))}</div>`;
+    const lines = Object.keys(it.people).map(nm => { const p = it.people[nm];
+      return it.kind === 'mae' ? `${esc(nm)}さん：前入金の残り ${yen(p.total)}（お客様 ${p.customers.map(c => esc(c.name)).join('・')}）`
+        : `${esc(nm)}さん：売掛 ` + p.months.map(m => `${esc(m.label)} ${yen(m.total)}`).join(' ／ '); });
+    if (it.kind === 'uri' && it.hoshu) lines.push(`全員の給料（報酬）：${Object.keys(it.hoshu).length}人分（${Array.from(new Set(Object.values(it.hoshu).flatMap(a => a.map(m => m.label)))).join('・')}）`);
+    return `<div class="card" style="margin:8px 0"><div class="lbl">${it.kind === 'mae' ? '前入金' : '売掛'}　${esc(it.fileName)}</div>${lines.length ? lines.map(l => `<div style="margin-top:4px">${l}</div>`).join('') : '<div class="err">対象の人が見つかりません</div>'}${it.report.warnings.map(w => `<div class="note">⚠ ${esc(w)}</div>`).join('')}</div>`; }).join('')}
+    <div style="display:flex;gap:8px;margin-top:10px"><button class="btn" data-a="saveextra">この内容で保存</button><button class="btn ghost" data-a="cancelextra">やめる</button></div></div>`;
 }
 function impView(imp){
   if (imp.status === 'parsing') return '<div class="loading">Excelを読み込み中…</div>';
@@ -1364,6 +1556,9 @@ document.addEventListener('click', async (ev) => {
   else if (a === 'logout') { try { await backend.logout(); } catch (e) {} if (TEST) return; }
   else if (a === 'login') doLogin();
   else if (a === 'pickfile') $('#xfile').click();
+  else if (a === 'pickextra') $('#efile').click();
+  else if (a === 'saveextra') doSaveExtra();
+  else if (a === 'cancelextra') { S.ex = null; render(); }
   else if (a === 'cancelimp') { S.imp = null; render(); }
   else if (a === 'confirmimp') doConfirmImport();
   else if (a === 'settarget') doSetTarget();
@@ -1375,6 +1570,7 @@ document.addEventListener('input', (ev) => {
   if (ev.target.id === 'tgt') S.targetDraft = ev.target.value;
 });
 document.addEventListener('change', (ev) => {
+  if (ev.target.id === 'efile' && ev.target.files && ev.target.files.length) { const fs = Array.from(ev.target.files); ev.target.value = ''; doParseExtra(fs); }
   if (ev.target.id === 'xfile' && ev.target.files && ev.target.files[0]) { const f = ev.target.files[0]; ev.target.value = ''; doParse(f); }
   if (ev.target.id === 'allowrm' && S.imp) S.imp.allowRemove = ev.target.checked;
 });
@@ -1473,6 +1669,27 @@ async function doConfirmImport(){
   } catch (e) { S.imp = { status: 'error', msg: '保存に失敗しました。既存のデータは変更されていません。(' + (e && e.code || e && e.message || '') + ')' }; }
   render();
 }
+async function doParseExtra(files){
+  S.ex = { status: 'parsing' }; render();
+  try {
+    const XLSX = await loadXLSX(); const items = [];
+    for (const f of files) { const buf = await f.arrayBuffer(); const r = window.X8Parse.parseExtra(XLSX, new Uint8Array(buf), f.name, EXTRA_NAMES); items.push({ fileName: f.name, kind: r.kind, people: r.people, hoshu: r.hoshu, report: r.report }); }
+    S.ex = { status: 'preview', items };
+  } catch (e) { S.ex = { status: 'error', msg: '読み込みに失敗しました: ' + (e && e.message || e) }; }
+  render();
+}
+async function doSaveExtra(){
+  const ex = S.ex; if (!ex || ex.status !== 'preview') return;
+  S.ex = { status: 'saving' }; render();
+  try {
+    let n = 0;
+    for (const it of ex.items) { if (!it.kind) continue;
+      for (const nm of Object.keys(it.people)) { await backend.saveExtra(nm, it.kind === 'mae' ? { mae: it.people[nm] } : { uri: it.people[nm] }); n++; }
+      if (it.kind === 'uri' && it.hoshu) for (const nm of Object.keys(it.hoshu)) { await backend.saveExtra(nm, { hoshu: it.hoshu[nm] }); n++; } }
+    S.extraCache = {}; S.ex = { status: 'done', summary: n + '件を保存しました。' }; toast('取り込みました');
+  } catch (e) { S.ex = { status: 'error', msg: '保存に失敗しました。(' + (e && e.code || e && e.message || '') + ')' }; }
+  render();
+}
 async function doSetTarget(){
   const raw = ($('#tgt') ? $('#tgt').value : '').replace(/[,\s]/g, ''); const n = Number(raw);
   if (!raw || !isFinite(n) || n < 0) { toast('金額を入力してください'); return; }
@@ -1491,8 +1708,8 @@ async function doRestore(){
   try { backend = TEST ? makeTestBackend() : await makeFirebaseBackend(); }
   catch (e) { S.phase = 'fatal'; S.fatal = '接続できませんでした。電波を確認して、再読み込みしてください。'; render(); return; }
   backend.onAuth((info) => {
-    if (unsubMonth) { unsubMonth(); unsubMonth = null; } if (unsubMeta) { unsubMeta(); unsubMeta = null; } if (unsubPriv) { unsubPriv(); unsubPriv = null; } if (unsubPrivPrev) { unsubPrivPrev(); unsubPrivPrev = null; }
-    S.unlocked = false; S.priv = null; S.privPrev = null; S.empId = null; S.memberInfo = null; S.dayView = 'cal'; S.rankScope = 'month';
+    if (unsubMonth) { unsubMonth(); unsubMonth = null; } if (unsubMeta) { unsubMeta(); unsubMeta = null; } if (unsubPriv) { unsubPriv(); unsubPriv = null; } if (unsubPrivPrev) { unsubPrivPrev(); unsubPrivPrev = null; } if (unsubExtra) { unsubExtra(); unsubExtra = null; }
+    S.extra = null; S.extraCache = {}; S.unlocked = false; S.priv = null; S.privPrev = null; S.empId = null; S.memberInfo = null; S.dayView = 'cal'; S.rankScope = 'month';
     if (!info) { S.phase = 'login'; S.role = null; S.hex = null; S.M = null; S.ym = null; S.meta = { months: [], targets: {} }; render(); return; }
     S.hex = info.hex || null; if (info.role !== 'member') S.empId = lsGet('x8s_emp') || null;
     startApp(info.role);
