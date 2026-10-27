@@ -644,10 +644,11 @@ const FIREBASE_CONFIG = {
   appId: "1:222731309583:web:3df818ef2166159d77097a"
 };
 const ME_MODE = /*ME_MODE*/false;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
+const ACH_NAMES = ['るい', 'るか', 'こうや'];  // 店の達成率を個人ページで見られる人
 const EXTRA_NAMES = ['るか'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-47 - 2026-10-27';
+const BUILD = 'sales-49 - 2026-10-27';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -783,7 +784,7 @@ async function makeFirebaseBackend(){
     async saveExtra(name, part){
       const ref = F.doc(db, 'priv', 'extra_' + hexOf(name)); const cur = await F.getDoc(ref); let o = {};
       if (cur.exists()) { try { o = JSON.parse(cur.data().payload) || {}; } catch (e) {} }
-      Object.assign(o, part, { name });
+      const prevAch = o.ach; Object.assign(o, part, { name }); if (part.ach) o.ach = Object.assign({}, prevAch, part.ach);
       await F.setDoc(ref, { ym: 'extra', owner: hexOf(name), payload: JSON.stringify(o), updatedAt: F.serverTimestamp() });
     },
     async getExtra(hex){ const sn = await F.getDoc(F.doc(db, 'priv', 'extra_' + hex)); if (!sn.exists()) return null; try { return JSON.parse(sn.data().payload); } catch (e) { return null; } },
@@ -836,7 +837,7 @@ function makeTestBackend(){
     subPriv(ym, hex, cb){ setTimeout(() => cb(T.priv ? JSON.parse(JSON.stringify(T.priv)) : null), 0); return () => {}; },
     async listMembers(){ return T.members || { members: {}, invites: {} }; },
     async issueInvite(){ return 'TEST2345'; }, async unregister(){},
-    async saveExtra(name, part){ T.extraSaved = T.extraSaved || {}; T.extraSaved[name] = Object.assign(T.extraSaved[name] || {}, part); },
+    async saveExtra(name, part){ T.extraSaved = T.extraSaved || {}; const c = T.extraSaved[name] || {}; const pa = c.ach; T.extraSaved[name] = Object.assign(c, part); if (part.ach) T.extraSaved[name].ach = Object.assign({}, pa, part.ach); },
     async getExtra(){ return T.extra || null; }, subExtra(hex, cb){ setTimeout(() => cb(T.extra || null), 0); return () => {}; },
     subMeta(cb){ setTimeout(() => cb(T.meta), 0); return () => {}; },
     subMonth(ym, cb){ setTimeout(() => cb(T.months[ym] ? JSON.parse(JSON.stringify(T.months[ym])) : null, T.updatedAt || Date.now()), 0); return () => {}; },
@@ -1353,14 +1354,7 @@ function psPaper(zoom){
 function loadJs(u){ return new Promise((ok, ng) => { const x = document.createElement('script'); x.src = u; x.onload = ok; x.onerror = () => ng(new Error('load')); document.head.appendChild(x); }); }
 async function psOut(kind, btn){
   const name = (btn.dataset.t || '給与明細');
-  if (kind === 'printps') {
-    const root = psPaper(true); if (!root) return;
-    document.body.classList.add('printing'); const old = document.title; document.title = name;
-    const done = () => { document.body.classList.remove('printing'); document.title = old; root.remove(); window.removeEventListener('afterprint', done); };
-    window.addEventListener('afterprint', done);
-    try { window.print(); } catch (_) { done(); }
-    return;
-  }
+  let win = null; if (kind === 'printps') { try { win = window.open('', '_blank'); if (win) win.document.write('<p style="font:16px sans-serif;padding:20px">PDFを作っています…</p>'); } catch (_) { win = null; } }
   const label = btn.textContent; btn.disabled = true; btn.textContent = '作成中…';
   try {
     if (!window.html2canvas) await loadJs('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
@@ -1373,9 +1367,10 @@ async function psOut(kind, btn){
     let w = 190, h = cv.height * w / cv.width; if (h > 277) { h = 277; w = cv.width * h / cv.height; }
     pdf.addImage(cv.toDataURL('image/jpeg', 0.95), 'JPEG', 10 + (190 - w) / 2, 10, w, h);
     const blob = pdf.output('blob'); const file = new File([blob], name + '.pdf', { type: 'application/pdf' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: name }); } catch (_) {} }
+    if (kind === 'printps' && win) { win.location.href = URL.createObjectURL(blob); }
+    else if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: name }); } catch (_) {} }
     else { const u = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = u; a.download = name + '.pdf'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 30000); }
-  } catch (err) { alert('PDFを作れませんでした。ネットにつながっているか確認して、もう一度押してください。'); }
+  } catch (err) { try { if (win) win.close(); } catch (_) {} alert('PDFを作れませんでした。ネットにつながっているか確認して、もう一度押してください。'); }
   btn.disabled = false; btn.textContent = label;
 }
 function payslipCard(rec, ym, ex, e){
@@ -1401,7 +1396,7 @@ function payslipCard(rec, ym, ex, e){
       ${row('売掛控除後の金額', after, '差引支給額 − 売掛金', 'ps-t ps-fin2')}` : ''}
     <div class="ps-foot">X8 本店</div>
   </div>
-  <div class="ps-act"><button class="btn" data-a="pdfps" data-t="${esc('給与明細_' + (e ? e.name : '') + '_' + ym)}">📄 PDFで保存</button><button class="btn ghost" data-a="printps">🖨 印刷(A4)</button></div>`;
+  <div class="ps-act"><button class="btn" data-a="pdfps" data-t="${esc('給与明細_' + (e ? e.name : '') + '_' + ym)}">📄 PDFで保存</button><button class="btn ghost" data-a="printps" data-t="${esc('給与明細_' + (e ? e.name : '') + '_' + ym)}">🖨 印刷(A4)</button></div>`;
 }
 function extraFor(e){
   if (!e) return null;
@@ -1412,6 +1407,21 @@ function extraFor(e){
     return S.extraCache[hx];
   }
   return null;
+}
+function achCard(){
+  if (S.role !== 'member' || !ACH_NAMES.some(n => hexOf(n) === S.hex)) return '';
+  const a = S.extra && S.extra.ach && S.extra.ach[S.ym];
+  const target = S.meta.targets && S.meta.targets[S.ym];
+  let body;
+  if (!target) body = '<div class="dim">今月の目標はまだ決まっていません。</div>';
+  else if (!a) body = '<div class="dim">達成率はまだ出ていません（管理者が取り込むと出ます）。</div>';
+  else { const pct = a.gross / target * 100, rest = target - a.gross;
+    body = `<div class="row2" style="align-items:end"><div><div class="lbl">月間目標</div><div style="font-family:Oswald;font-size:22px">${yen(target)}</div></div>
+      <div style="text-align:right"><div class="lbl">達成率</div><div class="big sm">${pct.toFixed(1)}%</div></div></div>
+      <div class="bar"><i style="width:${Math.min(100, pct)}%"></i></div>
+      <div class="row2" style="margin-top:10px"><div class="lbl">目標まで</div><div style="text-align:right;font-weight:700">${rest > 0 ? yen(rest) : '達成！🎉'}</div></div>
+      <div class="note">営業 ${a.days}日分。${ymLabel(S.ym)}の数字です。</div>`; }
+  return `<div class="card"><h2>🎯 お店の達成率</h2>${body}</div>`;
 }
 function viewPerson(){
   const M = S.M; if (!M) return noData();
@@ -1433,6 +1443,7 @@ function viewPerson(){
   const WORK = ['A出勤', 'B出勤', '遅刻'];
   const hist = days.map(d => ({ d, r: rowOf(e, d) })).filter(x => x.r && (x.r.slice(0, 8).some(n => n !== 0) || WORK.includes(x.r[8])));
   return `
+  ${achCard()}
   ${ME_MODE ? '' : `<button class="btn ghost small" data-a="persclear" style="margin-bottom:10px">${S.role === 'member' ? '← 自分の画面に戻る' : '← 人を選びなおす'}</button>`}
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:22px;font-weight:700">${esc(e.name)}</div><span class="pill">${e.kind === 'ops' ? '運営' : 'キャスト'}</span></div>
@@ -1479,6 +1490,10 @@ function viewAdmin(){
     <input type="file" id="efile" accept=".xlsx,.xls" multiple style="display:none">
     <button class="btn" data-a="pickextra">Excelファイルを選ぶ</button>
     ${S.ex ? exView(S.ex) : ''}
+  </div>
+  <div class="card"><h2>達成率を見せる人</h2>
+    <div class="note" style="margin-top:0">${ACH_NAMES.join('・')} の個人ページに、${S.ym ? ymLabel(S.ym) : ''}の月間目標・達成率・目標までの残りが出ます（お店の総売の金額そのものは出ません）。Excelを取り込むと自動で反映されます。目標を変えた時は、そのまま反映されます。</div>
+    <button class="btn" data-a="pushach">いまの${S.ym ? ymLabel(S.ym) : ''}を3人に反映する</button>
   </div>
   <div class="card"><h2>${S.ym ? ymLabel(S.ym) : ''} の月間目標（総売）</h2>
     <input type="number" id="tgt" inputmode="numeric" placeholder="例: 30000000" value="${esc(S.targetDraft !== '' ? S.targetDraft : (S.meta.targets && S.meta.targets[S.ym]) || '')}">
@@ -1686,6 +1701,7 @@ document.addEventListener('click', async (ev) => {
   else if (a === 'chgpw') doChangePw();
   else if (a === 'chgadm') doChangeAdminPw();
   else if (a === 'unlock') doUnlock();
+  else if (a === 'pushach') { if (S.M && S.ym) { pushAch(S.ym, S.M).then(() => toast('反映しました')).catch(() => toast('反映に失敗しました')); } }
   else if (a === 'relock') { S.unlocked = false; render(); }
   else if (a === 'loadmembers') loadMembers();
   else if (a === 'issueinv') doIssue(el.dataset.n);
@@ -1787,6 +1803,10 @@ async function doParse(file){
   } catch (e) { S.imp = { status: 'error', msg: '読み込みに失敗しました: ' + (e && e.message || e) }; }
   render();
 }
+async function pushAch(ym, M){
+  const g = storeSum(M).gross, n = dayList(M).length;
+  for (const nm of ACH_NAMES) await backend.saveExtra(nm, { ach: { [ym]: { gross: g, days: n, at: Date.now() } } });
+}
 async function doConfirmImport(){
   const imp = S.imp; if (!imp || imp.status !== 'preview') return;
   const { res, old, diff } = imp; const ym = res.month.ym;
@@ -1800,6 +1820,7 @@ async function doConfirmImport(){
   S.imp = { status: 'saving' }; render();
   try {
     await backend.saveMonth(ym, merged, rec, months);
+    try { await pushAch(ym, merged); } catch (e) { toast('達成率の反映に失敗しました（管理タブのボタンでやり直せます）'); }
     S.imp = { status: 'done', summary: ymLabel(ym) + '：' + dayList(merged).length + '日分、総売 ' + yen(tot.gross) };
     S.importsList = null; toast('取り込みました');
     if (S.ym !== ym) selectMonth(ym);
