@@ -147,29 +147,27 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
 .ps-fin .ps-v{color:#e8c77a;font-size:21px}
 .ps-fin2{background:rgba(232,199,122,.10)}.ps-fin2 .ps-v{font-size:24px}
 .ps-foot{padding:10px 18px;text-align:right;font-size:11px;color:var(--dim,#9b94a6);letter-spacing:.2em;display:none}
-.ps-act{margin:10px 0 4px}
 @page{size:A4;margin:10mm}
+#printroot{position:fixed;left:-10000px;top:0;width:794px;background:#fff;color:#111;padding:0;margin:0}
+#printroot .ps{width:100%;margin:0!important;border:1.5px solid #b98d36;border-radius:0;background:#fff!important;color:#111!important;font-size:13pt;-webkit-print-color-adjust:exact;print-color-adjust:exact;break-inside:avoid}
+#printroot .ps-title{font-size:22pt;padding:12px 8px 12px .5em}
+#printroot .ps-sub{color:#555!important;border-bottom:1px solid #ccc;font-size:13pt;padding:8px 20px}
+#printroot .ps-sub span:last-child{color:#111!important;font-size:18pt}
+#printroot .ps-net{border-bottom:1px solid #ccc;padding:10px 20px}#printroot .ps-net .lbl{color:#555!important}
+#printroot .ps-net .big{font-size:34pt;background:none!important;-webkit-background-clip:border-box;background-clip:border-box;color:#8a6410!important}
+#printroot .ps-h{background:#f6ecd0!important;color:#6b4d0a!important;border-color:#ddd!important;font-size:12pt;padding:5px 20px}
+#printroot .ps-r{border-bottom:1px solid #e3e3e3;padding:4px 20px;font-size:11.5pt;color:#111!important}
+#printroot .ps-n{color:#666!important;font-size:10pt}
+#printroot .ps-v{font-size:14pt;color:#111!important}#printroot .ps-v.neg{color:#c0262d!important}
+#printroot .ps-t{background:#f4f4f4!important}
+#printroot .ps-fin .ps-v{color:#8a6410!important;font-size:17pt}#printroot .ps-fin2{background:#f6ecd0!important}#printroot .ps-fin2 .ps-v{font-size:19pt}
+#printroot .ps-foot{display:block;color:#888!important;padding:4px 20px}
+.ps-act{display:flex;gap:8px;margin:10px 0 4px}.ps-act .btn{flex:1}
 @media print{
   html,body{background:#fff!important;color:#111!important}
   body.printing>*:not(#printroot){display:none!important}
-  #printroot .ps-act{display:none!important}
-  .ps{width:100%;margin:0!important;box-shadow:none!important;border:1.5px solid #b98d36;background:#fff!important;color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:13pt;break-inside:avoid}
-  .ps-title{font-size:22pt;padding:12px 8px 12px .5em}
-  .ps-sub{color:#555!important;border-bottom:1px solid #ccc;font-size:13pt}.ps-sub span:last-child{color:#111!important;font-size:18pt}
-  .ps-net{border-bottom:1px solid #ccc}.ps-net .lbl{color:#555!important}
-  .ps-net .big{font-size:34pt;background:none!important;-webkit-background-clip:border-box;color:#8a6410!important}
-  .ps-h{background:#f6ecd0!important;color:#6b4d0a!important;border-color:#ddd!important;font-size:12pt}
-  .ps-r{border-bottom:1px solid #e3e3e3;padding:4px 20px;font-size:11.5pt;color:#111!important}
-  .ps-n{color:#666!important;font-size:10pt}
-  .ps-v{font-size:14pt;color:#111!important}.ps-v.neg{color:#c0262d!important}
-  .ps-t{background:#f4f4f4!important}
   body.printing{padding:0!important;min-height:0!important;margin:0!important}
-  #printroot{padding:0;margin:0}
-  #printroot .ps{margin:0!important;border-radius:0}
-  .ps-foot{padding:4px 20px}
-  .ps-net{padding:10px 20px}.ps-h{padding:5px 20px}.ps-sub{padding:8px 20px}
-  .ps-fin .ps-v{color:#8a6410!important;font-size:17pt}.ps-fin2{background:#f6ecd0!important}.ps-fin2 .ps-v{font-size:19pt}
-  .ps-foot{display:block;color:#888!important}
+  body.printing #printroot{position:static;left:auto;width:auto}
 }
 </style>
 </head>
@@ -649,7 +647,7 @@ const ME_MODE = true;  // true: 個人専用ページ（me.html）。false: 全�
 const EXTRA_NAMES = ['るか'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-46 - 2026-10-27';
+const BUILD = 'sales-47 - 2026-10-27';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -1344,6 +1342,42 @@ function extraCards(x){
   }
   return h;
 }
+function psPaper(zoom){
+  const card = document.querySelector('.ps'); if (!card) return null;
+  const old = document.getElementById('printroot'); if (old) old.remove();
+  const root = document.createElement('div'); root.id = 'printroot';
+  const cl = card.cloneNode(true);
+  if (zoom) { const est = 520 + 33 * cl.querySelectorAll('.ps-r').length + 20 * cl.querySelectorAll('.ps-n').length; if (est > 1020) cl.style.zoom = (1020 / est).toFixed(3); }
+  root.appendChild(cl); document.body.appendChild(root); return root;
+}
+function loadJs(u){ return new Promise((ok, ng) => { const x = document.createElement('script'); x.src = u; x.onload = ok; x.onerror = () => ng(new Error('load')); document.head.appendChild(x); }); }
+async function psOut(kind, btn){
+  const name = (btn.dataset.t || '給与明細');
+  if (kind === 'printps') {
+    const root = psPaper(true); if (!root) return;
+    document.body.classList.add('printing'); const old = document.title; document.title = name;
+    const done = () => { document.body.classList.remove('printing'); document.title = old; root.remove(); window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done);
+    try { window.print(); } catch (_) { done(); }
+    return;
+  }
+  const label = btn.textContent; btn.disabled = true; btn.textContent = '作成中…';
+  try {
+    if (!window.html2canvas) await loadJs('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    if (!window.jspdf) await loadJs('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    const root = psPaper(false); try { await document.fonts.ready; } catch (_) {}
+    await new Promise(r => setTimeout(r, 300));
+    const cv = await window.html2canvas(root.firstChild, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+    root.remove();
+    const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    let w = 190, h = cv.height * w / cv.width; if (h > 277) { h = 277; w = cv.width * h / cv.height; }
+    pdf.addImage(cv.toDataURL('image/jpeg', 0.95), 'JPEG', 10 + (190 - w) / 2, 10, w, h);
+    const blob = pdf.output('blob'); const file = new File([blob], name + '.pdf', { type: 'application/pdf' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: name }); } catch (_) {} }
+    else { const u = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = u; a.download = name + '.pdf'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 30000); }
+  } catch (err) { alert('PDFを作れませんでした。ネットにつながっているか確認して、もう一度押してください。'); }
+  btn.disabled = false; btn.textContent = label;
+}
 function payslipCard(rec, ym, ex, e){
   if (!rec) return '';
   const mon = Number(ym.split('-')[1]);
@@ -1367,7 +1401,7 @@ function payslipCard(rec, ym, ex, e){
       ${row('売掛控除後の金額', after, '差引支給額 − 売掛金', 'ps-t ps-fin2')}` : ''}
     <div class="ps-foot">X8 本店</div>
   </div>
-  <div class="ps-act"><button class="btn ghost" data-a="printps" data-t="${esc('給与明細_' + (e ? e.name : '') + '_' + ym)}" style="width:100%">🖨 A4で印刷 ／ PDFで保存</button></div>`;
+  <div class="ps-act"><button class="btn" data-a="pdfps" data-t="${esc('給与明細_' + (e ? e.name : '') + '_' + ym)}">📄 PDFで保存</button><button class="btn ghost" data-a="printps">🖨 印刷(A4)</button></div>`;
 }
 function extraFor(e){
   if (!e) return null;
@@ -1645,7 +1679,7 @@ document.addEventListener('click', async (ev) => {
   else if (a === 'openday') { S.dd = el.dataset.d; S.dayDetail = el.dataset.d; S.tab = 'days'; render(); window.scrollTo(0, 0); }
   else if (a === 'backdays') { S.dayDetail = null; render(); }
   else if (a === 'person') { S.empId = el.dataset.id; if (S.role !== 'member') lsSet('x8s_emp', S.empId); S.tab = 'pers'; render(); window.scrollTo(0, 0); }
-  else if (a === 'printps') { const card = document.querySelector('.ps'); if (card) { const old = document.title; document.title = el.dataset.t || '給与明細'; const root = document.createElement('div'); root.id = 'printroot'; const cl = card.cloneNode(true); const est = 520 + 33 * cl.querySelectorAll('.ps-r').length + 20 * cl.querySelectorAll('.ps-n').length; if (est > 1020) cl.style.zoom = (1020 / est).toFixed(3); root.appendChild(cl); document.body.appendChild(root); document.body.classList.add('printing'); const done = () => { document.body.classList.remove('printing'); root.remove(); document.title = old; window.removeEventListener('afterprint', done); }; window.addEventListener('afterprint', done); try { window.print(); } catch (_) { done(); } setTimeout(() => { if (document.getElementById('printroot') && !document.hasFocus) done(); }, 60000); } }
+  else if (a === 'printps' || a === 'pdfps') { psOut(a, el); }
   else if (a === 'persclear') { S.empId = null; S.empQuery = ''; render(); }
   else if (a === 'logintab') { S.loginRole = el.dataset.r; S.regMode = false; S.loginErr = ''; render(); }
   else if (a === 'regtoggle') { S.regMode = !S.regMode; S.loginErr = ''; render(); }
