@@ -146,6 +146,7 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
 .ps-t{background:rgba(255,255,255,.04);font-weight:800}
 .ps-fin .ps-v{color:#e8c77a;font-size:21px}
 .ps-fin2{background:rgba(232,199,122,.10)}.ps-fin2 .ps-v{font-size:24px}
+.tbl.ach{width:100%;margin-top:12px}.tbl.ach td,.tbl.ach th{text-align:right;padding:6px 6px;white-space:nowrap;font-size:13px}.tbl.ach td.l,.tbl.ach th:first-child{text-align:left}.tbl.ach td.cur{font-weight:700;background:rgba(232,199,122,.08)}
 .ps-foot{padding:10px 18px;text-align:right;font-size:11px;color:var(--dim,#9b94a6);letter-spacing:.2em;display:none}
 @page{size:A4;margin:10mm}
 #printroot{position:fixed;left:-10000px;top:0;width:794px;background:#fff;color:#111;padding:0;margin:0}
@@ -197,7 +198,7 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
   ];
   var ATT_HEADER = '出勤';
   // 運営メンバーのうち、一覧・ランキングに載せる人(しんさんの指定)
-  var OPS_SHOWN = ['るか', 'りお', 'かなた'];
+  var OPS_SHOWN = ['るか', 'りお', 'かなた', 'しん'];  // しん: 個人ページ・給料明細用（ランキングには出さない）
 
   // 名前の表記ゆれをそろえる（「（運営）」の注記を外し、全角半角をそろえる）
   function cleanName(s) { return String(s == null ? '' : s).normalize('NFKC').replace(/\(運営\)\s*$/, '').trim(); }
@@ -397,6 +398,24 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
     return out;
   }
 
+  /* ---------- 達成率シート（見せる人を限定する） ---------- */
+  function parseAch(XLSX, wb) {
+    var ws = wb.Sheets['達成率']; if (!ws) return null;
+    var g = function (r, c) { var cell = ws[XLSX.utils.encode_cell({ r: r - 1, c: c })]; return cell && (cell.t === 'n' || cell.t === 's') ? cell.v : null; };   // rは1始まり。エラー値(#DIV/0!など)は空として扱う, cは0始まり(A=0)
+    var find = function (label, c, from) { for (var r = from || 1; r <= 40; r++) { var t = g(r, c); if (typeof t === 'string' && t.trim() === label) return r; } return 0; };
+    var out = { plan: xNum(g(3, 12)), pred: xNum(g(6, 7)), avg: xNum(g(6, 11)), goals: [], rows: [] };
+    ['売上', 'P在籍', 'P平均出勤'].forEach(function (l) {
+      var r = find(l, 3); if (!r) return;
+      out.goals.push({ l: l, goal: xNum(g(r, 4)), rate: xNum(g(r, 6)), left: xNum(g(r, 8)) });
+    });
+    var hdr = find('先月', 4) || 14;
+    ['総売上', '新規', '初回人数', '初回件数', '指名件数', '全体組数', '全体人数', '営業日数', '在籍人数', 'P平均出勤'].forEach(function (l) {
+      var r = find(l, 3, hdr + 1); if (!r) return;
+      out.rows.push({ l: l, prev: xNum(g(r, 4)), avg1: xNum(g(r, 5)), cur: xNum(g(r, 6)), avg2: xNum(g(r, 7)), ratio: xNum(g(r, 8)) });
+    });
+    return out.goals.length || out.rows.length ? out : null;
+  }
+
   function parseWorkbook(XLSX, data, fileName) {
     var report = { fileName: fileName || '', errors: [], warnings: [], emptyDays: [], checks: [], hidden: [] };
     var wb0 = XLSX.read(data, { type: 'array', bookSheets: true });
@@ -408,7 +427,7 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
       report.errors.push({ level: 'error', msg: '「設定」シートがありません。売上管理のExcelではない可能性があります。' });
       return { month: null, report: report };
     }
-    var wb = XLSX.read(data, { type: 'array', sheets: need.filter(function (n) { return names.indexOf(n) >= 0; }) });
+    var wb = XLSX.read(data, { type: 'array', sheets: need.concat(['達成率']).filter(function (n) { return names.indexOf(n) >= 0; }) });
     var set = wb.Sheets['設定'];
 
     var year = num(val(set, 1, 2)), mon = num(val(set, 2, 2));
@@ -498,8 +517,9 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
       .sort(function (a, b) { return a.no - b.no; });
     var payMap = {};
     try { payMap = parsePayslips(XLSX, data, names, employees, mon, report); } catch (e) { report.warnings.push({ level: 'warn', msg: '給料明細を読み込めませんでした: ' + (e && e.message || e) }); }
+    var achObj = null; try { achObj = parseAch(XLSX, wb); } catch (e) { report.warnings.push({ level: 'warn', msg: '達成率シートを読み込めませんでした: ' + (e && e.message || e) }); }
     var monthObj = {
-      pay: payMap,
+      pay: payMap, ach: achObj,
       ym: ym, year: year, month: mon, daysInMonth: daysInMonth,
       employees: employees.map(function (e) { return { id: e.id, name: e.name, kind: e.kind }; }),
       days: days,
@@ -574,13 +594,23 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
           var rw = rows[r] || [];
           if (rw[c] === '合計') { sheetTot = xNum(rw[c + 2]); break; }
           var cu = rw[c + 1], am = xNum(rw[c + 2]);
-          if (typeof cu === 'string' && cu.trim() && am != null && am !== 0) lst.push({ d: xIso(rw[c]), name: cu.trim(), amt: am });
+          // 入金：その行の「入金日」「入金日2」と、すぐ下の行の金額（金額 = 掛け − 入金）
+          var nx = rows[r + 1] || [], pays = [];
+          [3, 4].forEach(function (k) {
+            var pa = xNum(nx[c + k]); if (!pa) return;
+            var dv = rw[c + k]; var dd = typeof dv === 'number' ? xIso(dv) : (typeof dv === 'string' ? xIso(dv) : ''), nt = '';
+            if (typeof dv === 'string') { var mm = /[（(]([^）)]+)[）)]/.exec(dv); if (mm) nt = mm[1]; if (!dd) nt = nt || dv.trim(); }
+            pays.push({ d: dd, amt: pa, note: nt });
+          });
+          var paid = pays.reduce(function (a, q) { return a + q.amt; }, 0);
+          if (typeof cu === 'string' && cu.trim() && am != null && (am !== 0 || paid)) lst.push({ d: xIso(rw[c]), name: cu.trim(), amt: am, paid: paid, pays: pays });
         }
-        var by = {}; lst.forEach(function (e) { by[e.name] = (by[e.name] || 0) + e.amt; });
+        var by = {}, byPaid = {}; lst.forEach(function (e) { by[e.name] = (by[e.name] || 0) + e.amt; byPaid[e.name] = (byPaid[e.name] || 0) + (e.paid || 0); });
+        var paidTotal = lst.reduce(function (a, e) { return a + (e.paid || 0); }, 0);
         var total = lst.reduce(function (a, e) { return a + e.amt; }, 0);
         if (sheetTot != null && sheetTot !== total) report.warnings.push(nm + ' さん ' + head[c] + '：明細の合計 ' + total + ' と、シートの合計 ' + sheetTot + ' が違います');
-        months.push({ label: String(head[c]).trim().replace(/[０-９]/g, function (x) { return String.fromCharCode(x.charCodeAt(0) - 65248); }), n: zen2n(head[c]), total: total, sheetTotal: sheetTot,
-          byCustomer: Object.keys(by).map(function (k) { return { name: k, amt: by[k] }; }).sort(function (a, b) { return b.amt - a.amt; }), rows: lst });
+        months.push({ label: String(head[c]).trim().replace(/[０-９]/g, function (x) { return String.fromCharCode(x.charCodeAt(0) - 65248); }), n: zen2n(head[c]), total: total, sheetTotal: sheetTot, paid: paidTotal,
+          byCustomer: Object.keys(by).map(function (k) { return { name: k, amt: by[k], paid: byPaid[k] || 0 }; }).sort(function (a, b) { return b.amt - a.amt || b.paid - a.paid; }), rows: lst });
       }
       if (!months.length) report.warnings.push(nm + ' さんの売掛の表が見つかりません');
       else people[nm] = { months: months };
@@ -644,11 +674,12 @@ const FIREBASE_CONFIG = {
   appId: "1:222731309583:web:3df818ef2166159d77097a"
 };
 const ME_MODE = /*ME_MODE*/false;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
-const ACH_NAMES = ['るい', 'るか', 'こうや'];  // 店の達成率を個人ページで見られる人
-const EXTRA_NAMES = ['るか'];  // 売掛・前入金を個人ページに出す人（この人だけ）
+const RANK_HIDE = ['しん'];  // 個人ページ・給料明細だけ。ランキングには出さない
+const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや'];  // 店の達成率を個人ページで見られる人
+const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-49 - 2026-10-27';
+const BUILD = 'sales-53 - 2026-10-27';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -701,14 +732,15 @@ function splitMonth(M){
       const t = pub.totals[id]; for (let i = 0; i < 8; i++) t[i] += d.rows[id][i] || 0; t[8]++;
     });
   });
-  Object.keys(pub.totals).forEach(id => { pub.totals[id][1] = 0; });  // 総売は公開用に入れない（本人用のprivと管理者用のfullにだけある）
+  Object.keys(pub.totals).forEach(id => { pub.totals[id][1] = 0; });
+  M.employees.forEach(e => { if (RANK_HIDE.includes(e.name)) pub.totals[e.id] = new Array(9).fill(0); });  // しんさんの数字は公開用に入れない  // 総売は公開用に入れない（本人用のprivと管理者用のfullにだけある）
   return { pub, privs };
 }
 function empMonth(M, id){
   if (M.totals) { const a = M.totals[id] || new Array(9).fill(0); const t = a.slice(0, 8); t.days = a[8] || 0; return t; }
   const t = new Array(8).fill(0); let n = 0; dayList(M).forEach(dd => { const r = M.days[dd].rows[id]; if (r) { for (let i = 0; i < 8; i++) t[i] += r[i] || 0; n++; } }); t.days = n; return t; }
 function ranking(M, i, dd){
-  const list = M.employees.map((e, idx) => ({ id: e.id, name: e.name, kind: e.kind, idx, v: dd ? (((M.days[dd] && M.days[dd].rows[e.id]) || [])[i] || 0) : empMonth(M, e.id)[i] }));
+  const list = M.employees.filter(e => !RANK_HIDE.includes(e.name)).map((e, idx) => ({ id: e.id, name: e.name, kind: e.kind, idx, v: dd ? (((M.days[dd] && M.days[dd].rows[e.id]) || [])[i] || 0) : empMonth(M, e.id)[i] }));
   list.sort((a, b) => b.v - a.v || a.idx - b.idx);
   let rank = 0, prev = null, pos = 0;
   list.forEach(x => { pos++; if (x.v !== prev) { rank = pos; prev = x.v; } x.rank = rank; });
@@ -1042,7 +1074,7 @@ function shokaiDaily(M){
     <div class="note">日付の行をタップすると、その日の内訳が見られます。管理者だけに出ます。</div>
   </div>`;
 }
-const STAFF_CARD_SKIP = ['ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう']; // 運営のため増減の集計から外す
+const STAFF_CARD_SKIP = ['しん', 'ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう']; // 運営のため増減の集計から外す
 function staffChangeCard(M){
   const keep = e => STAFF_CARD_SKIP.indexOf(e.name) < 0;
   const act = (X) => new Set(X.employees.filter(e => keep(e) && empMonth(X, e.id).days > 0).map(e => e.id));
@@ -1334,11 +1366,13 @@ function extraCards(x){
   }
   if (x.uri) {
     const ms = x.uri.months.slice().reverse();
+    const pd = (q) => (q.d ? mdOf(q.d) + ' ' : '') + yen(q.amt) + (q.note ? '（' + q.note + '）' : '');
     h += `<div class="card"><h2>現状の掛け</h2>
-      ${ms.map((m, i) => `${i ? '<div class="hr"></div>' : ''}<div class="lbl">${esc(m.label)}</div><div class="big ${i ? 'sm' : ''}">${yen(m.total)}</div>
-        ${m.byCustomer.map(c => `<div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px"><span>${esc(c.name)} 様</span><b>${yen(c.amt)}</b></div>`).join('')}
-        <details style="margin-top:8px"${i ? '' : ''}><summary class="dim" style="font-size:13px">日ごとの明細（${m.rows.length}件）</summary>
-        <div class="scrollx"><table class="tbl"><thead><tr><th>日付</th><th>お客様</th><th>金額</th></tr></thead><tbody>${m.rows.map(e => `<tr><td>${mdOf(e.d)}</td><td>${esc(e.name)}</td><td>${yen(e.amt)}</td></tr>`).join('')}</tbody></table></div></details>`).join('')}
+      ${ms.map((m, i) => `${i ? '<div class="hr"></div>' : ''}<div class="lbl">${esc(m.label)}　現状の掛け（入金を引いた残り）</div><div class="big ${i ? 'sm' : ''}">${yen(m.total)}</div>
+        ${m.paid ? `<div class="dim" style="font-size:13px;margin-top:4px">掛け ${yen(m.total + m.paid)} − 入金済み <b class="pos">${yen(m.paid)}</b></div>` : '<div class="dim" style="font-size:13px;margin-top:4px">入金はまだありません</div>'}
+        ${m.byCustomer.map(c => `<div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px"><span>${esc(c.name)} 様${c.paid ? `<small class="dim"> （入金 ${yen(c.paid)}）</small>` : ''}</span><b>${yen(c.amt)}</b></div>`).join('')}
+        <details style="margin-top:8px"><summary class="dim" style="font-size:13px">日ごとの明細（${m.rows.length}件）</summary>
+        <div class="scrollx"><table class="tbl ach" style="margin-top:6px;width:100%"><thead><tr><th>日付</th><th style="text-align:left">お客様・入金</th><th>掛け</th><th>残り</th></tr></thead><tbody>${m.rows.map(e => `<tr><td>${mdOf(e.d)}</td><td class="l" style="white-space:normal">${esc(e.name)}${(e.pays || []).map(q => `<div class="pos" style="font-size:11.5px">入金 ${esc(pd(q))}</div>`).join('')}</td><td>${yen(e.amt + (e.paid || 0))}</td><td>${yen(e.amt)}</td></tr>`).join('')}</tbody></table></div></details>`).join('')}
     </div>`;
   }
   return h;
@@ -1408,6 +1442,31 @@ function extraFor(e){
   }
   return null;
 }
+function achTable(t, gross, target){
+  const f1 = (v) => v == null ? '—' : (Math.abs(v - Math.round(v)) < 0.05 ? Math.round(v).toLocaleString('ja-JP') : v.toFixed(1));
+  const pc = (v) => v == null ? '' : (v * 100).toFixed(1) + '%';
+  const sg = (v) => v == null ? '—' : (v < 0 ? '−' : '') + yen(Math.abs(v));
+  const goals = (t.goals || []).map(x => {
+    if (x.l === '売上' && target) { const r = gross / target; return { l: x.l, goal: target, rate: r, left: target - gross, yen: true }; }
+    return Object.assign({ yen: x.l === '売上' }, x);
+  });
+  const gr = goals.map(x => `<tr><td class="l">${esc(x.l)}</td><td>${x.yen ? yen(x.goal) : f1(x.goal) + (x.l === 'P在籍' ? '名' : '名')}</td><td class="${x.rate != null && x.rate < 1 ? 'neg' : 'pos'}">${pc(x.rate)}</td><td>${x.yen ? sg(x.left) : f1(x.left)}</td></tr>`).join('');
+  const DIFF = ['在籍人数', 'P平均出勤'];
+  const hasPrev = (t.rows || []).some(x => x.prev != null);
+  const rows = (t.rows || []).map(x => {
+    const y = x.l === '総売上';
+    const fv = (v) => v == null ? '' : (y ? yen(v) : f1(v));
+    let ra = '';
+    if (x.prev != null && x.ratio != null) ra = DIFF.includes(x.l) ? `<span class="${x.ratio < 0 ? 'neg' : 'pos'}">${x.ratio > 0 ? '+' : ''}${f1(x.ratio)}</span>` : `<span class="${x.ratio < 1 ? 'neg' : 'pos'}">${pc(x.ratio)}</span>`;
+    return `<tr><td class="l">${esc(x.l)}</td>${hasPrev ? `<td>${fv(x.prev)}</td>` : ''}<td class="cur">${fv(x.cur)}</td><td>${fv(x.avg2)}</td>${hasPrev ? `<td>${ra}</td>` : ''}</tr>`;
+  }).join('');
+  return `<div class="hr"></div>
+    ${t.pred != null ? `<div class="row2"><div class="lbl">平均着地予測</div><div style="text-align:right;font-weight:700">${yen(t.pred)}</div></div>` : ''}
+    ${t.avg != null ? `<div class="row2" style="margin-top:6px"><div class="lbl">1日平均</div><div style="text-align:right;font-weight:700">${yen(Math.round(t.avg))}</div></div>` : ''}
+    ${t.plan != null ? `<div class="row2" style="margin-top:6px"><div class="lbl">営業予定日数</div><div style="text-align:right;font-weight:700">${t.plan}日</div></div>` : ''}
+    ${gr ? `<div class="scrollx"><table class="tbl ach"><thead><tr><th></th><th>目標</th><th>達成率</th><th>目標まで</th></tr></thead><tbody>${gr}</tbody></table></div>` : ''}
+    ${rows ? `<div class="scrollx"><table class="tbl ach"><thead><tr><th></th>${hasPrev ? '<th>先月</th>' : ''}<th>当月</th><th>平均(日)</th>${hasPrev ? '<th>平均先月比</th>' : ''}</tr></thead><tbody>${rows}</tbody></table></div>` : ''}`;
+}
 function achCard(){
   if (S.role !== 'member' || !ACH_NAMES.some(n => hexOf(n) === S.hex)) return '';
   const a = S.extra && S.extra.ach && S.extra.ach[S.ym];
@@ -1420,7 +1479,8 @@ function achCard(){
       <div style="text-align:right"><div class="lbl">達成率</div><div class="big sm">${pct.toFixed(1)}%</div></div></div>
       <div class="bar"><i style="width:${Math.min(100, pct)}%"></i></div>
       <div class="row2" style="margin-top:10px"><div class="lbl">目標まで</div><div style="text-align:right;font-weight:700">${rest > 0 ? yen(rest) : '達成！🎉'}</div></div>
-      <div class="note">営業 ${a.days}日分。${ymLabel(S.ym)}の数字です。</div>`; }
+      <div class="note">営業 ${a.days}日分。${ymLabel(S.ym)}の数字です。</div>
+      ${a.tbl ? achTable(a.tbl, a.gross, target) : ''}`; }
   return `<div class="card"><h2>🎯 お店の達成率</h2>${body}</div>`;
 }
 function viewPerson(){
@@ -1492,8 +1552,8 @@ function viewAdmin(){
     ${S.ex ? exView(S.ex) : ''}
   </div>
   <div class="card"><h2>達成率を見せる人</h2>
-    <div class="note" style="margin-top:0">${ACH_NAMES.join('・')} の個人ページに、${S.ym ? ymLabel(S.ym) : ''}の月間目標・達成率・目標までの残りが出ます（お店の総売の金額そのものは出ません）。Excelを取り込むと自動で反映されます。目標を変えた時は、そのまま反映されます。</div>
-    <button class="btn" data-a="pushach">いまの${S.ym ? ymLabel(S.ym) : ''}を3人に反映する</button>
+    <div class="note" style="margin-top:0">${ACH_NAMES.join('・')} の個人ページに、${S.ym ? ymLabel(S.ym) : ''}の月間目標・達成率・目標までの残りと、Excelの「達成率」シートの表（総売上・新規・初回人数など）が出ます。Excelを取り込むと自動で反映されます。目標を変えた時は、そのまま反映されます。</div>
+    <button class="btn" data-a="pushach">いまの${S.ym ? ymLabel(S.ym) : ''}を${ACH_NAMES.length}人に反映する</button>
   </div>
   <div class="card"><h2>${S.ym ? ymLabel(S.ym) : ''} の月間目標（総売）</h2>
     <input type="number" id="tgt" inputmode="numeric" placeholder="例: 30000000" value="${esc(S.targetDraft !== '' ? S.targetDraft : (S.meta.targets && S.meta.targets[S.ym]) || '')}">
@@ -1805,7 +1865,8 @@ async function doParse(file){
 }
 async function pushAch(ym, M){
   const g = storeSum(M).gross, n = dayList(M).length;
-  for (const nm of ACH_NAMES) await backend.saveExtra(nm, { ach: { [ym]: { gross: g, days: n, at: Date.now() } } });
+  const o = { gross: g, days: n, at: Date.now() }; if (M.ach) o.tbl = M.ach;
+  for (const nm of ACH_NAMES) await backend.saveExtra(nm, { ach: { [ym]: o } });
 }
 async function doConfirmImport(){
   const imp = S.imp; if (!imp || imp.status !== 'preview') return;
