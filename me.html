@@ -679,7 +679,7 @@ const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや'];  // 店の達成�
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-53 - 2026-10-27';
+const BUILD = 'sales-56 - 2026-10-29';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -1352,9 +1352,31 @@ function attendanceCard(M, e){
   </div>`;
 }
 function mdOf(d){ return d ? Number(d.slice(5, 7)) + '/' + Number(d.slice(8, 10)) : ''; }
+function groupBack(tb, gross){
+  const n = (v) => Number(String(v).replace(/[^0-9.]/g, '')) || 0;
+  const tiers = (tb.rows || []).map(r => ({ th: n(r[0]), pct: r[1], back: n(r[2]) })).sort((a, b) => a.th - b.th);
+  let cur = null, next = null;
+  tiers.forEach(t => { if (gross >= t.th) cur = t; });
+  next = tiers.find(t => t.th > gross) || null;
+  const cap = n(tb.limit);
+  return { tiers, cur, next, back: cur ? (cap ? Math.min(cur.back, cap) : cur.back) : 0 };
+}
 function extraCards(x){
   if (!x || !EXTRA_NAMES.includes(x.name)) return '';
   let h = '';
+  if (x.terms && x.terms.table) {
+    const tb = x.terms.table;
+    const ach = x.ach && x.ach[S.ym];
+    const g = S.role === 'admin' && S.M ? storeSum(S.M).gross : (ach ? ach.gross : null);
+    let body;
+    if (g == null) body = '<div class="dim">今月の店売りは、管理者が取り込むと出ます。</div>';
+    else { const r = groupBack(tb, g);
+      body = `<div class="lbl">${ymLabel(S.ym)} の店売り（総売上）</div><div class="big sm">${yen(g)}</div>
+        <div class="row2" style="margin-top:12px"><div class="lbl">グループ売上バック<br><small>${r.cur ? yen(r.cur.th) + ' 以上の段階' : '25,000,000円未満'}</small></div><div style="text-align:right"><b style="font-size:26px;color:var(--gold)">${yen(r.back)}</b></div></div>
+        ${r.next ? `<div class="note">次の段階（${yen(r.next.th)}）まで あと ${yen(r.next.th - g)}　→　バック ${yen(r.next.back)}</div>` : '<div class="note">一番上の段階です。</div>'}
+        <div class="note">今月の途中の数字です。月末の店売りで決まります。</div>`; }
+    h += `<div class="card"><h2>グループ売上バック</h2>${body}</div>`;
+  }
   if (x.mae) {
     const m = x.mae;
     h += `<div class="card"><h2>前入金</h2><div class="lbl">いまの残り</div><div class="big">${yen(m.total)}</div>
@@ -1546,8 +1568,8 @@ function viewAdmin(){
     ${imp ? impView(imp) : ''}
   </div>
   <div class="card"><h2>売掛・前入金を取り込む</h2>
-    <div class="note" style="margin-top:0">「報酬一覧」のExcelと、「前入金管理シート」のExcelを選んでください。2つ同時でも、1つずつでも大丈夫です。${esc(EXTRA_NAMES.join('・'))}さんの個人ページにだけ出ます。<br>報酬一覧：全員の「売掛」が、各自の給料明細に出ます（給料から引く分）。お客様別の売掛は${esc(EXTRA_NAMES.join('・'))}さんだけです。<br>（給料明細は、毎月のExcelを取り込むと、全員の分が自動で入ります。）</div>
-    <input type="file" id="efile" accept=".xlsx,.xls" multiple style="display:none">
+    <div class="note" style="margin-top:0">「報酬一覧」のExcelと、「前入金管理シート」のExcelを選んでください（しんさんの「報酬条件」のファイル(.json)もここから入れます）。2つ同時でも、1つずつでも大丈夫です。${esc(EXTRA_NAMES.join('・'))}さんの個人ページにだけ出ます。<br>報酬一覧：全員の「売掛」が、各自の給料明細に出ます（給料から引く分）。お客様別の売掛は${esc(EXTRA_NAMES.join('・'))}さんだけです。<br>（給料明細は、毎月のExcelを取り込むと、全員の分が自動で入ります。）</div>
+    <input type="file" id="efile" accept=".xlsx,.xls,.json" multiple style="display:none">
     <button class="btn" data-a="pickextra">Excelファイルを選ぶ</button>
     ${S.ex ? exView(S.ex) : ''}
   </div>
@@ -1598,10 +1620,10 @@ function exView(ex){
   return `<div style="margin-top:12px">${items.map(it => {
     if (!it.kind) return `<div class="err">${esc(it.fileName)}：${esc(it.report.errors.join(' '))}</div>`;
     const lines = Object.keys(it.people).map(nm => { const p = it.people[nm];
-      return it.kind === 'mae' ? `${esc(nm)}さん：前入金の残り ${yen(p.total)}（お客様 ${p.customers.map(c => esc(c.name)).join('・')}）`
+      return it.kind === 'terms' ? `${esc(nm)}さん：報酬条件（${esc(p.title || '')}）` : it.kind === 'mae' ? `${esc(nm)}さん：前入金の残り ${yen(p.total)}（お客様 ${p.customers.map(c => esc(c.name)).join('・')}）`
         : `${esc(nm)}さん：売掛 ` + p.months.map(m => `${esc(m.label)} ${yen(m.total)}`).join(' ／ '); });
     if (it.kind === 'uri' && it.hoshu) lines.push(`全員の売掛（給料から引く分）：${Object.keys(it.hoshu).length}人分（${Array.from(new Set(Object.values(it.hoshu).flatMap(a => a.map(m => m.label)))).join('・')}）`);
-    return `<div class="card" style="margin:8px 0"><div class="lbl">${it.kind === 'mae' ? '前入金' : '売掛'}　${esc(it.fileName)}</div>${lines.length ? lines.map(l => `<div style="margin-top:4px">${l}</div>`).join('') : '<div class="err">対象の人が見つかりません</div>'}${it.report.warnings.map(w => `<div class="note">⚠ ${esc(w)}</div>`).join('')}</div>`; }).join('')}
+    return `<div class="card" style="margin:8px 0"><div class="lbl">${it.kind === 'terms' ? '報酬条件' : it.kind === 'mae' ? '前入金' : '売掛'}　${esc(it.fileName)}</div>${lines.length ? lines.map(l => `<div style="margin-top:4px">${l}</div>`).join('') : '<div class="err">対象の人が見つかりません</div>'}${it.report.warnings.map(w => `<div class="note">⚠ ${esc(w)}</div>`).join('')}</div>`; }).join('')}
     <div style="display:flex;gap:8px;margin-top:10px"><button class="btn" data-a="saveextra">この内容で保存</button><button class="btn ghost" data-a="cancelextra">やめる</button></div></div>`;
 }
 function impView(imp){
@@ -1892,7 +1914,9 @@ async function doParseExtra(files){
   S.ex = { status: 'parsing' }; render();
   try {
     const XLSX = await loadXLSX(); const items = [];
-    for (const f of files) { const buf = await f.arrayBuffer(); const r = window.X8Parse.parseExtra(XLSX, new Uint8Array(buf), f.name, EXTRA_NAMES); items.push({ fileName: f.name, kind: r.kind, people: r.people, hoshu: r.hoshu, report: r.report }); }
+    for (const f of files) {
+      if (/\.json$/i.test(f.name)) { const o = JSON.parse(await f.text()); const people = {}; Object.keys(o).filter(k => EXTRA_NAMES.includes(k)).forEach(k => { people[k] = o[k]; }); items.push({ fileName: f.name, kind: Object.keys(people).length ? 'terms' : null, people, report: { errors: ['対象の人（' + EXTRA_NAMES.join('・') + '）が見つかりません'], warnings: [] } }); continue; }
+      const buf = await f.arrayBuffer(); const r = window.X8Parse.parseExtra(XLSX, new Uint8Array(buf), f.name, EXTRA_NAMES); items.push({ fileName: f.name, kind: r.kind, people: r.people, hoshu: r.hoshu, report: r.report }); }
     S.ex = { status: 'preview', items };
   } catch (e) { S.ex = { status: 'error', msg: '読み込みに失敗しました: ' + (e && e.message || e) }; }
   render();
@@ -1903,7 +1927,7 @@ async function doSaveExtra(){
   try {
     let n = 0;
     for (const it of ex.items) { if (!it.kind) continue;
-      for (const nm of Object.keys(it.people)) { await backend.saveExtra(nm, it.kind === 'mae' ? { mae: it.people[nm] } : { uri: it.people[nm] }); n++; }
+      for (const nm of Object.keys(it.people)) { await backend.saveExtra(nm, it.kind === 'terms' ? { terms: it.people[nm] } : it.kind === 'mae' ? { mae: it.people[nm] } : { uri: it.people[nm] }); n++; }
       if (it.kind === 'uri' && it.hoshu) for (const nm of Object.keys(it.hoshu)) { await backend.saveExtra(nm, { hoshu: it.hoshu[nm] }); n++; }
     }
     S.extraCache = {}; S.ex = { status: 'done', summary: n + '件を保存しました。' }; toast('取り込みました');
