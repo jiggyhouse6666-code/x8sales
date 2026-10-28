@@ -679,7 +679,7 @@ const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや'];  // 店の達成�
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-57 - 2026-10-29';
+const BUILD = 'sales-58 - 2026-10-29';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -1352,6 +1352,22 @@ function attendanceCard(M, e){
   </div>`;
 }
 function mdOf(d){ return d ? Number(d.slice(5, 7)) + '/' + Number(d.slice(8, 10)) : ''; }
+// 店売りバック（グループ売上バック）の段階表。しんさんの個人ページにだけ使う
+const GROUP_BACK = { 'しん': { rows: [['25,000,000', '0.12%', '30,000'], ['30,000,000', '0.25%', '75,000'], ['35,000,000', '0.30%', '105,000'], ['40,000,000', '0.35%', '140,000'], ['50,000,000', '0.40%', '200,000'], ['60,000,000', '0.40%', '240,000'], ['70,000,000', '0.40%', '280,000'], ['80,000,000', '0.40%', '320,000'], ['90,000,000', '0.40%', '360,000'], ['100,000,000', '0.40%', '400,000']], limit: '500,000' } };
+function groupBackCard(e){
+  const tb = e && GROUP_BACK[e.name]; if (!tb) return '';
+  if (!(S.role === 'admin' || (S.role === 'member' && hexOf(e.name) === S.hex))) return '';
+  const ach = S.extra && S.extra.ach && S.extra.ach[S.ym];
+  const g = S.role === 'admin' && S.M ? storeSum(S.M).gross : (ach ? ach.gross : null);
+  let body;
+  if (g == null) body = '<div class="dim">今月の店売りは、管理者が「いまの月を反映する」を押すと出ます。</div>';
+  else { const r = groupBack(tb, g);
+    body = `<div class="lbl">${ymLabel(S.ym)} の店売り（総売上）</div><div class="big sm">${yen(g)}</div>
+      <div class="row2" style="margin-top:12px"><div class="lbl">グループ売上バック<br><small>${r.cur ? yen(r.cur.th) + ' 以上の段階' : '25,000,000円未満'}</small></div><div style="text-align:right"><b style="font-size:26px;color:var(--gold)">${yen(r.back)}</b></div></div>
+      ${r.next ? `<div class="note">次の段階（${yen(r.next.th)}）まで あと ${yen(r.next.th - g)}　→　バック ${yen(r.next.back)}</div>` : '<div class="note">一番上の段階です。</div>'}
+      <div class="note">今月の途中の数字です。月末の店売りで決まります。</div>`; }
+  return `<div class="card"><h2>グループ売上バック</h2>${body}</div>`;
+}
 function groupBack(tb, gross){
   const n = (v) => Number(String(v).replace(/[^0-9.]/g, '')) || 0;
   const tiers = (tb.rows || []).map(r => ({ th: n(r[0]), pct: r[1], back: n(r[2]) })).sort((a, b) => a.th - b.th);
@@ -1364,19 +1380,6 @@ function groupBack(tb, gross){
 function extraCards(x){
   if (!x || !EXTRA_NAMES.includes(x.name)) return '';
   let h = '';
-  if (x.terms && x.terms.table) {
-    const tb = x.terms.table;
-    const ach = x.ach && x.ach[S.ym];
-    const g = S.role === 'admin' && S.M ? storeSum(S.M).gross : (ach ? ach.gross : null);
-    let body;
-    if (g == null) body = '<div class="dim">今月の店売りは、管理者が取り込むと出ます。</div>';
-    else { const r = groupBack(tb, g);
-      body = `<div class="lbl">${ymLabel(S.ym)} の店売り（総売上）</div><div class="big sm">${yen(g)}</div>
-        <div class="row2" style="margin-top:12px"><div class="lbl">グループ売上バック<br><small>${r.cur ? yen(r.cur.th) + ' 以上の段階' : '25,000,000円未満'}</small></div><div style="text-align:right"><b style="font-size:26px;color:var(--gold)">${yen(r.back)}</b></div></div>
-        ${r.next ? `<div class="note">次の段階（${yen(r.next.th)}）まで あと ${yen(r.next.th - g)}　→　バック ${yen(r.next.back)}</div>` : '<div class="note">一番上の段階です。</div>'}
-        <div class="note">今月の途中の数字です。月末の店売りで決まります。</div>`; }
-    h += `<div class="card"><h2>グループ売上バック</h2>${body}</div>`;
-  }
   if (x.mae) {
     const m = x.mae;
     h += `<div class="card"><h2>前入金</h2><div class="lbl">いまの残り</div><div class="big">${yen(m.total)}</div>
@@ -1527,6 +1530,7 @@ function viewPerson(){
   const hist = days.map(d => ({ d, r: rowOf(e, d) })).filter(x => x.r && (x.r.slice(0, 8).some(n => n !== 0) || WORK.includes(x.r[8])));
   return `
   ${achCard(e)}
+  ${groupBackCard(e)}
   ${ME_MODE ? '' : `<button class="btn ghost small" data-a="persclear" style="margin-bottom:10px">${S.role === 'member' ? '← 自分の画面に戻る' : '← 人を選びなおす'}</button>`}
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:22px;font-weight:700">${esc(e.name)}</div><span class="pill">${e.kind === 'ops' ? '運営' : 'キャスト'}</span></div>
