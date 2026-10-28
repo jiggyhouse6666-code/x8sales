@@ -679,7 +679,7 @@ const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや'];  // 店の達成�
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-56 - 2026-10-29';
+const BUILD = 'sales-57 - 2026-10-29';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -1489,9 +1489,10 @@ function achTable(t, gross, target){
     ${gr ? `<div class="scrollx"><table class="tbl ach"><thead><tr><th></th><th>目標</th><th>達成率</th><th>目標まで</th></tr></thead><tbody>${gr}</tbody></table></div>` : ''}
     ${rows ? `<div class="scrollx"><table class="tbl ach"><thead><tr><th></th>${hasPrev ? '<th>先月</th>' : ''}<th>当月</th><th>平均(日)</th>${hasPrev ? '<th>平均先月比</th>' : ''}</tr></thead><tbody>${rows}</tbody></table></div>` : ''}`;
 }
-function achCard(){
-  if (S.role !== 'member' || !ACH_NAMES.some(n => hexOf(n) === S.hex)) return '';
-  const a = S.extra && S.extra.ach && S.extra.ach[S.ym];
+function achCard(e){
+  const adm = S.role === 'admin' && e && ACH_NAMES.includes(e.name) && S.M;
+  if (!adm && (S.role !== 'member' || !ACH_NAMES.some(n => hexOf(n) === S.hex))) return '';
+  const a = adm ? { gross: storeSum(S.M).gross, days: dayList(S.M).length, tbl: S.M.ach } : (S.extra && S.extra.ach && S.extra.ach[S.ym]);
   const target = S.meta.targets && S.meta.targets[S.ym];
   let body;
   if (!target) body = '<div class="dim">今月の目標はまだ決まっていません。</div>';
@@ -1525,7 +1526,7 @@ function viewPerson(){
   const WORK = ['A出勤', 'B出勤', '遅刻'];
   const hist = days.map(d => ({ d, r: rowOf(e, d) })).filter(x => x.r && (x.r.slice(0, 8).some(n => n !== 0) || WORK.includes(x.r[8])));
   return `
-  ${achCard()}
+  ${achCard(e)}
   ${ME_MODE ? '' : `<button class="btn ghost small" data-a="persclear" style="margin-bottom:10px">${S.role === 'member' ? '← 自分の画面に戻る' : '← 人を選びなおす'}</button>`}
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:22px;font-weight:700">${esc(e.name)}</div><span class="pill">${e.kind === 'ops' ? '運営' : 'キャスト'}</span></div>
