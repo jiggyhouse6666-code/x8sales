@@ -674,12 +674,14 @@ const FIREBASE_CONFIG = {
   appId: "1:222731309583:web:3df818ef2166159d77097a"
 };
 const ME_MODE = true;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
+const RANK_VIEW_NAMES = ['るか'];  // 個人ページ（me.html）でランキングも見られる人
+const NEWCOMER_NAMES = ['しん'];  // 新規入店者を見られる人
 const RANK_HIDE = ['しん'];  // 個人ページ・給料明細だけ。ランキングには出さない
 const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや'];  // 店の達成率を個人ページで見られる人
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-60 - 2026-10-29';
+const BUILD = 'sales-63 - 2026-10-29';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -1080,6 +1082,19 @@ function shokaiDaily(M){
   </div>`;
 }
 const STAFF_CARD_SKIP = ['しん', 'ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう']; // 運営のため増減の集計から外す
+// 新規入店者：今月出勤があって、前月は出勤がなかった人（しんさんの個人ページにだけ出す）
+function newcomerCard(M, e){
+  if (!e || !NEWCOMER_NAMES.includes(e.name)) return '';
+  if (!(S.role === 'admin' || (S.role === 'member' && hexOf(e.name) === S.hex))) return '';
+  if (!S.prevM) return `<div class="card"><h2>🆕 新規入店者</h2><div class="dim">前月のデータが入ると表示されます。</div></div>`;
+  const keep = x => STAFF_CARD_SKIP.indexOf(x.name) < 0;
+  const pa = new Set(S.prevM.employees.filter(x => keep(x) && empMonth(S.prevM, x.id).days > 0).map(x => x.id));
+  const add = M.employees.filter(x => keep(x) && empMonth(M, x.id).days > 0 && !pa.has(x.id));
+  return `<div class="card"><h2>🆕 新規入店者（${ymLabel(M.ym)}）</h2>
+    <div class="big sm">${add.length}人</div>
+    <div class="chips" style="margin-top:8px">${add.length ? add.map(x => `<span class="chip">${esc(x.name)}　${empMonth(M, x.id).days}日</span>`).join('') : '<span class="dim">いません</span>'}</div>
+    <div class="note">今月に出勤があって、前月は出勤がなかった人です（日数は今月の出勤日数）。</div></div>`;
+}
 function staffChangeCard(M){
   const keep = e => STAFF_CARD_SKIP.indexOf(e.name) < 0;
   const act = (X) => new Set(X.employees.filter(e => keep(e) && empMonth(X, e.id).days > 0).map(e => e.id));
@@ -1199,7 +1214,8 @@ function rkRow(i, byDay){
       const hasPrev = S.prevM.employees.some(e => e.id === x.id);
       sub = hasPrev ? `<small>${delta(x.v, pv, m.unit)}</small>` : '<small class="dim">前月なし</small>';
     }
-    return `<div class="rk tap r${x.rank <= 3 ? x.rank : ''}" data-a="person" data-id="${esc(x.id)}">
+    const own = S.role === 'member' && hexOf(x.name) === S.hex;
+    return `<div class="rk ${S.role === 'admin' || own ? 'tap' : ''} r${x.rank <= 3 ? x.rank : ''}" ${S.role === 'admin' || own ? `data-a="person" data-id="${esc(x.id)}"` : ''}>
       <div class="no">${x.rank}</div>
       <div class="nm">${esc(x.name)}${x.kind === 'ops' ? '<small>運営</small>' : ''}</div>
       <div class="vl">${val(m, x.v)}${sub}</div></div>`;
@@ -1551,6 +1567,7 @@ function viewPerson(){
   return `
   ${achCard(e)}
   ${groupBackCard(e)}
+  ${newcomerCard(M, e)}
   ${ME_MODE ? '' : `<button class="btn ghost small" data-a="persclear" style="margin-bottom:10px">${S.role === 'member' ? '← 自分の画面に戻る' : '← 人を選びなおす'}</button>`}
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:22px;font-weight:700">${esc(e.name)}</div><span class="pill">${e.kind === 'ops' ? '運営' : 'キャスト'}</span></div>
@@ -1762,10 +1779,11 @@ function render(){
     const msg = ME_MODE ? 'ここは個人用のページです。管理者の人は、こちらを開いてください。' : '個人ログインの人は、個人ページから入ってください。';
     root.innerHTML = `<div class="login"><div class="logo">X8</div><div class="note" style="margin:18px 0">${msg}</div><a class="btn" href="${ME_MODE ? './' : './me.html'}" style="display:block;text-align:center;text-decoration:none">${ME_MODE ? '全体用のページへ' : '個人ページへ'}</a><div style="margin-top:14px"><button class="btn ghost" data-a="logout">ログアウト</button></div></div>`; return;
   }
-  const tabs = ME_MODE ? [['pers', '👤', '自分の実績']] : [['home', '🏠', 'ホーム'], ['rank', '🏆', 'ランキング']];
+  const canRank = ME_MODE && S.role === 'member' && RANK_VIEW_NAMES.some(n => hexOf(n) === S.hex);
+  const tabs = ME_MODE ? (canRank ? [['rank', '🏆', 'ランキング'], ['pers', '👤', '自分の実績']] : [['pers', '👤', '自分の実績']]) : [['home', '🏠', 'ホーム'], ['rank', '🏆', 'ランキング']];
   if (!ME_MODE) { if (S.role === 'admin') tabs.push(['days', '📅', '日別']); tabs.push(['pers', '👤', '個人']); }
   if (S.role === 'admin') tabs.push(['admin', '⚙️', '管理']);
-  if (ME_MODE) S.tab = 'pers';
+  if (ME_MODE) S.tab = canRank && S.tab === 'rank' ? 'rank' : 'pers';
   if (S.role !== 'admin' && (S.tab === 'days' || S.tab === 'admin')) S.tab = 'home';
   let body = '';
   if (S.tab === 'home') body = viewHome();
@@ -1800,7 +1818,7 @@ document.addEventListener('click', async (ev) => {
   else if (a === 'rscope') { S.rankScope = el.dataset.s; render(); }
   else if (a === 'openday') { S.dd = el.dataset.d; S.dayDetail = el.dataset.d; S.tab = 'days'; render(); window.scrollTo(0, 0); }
   else if (a === 'backdays') { S.dayDetail = null; render(); }
-  else if (a === 'person') { S.empId = el.dataset.id; if (S.role !== 'member') lsSet('x8s_emp', S.empId); S.tab = 'pers'; render(); window.scrollTo(0, 0); }
+  else if (a === 'person') { if (S.role === 'member') { const me = S.M && S.M.employees.find(x => hexOf(x.name) === S.hex); if (!me || me.id !== el.dataset.id) return; } S.empId = el.dataset.id; if (S.role !== 'member') lsSet('x8s_emp', S.empId); S.tab = 'pers'; render(); window.scrollTo(0, 0); }
   else if (a === 'printps' || a === 'pdfps') { psOut(a, el); }
   else if (a === 'persclear') { S.empId = null; S.empQuery = ''; render(); }
   else if (a === 'logintab') { S.loginRole = el.dataset.r; S.regMode = false; S.loginErr = ''; render(); }
