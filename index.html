@@ -679,7 +679,7 @@ const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや'];  // 店の達成�
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-58 - 2026-10-29';
+const BUILD = 'sales-60 - 2026-10-29';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -712,6 +712,11 @@ function dayLabel(ym, dd){ const [y, m] = ym.split('-').map(Number); const w = '
 
 /* ---------- month data helpers ---------- */
 const dayList = (M) => Object.keys(M.days).sort();
+// 店売り（総売上）：Excelの「達成率」シートの当月の総売上をそのまま使う。無い時だけ日別の合計
+function storeGrossOf(M){
+  const r = M && M.ach && M.ach.rows ? M.ach.rows.find(x => x.l === '総売上') : null;
+  return r && typeof r.cur === 'number' && r.cur > 0 ? r.cur : storeSum(M).gross;
+}
 function storeSum(M, dds){ const t = {}; KEYS8.forEach(k => t[k] = 0); (dds || dayList(M)).forEach(dd => KEYS8.forEach(k => t[k] += (M.days[dd].store[k] || 0))); return t; }
 function shokaiSum(M, dds){ const t = { kumi: 0, nin: 0, sales: 0 }; (dds || dayList(M)).forEach(dd => { const h = M.days[dd] && M.days[dd].shokai; if (h) { t.kumi += h.kumi || 0; t.nin += h.nin || 0; t.sales += h.sales || 0; } }); return t; }
 function hasShokai(M){ return dayList(M).some(dd => M.days[dd].shokai); }
@@ -1358,7 +1363,7 @@ function groupBackCard(e){
   const tb = e && GROUP_BACK[e.name]; if (!tb) return '';
   if (!(S.role === 'admin' || (S.role === 'member' && hexOf(e.name) === S.hex))) return '';
   const ach = S.extra && S.extra.ach && S.extra.ach[S.ym];
-  const g = S.role === 'admin' && S.M ? storeSum(S.M).gross : (ach ? ach.gross : null);
+  const g = S.role === 'admin' && S.M ? storeGrossOf(S.M) : (ach ? ach.gross : null);
   let body;
   if (g == null) body = '<div class="dim">今月の店売りは、管理者が「いまの月を反映する」を押すと出ます。</div>';
   else { const r = groupBack(tb, g);
@@ -1432,7 +1437,22 @@ async function psOut(kind, btn){
   } catch (err) { try { if (win) win.close(); } catch (_) {} alert('PDFを作れませんでした。ネットにつながっているか確認して、もう一度押してください。'); }
   btn.disabled = false; btn.textContent = label;
 }
+// しんさんの給料明細に、店売りバック（グループ売上バック）を入れる。シートに店売りバックが入っている月は、シートの数字をそのまま使う
+function psAdjust(rec, ym, e){
+  const tb = e && GROUP_BACK[e.name]; if (!tb || !rec || ym < '2026-08') return rec;
+  if (rec.pay.some(x => /店売りバック/.test(x.k) && x.v)) return rec;
+  const ach = S.extra && S.extra.ach && S.extra.ach[ym];
+  const g = S.role === 'admin' && S.M && S.M.ym === ym ? storeGrossOf(S.M) : (ach ? ach.gross : null);
+  if (g == null) return rec;
+  const r = groupBack(tb, g); if (!r.back) return rec;
+  const inc = Math.round(r.back * 0.1);   // 源泉10%
+  const pay = rec.pay.filter(x => !/店売りバック/.test(x.k)).concat([{ k: '店売りバック（グループ売上バック）', v: r.back, note: '店売り ' + yen(g) + '（' + yen(r.cur.th) + ' 以上の段階）／月末の店売りで確定' }]);
+  const ded = rec.ded.map(x => x.k === '源泉' ? Object.assign({}, x, { v: x.v - inc }) : x);
+  const gross = rec.gross + r.back, dedTotal = rec.dedTotal - inc;
+  return Object.assign({}, rec, { pay, ded, gross, dedTotal, net: Math.floor((gross + dedTotal) / 10) * 10 });
+}
 function payslipCard(rec, ym, ex, e){
+  rec = psAdjust(rec, ym, e);
   if (!rec) return '';
   const mon = Number(ym.split('-')[1]);
   const hm = ex && ex.hoshu ? ex.hoshu.find(m => m.n === mon) : null;
@@ -1495,7 +1515,7 @@ function achTable(t, gross, target){
 function achCard(e){
   const adm = S.role === 'admin' && e && ACH_NAMES.includes(e.name) && S.M;
   if (!adm && (S.role !== 'member' || !ACH_NAMES.some(n => hexOf(n) === S.hex))) return '';
-  const a = adm ? { gross: storeSum(S.M).gross, days: dayList(S.M).length, tbl: S.M.ach } : (S.extra && S.extra.ach && S.extra.ach[S.ym]);
+  const a = adm ? { gross: storeGrossOf(S.M), days: dayList(S.M).length, tbl: S.M.ach } : (S.extra && S.extra.ach && S.extra.ach[S.ym]);
   const target = S.meta.targets && S.meta.targets[S.ym];
   let body;
   if (!target) body = '<div class="dim">今月の目標はまだ決まっていません。</div>';
@@ -1891,7 +1911,7 @@ async function doParse(file){
   render();
 }
 async function pushAch(ym, M){
-  const g = storeSum(M).gross, n = dayList(M).length;
+  const g = storeGrossOf(M), n = dayList(M).length;
   const o = { gross: g, days: n, at: Date.now() }; if (M.ach) o.tbl = M.ach;
   for (const nm of ACH_NAMES) await backend.saveExtra(nm, { ach: { [ym]: o } });
 }
