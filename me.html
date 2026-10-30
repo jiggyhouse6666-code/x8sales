@@ -681,8 +681,12 @@ const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや'];  // 店の達成�
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-63 - 2026-10-29';
+const BUILD = 'sales-70 - 2026-10-30';
 
+const GRP_RANK = { asof: '10月28日営業終了時点', lists: [
+  { k:'a', label:'総合', rows: [[1,"結月瑠衣","社長","X8-本店-"],[2,"春葵るか","PD","X8-本店-"],[3,"酸りお","SV","X8-本店-"],[4,"結城春乃","幹部","X8-本店-"],[5,"ひかる","社長","Taurus/Regulus-Lounge-"],[6,"ねむ","支配人","Taurus/Regulus-Lounge-"],[7,"りくと","店長","Attirant"],[8,"白馬 皐矢","統括","X8-本店-"],[9,"千冬","主任","222"],[10,"成宮鳴","Legacy Player","X8-本店-"],[11,"るな","店長","Diamant"],[12,"レオなるド","代表代理","Diamant"],[13,"皇 澪旺","代表代理","Attirant"],[14,"椿 雅","店長","Believe"],[15,"一ノ瀬紅","店長","222"],[16,"にの","PMG","Taurus"],[17,"蒼森璃央","支配人","Believe"],[18,"凪咲なぎさ","支配人","Diamant"],[19,"まさや","副主任","222"],[20,"神宮寺 福","Lead Player","X8-本店-"],[21,"あおい","幹部補佐","X8-本店-"],[22,"イヴ","幹部補佐","X8-本店-"],[23,"黒崎斗夢","副主任","X8-本店-"],[24,"れん","社長","Attirant"],[25,"楓","","X8-本店-"],[26,"あおい","店長","Regulus-Lounge-"],[27,"暁ときな","幹部補佐","X8-本店-"],[28,"美澄奏多","AAD","X8-本店-"],[29,"椿 翔大","PADV","222"],[30,"叶桜","","Regulus-Lounge-"],[31,"神崎零","幹部","X8-本店-"],[32,"N","","Believe"],[33,"ゆうと","PMG","Attirant"],[34,"そら","PMG","Regulus-Lounge-"],[35,"あまと","","Diamant"],[36,"りゅうが","","Believe"],[37,"メロ","副主任","Taurus"],[38,"麗夜","","Diamant"],[39,"アヤト","","Believe"],[40,"佳夜","","Regulus-Lounge-"],[41,"しゅん","","222"],[42,"ミナミ","","Attirant"],[43,"奏","","X8-本店-"],[44,"こはく","","Diamant"],[45,"カヲ","PMG","Regulus-Lounge-"],[46,"はんぞう","","Taurus"],[47,"雨宮 楓","","Attirant"],[48,"うた","","Taurus"],[49,"冬夜","","X8-本店-"],[50,"兎","","Attirant"],[51,"恋白 凛","","Taurus"],[52,"れい","","Taurus"],[53,"密","","X8-本店-"],[54,"瀬恋","","Diamant"],[55,"なつき","","222"],[56,"猫宮 はいる","","X8-本店-"],[57,"なおと","","Attirant"],[58,"鈴屋 什造","","X8-本店-"],[59,"桜翔","","Believe"],[60,"みさき","","Diamant"],[61,"なお","","Regulus-Lounge-"],[62,"さの","","222"],[63,"海景","","X8-本店-"],[64,"せな","","X8-本店-"],[65,"ゆうしん","","Attirant"],[66,"舞桜","","X8-本店-"],[67,"こーき","","X8-本店-"],[68,"成瀬 伊織","","Taurus"],[69,"大魔王","","X8-本店-"],[70,"ラム","","Diamant"],[71,"なおき","","222"],[72,"やまと","","Believe"],[73,"じん","","X8-本店-"],[74,"帝神月零織","","X8-本店-"],[75,"来夢","","222"],[76,"ぽん","","Taurus"],[77,"さつき","","Believe"],[78,"まなと","","Taurus"],[79,"眞月尽柘榴","","X8-本店-"],[80,"とむ","","222"],[81,"むの","","Taurus"],[82,"凰","","222"],[83,"りゅう","","X8-本店-"],[84,"おとぎ","","X8-本店-"]] },
+  { k:'b', label:'HBR', rows: [[1,"結城春乃","幹部","X8-本店-"],[2,"あおい","幹部補佐","X8-本店-"],[3,"楓","","X8-本店-"],[4,"叶桜","","Regulus-Lounge-"],[5,"N","","Believe"],[6,"りゅうが","","Believe"],[7,"メロ","副主任","Taurus"],[8,"麗夜","","Diamant"],[9,"アヤト","","Believe"],[10,"佳夜","","Regulus-Lounge-"],[11,"しゅん","","222"],[12,"ミナミ","","Attirant"],[13,"こはく","","Diamant"],[14,"うた","","Taurus"],[15,"兎","","Attirant"],[16,"れい","","Taurus"],[17,"瀬恋","","Diamant"],[18,"なつき","","222"],[19,"猫宮 はいる","","X8-本店-"],[20,"なおと","","Attirant"],[21,"鈴屋 什造","","X8-本店-"],[22,"みさき","","Diamant"],[23,"さの","","222"],[24,"海景","","X8-本店-"],[25,"せな","","X8-本店-"],[26,"ゆうしん","","Attirant"],[27,"こーき","","X8-本店-"],[28,"大魔王","","X8-本店-"],[29,"ラム","","Diamant"],[30,"やまと","","Believe"],[31,"帝神月零織","","X8-本店-"],[32,"ぽん","","Taurus"],[33,"さつき","","Believe"],[34,"まなと","","Taurus"],[35,"とむ","","222"],[36,"むの","","Taurus"],[37,"りゅう","","X8-本店-"]] }
+] };  // 金額なしの順位表。PDFが来たらここを差し替える
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
   { k:'gross',  i:1, label:'総売',       unit:'yen' },
@@ -965,6 +969,14 @@ function delta(cur, prev, unit){
   return `<span class="${d > 0 ? 'pos' : 'neg'}">${d > 0 ? '▲' : '▼'} ${s}</span>`;
 }
 
+function grpHomeCard(){
+  if (!grpOk()) return '';
+  const row = (r) => `<div class="rk r${r[0] <= 3 ? r[0] : ''}"><div class="no">${r[0]}</div><div class="nm">${esc(r[1])}${r[2] ? `<small>${esc(r[2])}</small>` : ''}</div><div class="vl" style="font-size:12px;font-family:'Noto Sans JP';color:${/X8/.test(r[3]) ? 'var(--gold)' : 'var(--dim)'}">${esc(r[3].replace(/^-|-$/g, ''))}</div></div>`;
+  return `<div class="card"><h2>総合売上ランキング TOP10</h2><div class="note" style="margin-top:0">${GRP_RANK.asof}</div>
+    ${GRP_RANK.lists[0].rows.slice(0, 10).map(row).join('')}
+    <div style="margin-top:10px"><button class="btn ghost small" data-a="grpgo" data-k="grp_a">総合をすべて見る</button> <button class="btn ghost small" data-a="grpgo" data-k="grp_b">HBR</button></div>
+  </div>`;
+}
 function viewHomeLite(){
   const M = S.M; if (!M) return noData();
   const days = dayList(M);
@@ -979,6 +991,7 @@ function viewHomeLite(){
     ${rk.length ? rk.map(rkRow(0, false)).join('') : '<div class="dim">データなし</div>'}
     <div style="margin-top:10px"><button class="btn ghost small" data-a="tab" data-t="rank">ランキングをすべて見る</button></div>
   </div>
+  ${grpHomeCard()}
   ${S.role === 'member' ? '<div class="card"><button class="btn" data-a="tab" data-t="pers">自分の実績を見る</button></div>' : ''}
   ${updatedLine()}`;
 }
@@ -1157,6 +1170,7 @@ function viewHome(){
     ${rk.length ? rk.map(rkRow(0, false)).join('') : '<div class="dim">データなし</div>'}
     <div style="margin-top:10px"><button class="btn ghost small" data-a="tab" data-t="rank">ランキングをすべて見る</button></div>
   </div>
+  ${grpHomeCard()}
   ${updatedLine()}`;
 }
 // 店舗の総売（パスワードの中＝日別タブにだけ置く）
@@ -1223,7 +1237,7 @@ function rkRow(i, byDay){
 }
 
 const gridMetList = () => MET;
-const metList = () => S.role === 'admin' ? MET.filter(z => z.k !== 'gross') : MET.filter(z => z.k !== 'gross');
+const metList = () => S.role === 'admin' ? MET : MET.filter(z => z.k !== 'gross');  // 総売ランキングは管理者だけ
 function viewCompare(M, m){
   if (!S.prevM) return '<div class="card"><div class="empty">前月のデータがまだありません。<br>管理者が前月のExcelを取り込むと表示されます。</div></div>';
   const P = S.prevM, i = m.i;
@@ -1244,11 +1258,21 @@ function viewCompare(M, m){
   </div>`;
 }
 
+const grpOk = () => !ME_MODE && (S.role === 'admin' || S.role === 'staff');  // 店売り側（全体用index）だけ。個人ページには出さない  // 金額なし。全体用(index)は従業員ログインも、個人用は店売りが見える4人
+const storeRankOk = () => !ME_MODE || (ME_MODE && S.role === 'member' && RANK_VIEW_NAMES.some(n => hexOf(n) === S.hex));
+const grpKey = () => (S.rankMetric || '').startsWith('grp_') && grpOk() ? S.rankMetric.slice(4) : null;
+function rankChips(activeK){
+  const a = storeRankOk() ? metList().map(z => `<button class="${z.k === activeK ? 'on' : ''}" data-a="rmetric" data-k="${z.k}">${z.label}</button>`) : [];
+  const g = grpOk() ? GRP_RANK.lists.map(x => `<button class="${'grp_' + x.k === activeK ? 'on' : ''}" data-a="rmetric" data-k="grp_${x.k}">${x.k === 'a' ? '総合' : x.label}</button>`) : [];
+  return `<div class="seg">${a.concat(g).join('')}</div>`;
+}
 function viewRank(){
+  if (!storeRankOk() && grpOk() && !grpKey()) S.rankMetric = 'grp_a';
+  if (grpKey()) return rankChips(S.rankMetric) + viewGrp(grpKey()) + updatedLine();
   const M = S.M; if (!M) return noData();
   const m = metList().find(z => z.k === S.rankMetric) || metList()[0];
   if (S.rankView === 'cmp') return `<div class="seg2"><button data-a="rview" data-v="rank">ランキング</button><button class="on" data-a="rview" data-v="cmp">前月比一覧</button></div>
-  <div class="seg">${metList().map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="rmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
+  ${rankChips(m.k)}
   ${viewCompare(M, m)}${updatedLine()}`;
   const byDay = S.role === 'admin' && S.rankScope === 'day' && S.dd;
   const list = ranking(M, m.i, byDay ? S.dd : null);
@@ -1256,7 +1280,7 @@ function viewRank(){
   const days = dayList(M);
   return `
   <div class="seg2"><button class="on" data-a="rview" data-v="rank">ランキング</button><button data-a="rview" data-v="cmp">前月比一覧</button></div>
-  <div class="seg">${metList().map(z => `<button class="${z.k === m.k ? 'on' : ''}" data-a="rmetric" data-k="${z.k}">${z.label}</button>`).join('')}</div>
+  ${rankChips(m.k)}
   ${S.role === 'admin' ? `<div class="seg2">
     <button class="${!byDay ? 'on' : ''}" data-a="rscope" data-s="month">${ymLabel(M.ym)} 月間</button>
     <button class="${byDay ? 'on' : ''}" data-a="rscope" data-s="day">日別</button>
@@ -1269,6 +1293,15 @@ function viewRank(){
   </div>
   <div class="note">同じ数字の人は同じ順位です。同順位の並びは名簿順です。${zero.length ? ` 実績0の ${zero.length}人 は表示していません。` : ''}</div>
   ${updatedLine()}`;
+}
+
+function viewGrp(key){
+  const L = GRP_RANK.lists.find(x => x.k === key) || GRP_RANK.lists[0];
+  const row = (r) => `<div class="rk r${r[0] <= 3 ? r[0] : ''}"><div class="no">${r[0]}</div><div class="nm">${esc(r[1])}${r[2] ? `<small>${esc(r[2])}</small>` : ''}</div><div class="vl" style="font-size:12px;font-family:'Noto Sans JP';color:${/X8/.test(r[3]) ? 'var(--gold)' : 'var(--dim)'}">${esc(r[3].replace(/^-|-$/g, '').replace(/-$/, ''))}</div></div>`;
+  return `<div class="card"><h2>X8 総合売上ランキング${L.k === 'b' ? '（HBR）' : ''}</h2><div class="note" style="margin-top:0">${GRP_RANK.asof}</div>
+    ${L.rows.map(row).join('')}
+  </div>
+  <div class="note">金額は載せていません。順位だけの表です。</div>`;
 }
 
 function viewGrid(M){
@@ -1780,10 +1813,11 @@ function render(){
     root.innerHTML = `<div class="login"><div class="logo">X8</div><div class="note" style="margin:18px 0">${msg}</div><a class="btn" href="${ME_MODE ? './' : './me.html'}" style="display:block;text-align:center;text-decoration:none">${ME_MODE ? '全体用のページへ' : '個人ページへ'}</a><div style="margin-top:14px"><button class="btn ghost" data-a="logout">ログアウト</button></div></div>`; return;
   }
   const canRank = ME_MODE && S.role === 'member' && RANK_VIEW_NAMES.some(n => hexOf(n) === S.hex);
-  const tabs = ME_MODE ? (canRank ? [['rank', '🏆', 'ランキング'], ['pers', '👤', '自分の実績']] : [['pers', '👤', '自分の実績']]) : [['home', '🏠', 'ホーム'], ['rank', '🏆', 'ランキング']];
+  const canGrp = false;
+  const tabs = ME_MODE ? ((canRank || canGrp) ? [['rank', '🏆', 'ランキング'], ['pers', '👤', '自分の実績']] : [['pers', '👤', '自分の実績']]) : [['home', '🏠', 'ホーム'], ['rank', '🏆', 'ランキング']];
   if (!ME_MODE) { if (S.role === 'admin') tabs.push(['days', '📅', '日別']); tabs.push(['pers', '👤', '個人']); }
   if (S.role === 'admin') tabs.push(['admin', '⚙️', '管理']);
-  if (ME_MODE) S.tab = canRank && S.tab === 'rank' ? 'rank' : 'pers';
+  if (ME_MODE) S.tab = ((canRank || canGrp) && S.tab === 'rank') ? 'rank' : 'pers';
   if (S.role !== 'admin' && (S.tab === 'days' || S.tab === 'admin')) S.tab = 'home';
   let body = '';
   if (S.tab === 'home') body = viewHome();
@@ -1818,6 +1852,8 @@ document.addEventListener('click', async (ev) => {
   else if (a === 'rscope') { S.rankScope = el.dataset.s; render(); }
   else if (a === 'openday') { S.dd = el.dataset.d; S.dayDetail = el.dataset.d; S.tab = 'days'; render(); window.scrollTo(0, 0); }
   else if (a === 'backdays') { S.dayDetail = null; render(); }
+  else if (a === 'grpgo') { S.rankMetric = el.dataset.k; S.rankView = 'rank'; S.tab = 'rank'; render(); window.scrollTo(0, 0); }
+  else if (a === 'gview') { S.grpView = el.dataset.v; render(); }
   else if (a === 'person') { if (S.role === 'member') { const me = S.M && S.M.employees.find(x => hexOf(x.name) === S.hex); if (!me || me.id !== el.dataset.id) return; } S.empId = el.dataset.id; if (S.role !== 'member') lsSet('x8s_emp', S.empId); S.tab = 'pers'; render(); window.scrollTo(0, 0); }
   else if (a === 'printps' || a === 'pdfps') { psOut(a, el); }
   else if (a === 'persclear') { S.empId = null; S.empQuery = ''; render(); }
