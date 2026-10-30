@@ -681,7 +681,7 @@ const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや'];  // 店の達成�
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-70 - 2026-10-30';
+const BUILD = 'sales-71 - 2026-10-30';
 
 const GRP_RANK = { asof: '10月28日営業終了時点', lists: [
   { k:'a', label:'総合', rows: [[1,"結月瑠衣","社長","X8-本店-"],[2,"春葵るか","PD","X8-本店-"],[3,"酸りお","SV","X8-本店-"],[4,"結城春乃","幹部","X8-本店-"],[5,"ひかる","社長","Taurus/Regulus-Lounge-"],[6,"ねむ","支配人","Taurus/Regulus-Lounge-"],[7,"りくと","店長","Attirant"],[8,"白馬 皐矢","統括","X8-本店-"],[9,"千冬","主任","222"],[10,"成宮鳴","Legacy Player","X8-本店-"],[11,"るな","店長","Diamant"],[12,"レオなるド","代表代理","Diamant"],[13,"皇 澪旺","代表代理","Attirant"],[14,"椿 雅","店長","Believe"],[15,"一ノ瀬紅","店長","222"],[16,"にの","PMG","Taurus"],[17,"蒼森璃央","支配人","Believe"],[18,"凪咲なぎさ","支配人","Diamant"],[19,"まさや","副主任","222"],[20,"神宮寺 福","Lead Player","X8-本店-"],[21,"あおい","幹部補佐","X8-本店-"],[22,"イヴ","幹部補佐","X8-本店-"],[23,"黒崎斗夢","副主任","X8-本店-"],[24,"れん","社長","Attirant"],[25,"楓","","X8-本店-"],[26,"あおい","店長","Regulus-Lounge-"],[27,"暁ときな","幹部補佐","X8-本店-"],[28,"美澄奏多","AAD","X8-本店-"],[29,"椿 翔大","PADV","222"],[30,"叶桜","","Regulus-Lounge-"],[31,"神崎零","幹部","X8-本店-"],[32,"N","","Believe"],[33,"ゆうと","PMG","Attirant"],[34,"そら","PMG","Regulus-Lounge-"],[35,"あまと","","Diamant"],[36,"りゅうが","","Believe"],[37,"メロ","副主任","Taurus"],[38,"麗夜","","Diamant"],[39,"アヤト","","Believe"],[40,"佳夜","","Regulus-Lounge-"],[41,"しゅん","","222"],[42,"ミナミ","","Attirant"],[43,"奏","","X8-本店-"],[44,"こはく","","Diamant"],[45,"カヲ","PMG","Regulus-Lounge-"],[46,"はんぞう","","Taurus"],[47,"雨宮 楓","","Attirant"],[48,"うた","","Taurus"],[49,"冬夜","","X8-本店-"],[50,"兎","","Attirant"],[51,"恋白 凛","","Taurus"],[52,"れい","","Taurus"],[53,"密","","X8-本店-"],[54,"瀬恋","","Diamant"],[55,"なつき","","222"],[56,"猫宮 はいる","","X8-本店-"],[57,"なおと","","Attirant"],[58,"鈴屋 什造","","X8-本店-"],[59,"桜翔","","Believe"],[60,"みさき","","Diamant"],[61,"なお","","Regulus-Lounge-"],[62,"さの","","222"],[63,"海景","","X8-本店-"],[64,"せな","","X8-本店-"],[65,"ゆうしん","","Attirant"],[66,"舞桜","","X8-本店-"],[67,"こーき","","X8-本店-"],[68,"成瀬 伊織","","Taurus"],[69,"大魔王","","X8-本店-"],[70,"ラム","","Diamant"],[71,"なおき","","222"],[72,"やまと","","Believe"],[73,"じん","","X8-本店-"],[74,"帝神月零織","","X8-本店-"],[75,"来夢","","222"],[76,"ぽん","","Taurus"],[77,"さつき","","Believe"],[78,"まなと","","Taurus"],[79,"眞月尽柘榴","","X8-本店-"],[80,"とむ","","222"],[81,"むの","","Taurus"],[82,"凰","","222"],[83,"りゅう","","X8-本店-"],[84,"おとぎ","","X8-本店-"]] },
@@ -1264,7 +1264,7 @@ const grpKey = () => (S.rankMetric || '').startsWith('grp_') && grpOk() ? S.rank
 function rankChips(activeK){
   const a = storeRankOk() ? metList().map(z => `<button class="${z.k === activeK ? 'on' : ''}" data-a="rmetric" data-k="${z.k}">${z.label}</button>`) : [];
   const g = grpOk() ? GRP_RANK.lists.map(x => `<button class="${'grp_' + x.k === activeK ? 'on' : ''}" data-a="rmetric" data-k="grp_${x.k}">${x.k === 'a' ? '総合' : x.label}</button>`) : [];
-  return `<div class="seg">${a.concat(g).join('')}</div>`;
+  return (a.length ? `<div class="seg">${a.join('')}</div>` : '') + (g.length ? `<div class="seg">${g.join('')}</div>` : '');
 }
 function viewRank(){
   if (!storeRankOk() && grpOk() && !grpKey()) S.rankMetric = 'grp_a';
