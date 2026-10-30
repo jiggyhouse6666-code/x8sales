@@ -681,7 +681,7 @@ const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや'];  // 店の達成�
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-63 - 2026-10-29';
+const BUILD = 'sales-64 - 2026-10-30';
 
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -1223,7 +1223,7 @@ function rkRow(i, byDay){
 }
 
 const gridMetList = () => MET;
-const metList = () => S.role === 'admin' ? MET.filter(z => z.k !== 'gross') : MET.filter(z => z.k !== 'gross');
+const metList = () => S.role === 'admin' ? MET : MET.filter(z => z.k !== 'gross');  // 総売ランキングは管理者だけ
 function viewCompare(M, m){
   if (!S.prevM) return '<div class="card"><div class="empty">前月のデータがまだありません。<br>管理者が前月のExcelを取り込むと表示されます。</div></div>';
   const P = S.prevM, i = m.i;
