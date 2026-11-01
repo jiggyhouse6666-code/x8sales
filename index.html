@@ -370,7 +370,8 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
     var gross = pNum(g(33, 2)), dedT = pNum(g(35, 5)), net = pNum(g(5, 2));
     var sp = pay.reduce(function (a, x) { return a + x.v; }, 0);
     if (Math.abs(sp - gross) > 20) report.warnings.push({ level: 'warn', msg: name + ' さんの給料明細：支給の合計が、シートの合計と合いません（' + sp + ' / ' + pRound(gross) + '）' });
-    return { label: label, net: pRound(net), gross: pRound(gross), dedTotal: pRound(dedT), pay: pay, ded: ded };
+    var adj = pNum(g(17, 9));  // 「調整分時給」（遅出勤・早帰りの計算に使う。30分あたり＝時給÷2）
+    return { label: label, net: pRound(net), gross: pRound(gross), dedTotal: pRound(dedT), pay: pay, ded: ded, adjHourly: adj && adj > 0 ? pRound(adj) : null };
   }
   function payOps(rows, label, name, report) {
     var g = function (r, c) { var rw = rows[r - 1]; return rw ? rw[c] : null; };
@@ -681,7 +682,7 @@ const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや'];  // 店の達成�
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-72 - 2026-10-30';
+const BUILD = 'sales-74 - 2026-11-01';
 
 const GRP_RANK = { asof: '10月28日営業終了時点', lists: [
   { k:'a', label:'総合', rows: [[1,"結月瑠衣","社長","X8-本店-",17812800],[2,"春葵るか","PD","X8-本店-",3709400],[3,"酸りお","SV","X8-本店-",3557900],[4,"結城春乃","幹部","X8-本店-",3336300],[5,"ひかる","社長","Taurus/Regulus-Lounge-",2742300],[6,"ねむ","支配人","Taurus/Regulus-Lounge-",2363300],[7,"りくと","店長","Attirant",2308000],[8,"白馬 皐矢","統括","X8-本店-",2299500],[9,"千冬","主任","222",2290200],[10,"成宮鳴","Legacy Player","X8-本店-",2074700],[11,"るな","店長","Diamant",1788500],[12,"レオなるド","代表代理","Diamant",1749500],[13,"皇 澪旺","代表代理","Attirant",1634700],[14,"椿 雅","店長","Believe",1630900],[15,"一ノ瀬紅","店長","222",1431000],[16,"にの","PMG","Taurus",1400900],[17,"蒼森璃央","支配人","Believe",1379900],[18,"凪咲なぎさ","支配人","Diamant",1293400],[19,"まさや","副主任","222",1216600],[20,"神宮寺 福","Lead Player","X8-本店-",1133500],[21,"あおい","幹部補佐","X8-本店-",1063800],[22,"イヴ","幹部補佐","X8-本店-",1042300],[23,"黒崎斗夢","副主任","X8-本店-",1021800],[24,"れん","社長","Attirant",1007600],[25,"楓","","X8-本店-",881500],[26,"あおい","店長","Regulus-Lounge-",868300],[27,"暁ときな","幹部補佐","X8-本店-",779600],[28,"美澄奏多","AAD","X8-本店-",757400],[29,"椿 翔大","PADV","222",755900],[30,"叶桜","","Regulus-Lounge-",699700],[31,"神崎零","幹部","X8-本店-",575600],[32,"N","","Believe",562100],[33,"ゆうと","PMG","Attirant",553500],[34,"そら","PMG","Regulus-Lounge-",503000],[35,"あまと","","Diamant",494100],[36,"りゅうが","","Believe",474400],[37,"メロ","副主任","Taurus",470100],[38,"麗夜","","Diamant",464100],[39,"アヤト","","Believe",419500],[40,"佳夜","","Regulus-Lounge-",290100],[41,"しゅん","","222",272000],[42,"ミナミ","","Attirant",255600],[43,"奏","","X8-本店-",213400],[44,"こはく","","Diamant",209100],[45,"カヲ","PMG","Regulus-Lounge-",201000],[46,"はんぞう","","Taurus",191800],[47,"雨宮 楓","","Attirant",188700],[48,"うた","","Taurus",173500],[49,"冬夜","","X8-本店-",168500],[50,"兎","","Attirant",167300],[51,"恋白 凛","","Taurus",163700],[52,"れい","","Taurus",161500],[53,"密","","X8-本店-",151500],[54,"瀬恋","","Diamant",142000],[55,"なつき","","222",138300],[56,"猫宮 はいる","","X8-本店-",128700],[57,"なおと","","Attirant",118100],[58,"鈴屋 什造","","X8-本店-",110400],[59,"桜翔","","Believe",103200],[60,"みさき","","Diamant",100200],[61,"なお","","Regulus-Lounge-",99400],[62,"さの","","222",96200],[63,"海景","","X8-本店-",64200],[64,"せな","","X8-本店-",47600],[65,"ゆうしん","","Attirant",44500],[66,"舞桜","","X8-本店-",43700],[67,"こーき","","X8-本店-",37900],[68,"成瀬 伊織","","Taurus",37500],[69,"大魔王","","X8-本店-",36900],[70,"ラム","","Diamant",36200],[71,"なおき","","222",30700],[72,"やまと","","Believe",22900],[73,"じん","","X8-本店-",20000],[74,"帝神月零織","","X8-本店-",18100],[75,"来夢","","222",13600],[76,"ぽん","","Taurus",12500],[77,"さつき","","Believe",10000],[78,"まなと","","Taurus",10000],[79,"眞月尽柘榴","","X8-本店-",10000],[80,"とむ","","222",6900],[81,"むの","","Taurus",6400],[82,"凰","","222",5800],[83,"りゅう","","X8-本店-",5000],[84,"おとぎ","","X8-本店-",5000]] },
@@ -1379,7 +1380,23 @@ function rowOf(e, dd){
 function privGross(P){ if (!P || !P.days) return null; let g = 0; Object.keys(P.days).forEach(dd => { g += (P.days[dd] && P.days[dd][1]) || 0; }); return g; }
 function canDetail(e){ return S.role === 'admin' || (S.role === 'member' && hexOf(e.name) === S.hex); }
 const ATT_MARK = { 'A出勤': ['A', 'var(--gold)'], 'B出勤': ['B', '#7fd1b9'], '遅刻': ['遅', '#e8b04a'], '当欠': ['欠', '#e0566b'], '無欠': ['欠', '#e0566b'], '欠勤': ['欠', '#e0566b'], '出欠': ['出欠', '#9b94a6'], '休み': ['休', '#6f6a7a'], '有給': ['有', '#8aa4ff'], 'メンバー': ['メ', '#9b94a6'] };
-function attendanceCard(M, e){
+// 勤務時間：A出勤=19:00〜、B出勤=20:00〜、終わりは26:00。遅出勤・早帰りは金額(600円=30分)から時間にもどす
+const WORK_END = 26, WORK_START = { 'A出勤': 19, 'B出勤': 20 }, LATE_YEN_PER_30 = 600;
+function workHours(cnt, rec){
+  const base = (cnt['A出勤'] || 0) * (WORK_END - WORK_START['A出勤']) + (cnt['B出勤'] || 0) * (WORK_END - WORK_START['B出勤']);
+  const pick = (k) => { const x = rec && rec.ded ? rec.ded.find(d => d.k === k) : null; return x ? Math.abs(x.v) : 0; };
+  // 30分あたりの金額：ふつうは600円。日給が高い人(日給の平均が8,000円以上＝1万円の人)は、Excelの「調整分時給」1,700円÷2＝850円
+  const bp = rec && rec.pay ? rec.pay.find(x => x.k === '基本給') : null;
+  const bdays = bp && bp.note ? (bp.note.match(/(\d+(?:\.\d+)?)日/g) || []).reduce((a, t) => a + parseFloat(t), 0) : 0;
+  const avgWage = bp && bdays ? bp.v / bdays : 0;
+  const per30 = avgWage >= 8000 ? ((rec.adjHourly || 1700) / 2) : LATE_YEN_PER_30;
+  const hrs = (yen) => yen / per30 * 0.5;
+  const late = hrs(pick('遅出勤')), early = hrs(pick('早帰り'));
+  const odd = [pick('遅出勤'), pick('早帰り')].some(v => v % per30 !== 0);
+  return { base, late, early, total: Math.max(0, base - late - early), odd, known: !!rec, per30, hasAdj: !!(rec && rec.adjHourly) };
+}
+const hFmt = (h) => (Math.round(h * 100) / 100) + '時間';
+function attendanceCard(M, e, rec){
   const days = dayList(M); const [y, mo] = M.ym.split('-').map(Number); const first = new Date(y, mo - 1, 1).getDay(); const N = M.daysInMonth;
   const cnt = {}; let work = 0;
   const att = (dd) => { const r = rowOf(e, dd); return r ? (r[8] || '') : null; };
@@ -1401,6 +1418,12 @@ function attendanceCard(M, e){
       <div class="kpi"><div class="v">${cnt['B出勤'] || 0}</div><div class="l">B出勤</div></div>
       <div class="kpi"><div class="v">${off}</div><div class="l">休み・有給</div></div>
     </div>
+    ${(() => { const w = workHours(cnt, rec); return `<div class="kpis" style="margin-top:12px">
+      <div class="kpi"><div class="v" style="color:var(--gold)">${hFmt(w.total)}</div><div class="l">勤務時間（合計）</div></div>
+      <div class="kpi"><div class="v">${hFmt(w.base)}</div><div class="l">予定（A7h・B6h）</div></div>
+      <div class="kpi"><div class="v">${w.known ? hFmt(w.late) : '—'}</div><div class="l">遅出勤</div></div>
+      <div class="kpi"><div class="v">${w.known ? hFmt(w.early) : '—'}</div><div class="l">早帰り</div></div>
+    </div><div class="note">A出勤は19時、B出勤は20時から26時まで。遅出勤・早帰りは、Excelの金額を30分あたりの金額で時間にもどしています（ふつうは600円、日給1万円の人は850円）。${w.per30 !== 600 ? `この人は30分あたり${yen(w.per30)}です。` : ''}${w.odd ? '割り切れない金額があるので、目安の時間です。' : ''}遅刻の日は開始時間が分からないため、勤務時間に入れていません。</div>`; })()}
     <div class="cal" style="margin-top:14px">${'日月火水木金土'.split('').map(w => `<div class="dw">${w}</div>`).join('')}${cells}</div>
     <div class="note">A=A出勤　B=B出勤　遅=遅刻　欠=当欠など　休=休み　有=有給　「—」は記録なし。Excelの「出勤」の列の記録です。営業していない日は薄く表示しています。</div>
   </div>`;
@@ -1620,7 +1643,7 @@ function viewPerson(){
     <div class="note">月間目標は店舗全体のみです（個人目標は未設定）。</div>
   </div>
   ${detail ? (() => { const x = extraFor(e); return extraCards(x); })() : ''}
-  ${detail ? attendanceCard(M, e) + payslipCard(S.role === 'admin' ? (M.pay && M.pay[e.id]) : (S.priv && S.priv.pay), M.ym, extraFor(e), e) : ''}
+  ${detail ? (() => { const rec = S.role === 'admin' ? (M.pay && M.pay[e.id]) : (S.priv && S.priv.pay); return attendanceCard(M, e, rec) + payslipCard(rec, M.ym, extraFor(e), e); })() : ''}
   ${!detail ? '<div class="card"><h2>🔒 日別履歴</h2><div class="dim">日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div></div>' : `<div class="card"><h2>日別履歴</h2>
     <div class="scrollx"><table class="tbl"><thead><tr><th>営業日</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
     ${hist.slice().reverse().map(({ d, r }) => `<tr ${S.role === 'admin' ? `class="tap" data-a="openday" data-d="${d}"` : ''}><td>${Number(M.ym.split('-')[1])}/${Number(d)}</td><td>${fmt(r[0])}</td><td>${fmt(r[1])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" class="dim">実績なし</td></tr>'}
