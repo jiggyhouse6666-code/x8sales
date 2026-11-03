@@ -541,9 +541,26 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
       .sort(function (a, b) { return a.no - b.no; });
     var payMap = {};
     try { payMap = parsePayslips(XLSX, data, names, employees, mon, report); } catch (e) { report.warnings.push({ level: 'warn', msg: '給料明細を読み込めませんでした: ' + (e && e.message || e) }); }
+    var entry = {};
+    try {
+      var wsS = wb.Sheets['設定'];
+      if (wsS) {
+        var ec = 0;
+        for (var c0 = 1; c0 <= 30 && !ec; c0++) { if (/入店区分|体験|本入店/.test(str(val(wsS, 2, c0)))) ec = c0; }
+        if (ec) {
+          var okIds = {}; employees.forEach(function (e) { okIds[e.id] = 1; });
+          for (var r0 = 3; r0 <= 130; r0++) {
+            var nm0 = cleanName(val(wsS, r0, 5)), ev = str(val(wsS, r0, ec));
+            if (!nm0 || !ev || nm0 === '登録名') continue;
+            var id0 = nameId(nm0); if (!okIds[id0]) continue;
+            entry[id0] = /体験/.test(ev) ? '体験' : (/本/.test(ev) ? '本入店' : '');
+          }
+        }
+      }
+    } catch (e) {}
     var achObj = null; try { achObj = parseAch(XLSX, wb); } catch (e) { report.warnings.push({ level: 'warn', msg: '達成率シートを読み込めませんでした: ' + (e && e.message || e) }); }
     var monthObj = {
-      pay: payMap, ach: achObj,
+      pay: payMap, ach: achObj, entry: entry,
       ym: ym, year: year, month: mon, daysInMonth: daysInMonth,
       employees: employees.map(function (e) { return { id: e.id, name: e.name, kind: e.kind }; }),
       days: days,
@@ -708,8 +725,8 @@ const FB_VER = '12.19.0';
 const BUILD = 'sales-76 - 2026-11-02';
 
 const GRP_RANK = { asof: '10月28日営業終了時点', lists: [
-  { k:'a', label:'総合', rows: [[1,"結月瑠衣","社長","X8-本店-",17812800],[2,"春葵るか","PD","X8-本店-",3709400],[3,"酸りお","SV","X8-本店-",3557900],[4,"結城春乃","幹部","X8-本店-",3336300],[5,"ひかる","社長","Taurus/Regulus-Lounge-",2742300],[6,"ねむ","支配人","Taurus/Regulus-Lounge-",2363300],[7,"りくと","店長","Attirant",2308000],[8,"白馬 皐矢","統括","X8-本店-",2299500],[9,"千冬","主任","222",2290200],[10,"成宮鳴","Legacy Player","X8-本店-",2074700],[11,"るな","店長","Diamant",1788500],[12,"レオなるド","代表代理","Diamant",1749500],[13,"皇 澪旺","代表代理","Attirant",1634700],[14,"椿 雅","店長","Believe",1630900],[15,"一ノ瀬紅","店長","222",1431000],[16,"にの","PMG","Taurus",1400900],[17,"蒼森璃央","支配人","Believe",1379900],[18,"凪咲なぎさ","支配人","Diamant",1293400],[19,"まさや","副主任","222",1216600],[20,"神宮寺 福","Lead Player","X8-本店-",1133500],[21,"あおい","幹部補佐","X8-本店-",1063800],[22,"イヴ","幹部補佐","X8-本店-",1042300],[23,"黒崎斗夢","副主任","X8-本店-",1021800],[24,"れん","社長","Attirant",1007600],[25,"楓","","X8-本店-",881500],[26,"あおい","店長","Regulus-Lounge-",868300],[27,"暁ときな","幹部補佐","X8-本店-",779600],[28,"美澄奏多","AAD","X8-本店-",757400],[29,"椿 翔大","PADV","222",755900],[30,"叶桜","","Regulus-Lounge-",699700],[31,"神崎零","幹部","X8-本店-",575600],[32,"N","","Believe",562100],[33,"ゆうと","PMG","Attirant",553500],[34,"そら","PMG","Regulus-Lounge-",503000],[35,"あまと","","Diamant",494100],[36,"りゅうが","","Believe",474400],[37,"メロ","副主任","Taurus",470100],[38,"麗夜","","Diamant",464100],[39,"アヤト","","Believe",419500],[40,"佳夜","","Regulus-Lounge-",290100],[41,"しゅん","","222",272000],[42,"ミナミ","","Attirant",255600],[43,"奏","","X8-本店-",213400],[44,"こはく","","Diamant",209100],[45,"カヲ","PMG","Regulus-Lounge-",201000],[46,"はんぞう","","Taurus",191800],[47,"雨宮 楓","","Attirant",188700],[48,"うた","","Taurus",173500],[49,"冬夜","","X8-本店-",168500],[50,"兎","","Attirant",167300],[51,"恋白 凛","","Taurus",163700],[52,"れい","","Taurus",161500],[53,"密","","X8-本店-",151500],[54,"瀬恋","","Diamant",142000],[55,"なつき","","222",138300],[56,"猫宮 はいる","","X8-本店-",128700],[57,"なおと","","Attirant",118100],[58,"鈴屋 什造","","X8-本店-",110400],[59,"桜翔","","Believe",103200],[60,"みさき","","Diamant",100200],[61,"なお","","Regulus-Lounge-",99400],[62,"さの","","222",96200],[63,"海景","","X8-本店-",64200],[64,"せな","","X8-本店-",47600],[65,"ゆうしん","","Attirant",44500],[66,"舞桜","","X8-本店-",43700],[67,"こーき","","X8-本店-",37900],[68,"成瀬 伊織","","Taurus",37500],[69,"大魔王","","X8-本店-",36900],[70,"ラム","","Diamant",36200],[71,"なおき","","222",30700],[72,"やまと","","Believe",22900],[73,"じん","","X8-本店-",20000],[74,"帝神月零織","","X8-本店-",18100],[75,"来夢","","222",13600],[76,"ぽん","","Taurus",12500],[77,"さつき","","Believe",10000],[78,"まなと","","Taurus",10000],[79,"眞月尽柘榴","","X8-本店-",10000],[80,"とむ","","222",6900],[81,"むの","","Taurus",6400],[82,"凰","","222",5800],[83,"りゅう","","X8-本店-",5000],[84,"おとぎ","","X8-本店-",5000]] },
-  { k:'b', label:'HBR', rows: [[1,"結城春乃","幹部","X8-本店-",3336300],[2,"あおい","幹部補佐","X8-本店-",1063800],[3,"楓","","X8-本店-",881500],[4,"叶桜","","Regulus-Lounge-",699700],[5,"N","","Believe",562100],[6,"りゅうが","","Believe",474400],[7,"メロ","副主任","Taurus",470100],[8,"麗夜","","Diamant",464100],[9,"アヤト","","Believe",419500],[10,"佳夜","","Regulus-Lounge-",290100],[11,"しゅん","","222",272000],[12,"ミナミ","","Attirant",255600],[13,"こはく","","Diamant",209100],[14,"うた","","Taurus",173500],[15,"兎","","Attirant",167300],[16,"れい","","Taurus",161500],[17,"瀬恋","","Diamant",142000],[18,"なつき","","222",138300],[19,"猫宮 はいる","","X8-本店-",128700],[20,"なおと","","Attirant",118100],[21,"鈴屋 什造","","X8-本店-",110400],[22,"みさき","","Diamant",100200],[23,"さの","","222",96200],[24,"海景","","X8-本店-",64200],[25,"せな","","X8-本店-",47600],[26,"ゆうしん","","Attirant",44500],[27,"こーき","","X8-本店-",37900],[28,"大魔王","","X8-本店-",36900],[29,"ラム","","Diamant",36200],[30,"やまと","","Believe",22900],[31,"帝神月零織","","X8-本店-",18100],[32,"ぽん","","Taurus",12500],[33,"さつき","","Believe",10000],[34,"まなと","","Taurus",10000],[35,"とむ","","222",6900],[36,"むの","","Taurus",6400],[37,"りゅう","","X8-本店-",5000]] }
+  { k:'a', label:'総合', asof:'10月31日営業終了時点', rows: [[1,"結月瑠衣","社長","X8-本店-",17906200],[2,"ひかる","社長","Taurus/Regulus-Lounge-",4494900],[3,"結城春乃","幹部","X8-本店-",4074200],[4,"春葵るか","PD","X8-本店-",3884900],[5,"ねむ","支配人","Taurus/Regulus-Lounge-",3607700],[6,"酸りお","SV","X8-本店-",3557900],[7,"りくと","店長","Attirant",3064500],[8,"白馬 皐矢","統括","X8-本店-",2436300],[9,"千冬","主任","222",2409200],[10,"レオなるド","代表代理","Diamant",2274800],[11,"成宮鳴","Legacy Player","X8-本店-",2273100],[12,"るな","店長","Diamant",2118100],[13,"皇 澪旺","代表代理","Attirant",2082100],[14,"蒼森璃央","支配人","Believe",1948500],[15,"凪咲なぎさ","支配人","Diamant",1946400],[16,"椿 雅","店長","Believe",1812900],[17,"にの","PMG","Taurus",1568200],[18,"一ノ瀬紅","店長","222",1505400],[19,"あおい","店長","Regulus-Lounge-",1487200],[20,"れん","社長","Attirant",1440700],[21,"まさや","副主任","222",1427400],[22,"神宮寺 福","Lead Player","X8-本店-",1133500],[23,"あおい","幹部補佐","X8-本店-",1130800],[24,"楓","","X8-本店-",1097300],[25,"黒崎斗夢","副主任","X8-本店-",1066600],[26,"イヴ","幹部補佐","X8-本店-",1052300],[27,"暁ときな","幹部補佐","X8-本店-",845600],[28,"N","","Believe",795400],[29,"美澄奏多","AAD","X8-本店-",784800],[30,"椿 翔大","PADV","222",779800],[31,"叶桜","","Regulus-Lounge-",761600],[32,"麗夜","","Diamant",604600],[33,"りゅうが","","Believe",584200],[34,"神崎零","幹部","X8-本店-",580600],[35,"そら","PMG","Regulus-Lounge-",563800],[36,"ゆうと","PMG","Attirant",557900],[37,"メロ","副主任","Taurus",534800],[38,"あまと","","Diamant",481900],[39,"アヤト","","Believe",445100],[40,"佳夜","","Regulus-Lounge-",340700],[41,"しゅん","","222",276400],[42,"ミナミ","","Attirant",255600],[43,"カヲ","PMG","Regulus-Lounge-",253900],[44,"こはく","","Diamant",244200],[45,"雨宮 楓","","Attirant",216600],[46,"奏","","X8-本店-",213400],[47,"はんぞう","","Taurus",209500],[48,"密","","X8-本店-",174400],[49,"うた","","Taurus",173500],[50,"冬夜","","X8-本店-",168500]] },
+  { k:'b', label:'HBR', asof:'10月28日営業終了時点', rows: [[1,"結城春乃","幹部","X8-本店-",3336300],[2,"あおい","幹部補佐","X8-本店-",1063800],[3,"楓","","X8-本店-",881500],[4,"叶桜","","Regulus-Lounge-",699700],[5,"N","","Believe",562100],[6,"りゅうが","","Believe",474400],[7,"メロ","副主任","Taurus",470100],[8,"麗夜","","Diamant",464100],[9,"アヤト","","Believe",419500],[10,"佳夜","","Regulus-Lounge-",290100],[11,"しゅん","","222",272000],[12,"ミナミ","","Attirant",255600],[13,"こはく","","Diamant",209100],[14,"うた","","Taurus",173500],[15,"兎","","Attirant",167300],[16,"れい","","Taurus",161500],[17,"瀬恋","","Diamant",142000],[18,"なつき","","222",138300],[19,"猫宮 はいる","","X8-本店-",128700],[20,"なおと","","Attirant",118100],[21,"鈴屋 什造","","X8-本店-",110400],[22,"みさき","","Diamant",100200],[23,"さの","","222",96200],[24,"海景","","X8-本店-",64200],[25,"せな","","X8-本店-",47600],[26,"ゆうしん","","Attirant",44500],[27,"こーき","","X8-本店-",37900],[28,"大魔王","","X8-本店-",36900],[29,"ラム","","Diamant",36200],[30,"やまと","","Believe",22900],[31,"帝神月零織","","X8-本店-",18100],[32,"ぽん","","Taurus",12500],[33,"さつき","","Believe",10000],[34,"まなと","","Taurus",10000],[35,"とむ","","222",6900],[36,"むの","","Taurus",6400],[37,"りゅう","","X8-本店-",5000]] }
 ] };  // 金額なしの順位表。PDFが来たらここを差し替える
 const MET = [
   { k:'sub',    i:0, label:'小計',       unit:'yen' },
@@ -755,7 +772,7 @@ function hiddenSum(M){ const t = {}; KEYS8.forEach(k => t[k] = 0); dayList(M).fo
 const hexOf = (name) => { const s = String(name == null ? '' : name).normalize('NFKC').trim(); let h = 'u'; for (let i = 0; i < s.length; i++) h += s.charCodeAt(i).toString(16).padStart(4, '0'); return h; };
 // 公開用の月データ（個人の日別は入れない）と、個人ごとの日別データに分ける
 function splitMonth(M){
-  const pub = { ym: M.ym, year: M.year, month: M.month, daysInMonth: M.daysInMonth, employees: M.employees, metrics: M.metrics, days: {}, totals: {} };
+  const pub = { ym: M.ym, year: M.year, month: M.month, daysInMonth: M.daysInMonth, employees: M.employees, metrics: M.metrics, entry: M.entry || {}, days: {}, totals: {} };
   const privs = {};
   M.employees.forEach(e => { privs[e.id] = { days: {} }; if (M.pay && M.pay[e.id]) privs[e.id].pay = M.pay[e.id]; const t = new Array(9).fill(0); pub.totals[e.id] = t; });
   Object.keys(M.days).forEach(dd => {
@@ -881,6 +898,10 @@ async function makeFirebaseBackend(){
       const t = {}; t[ym] = amount;
       await F.setDoc(F.doc(db, 'meta', 'app'), { targets: t, updatedAt: F.serverTimestamp() }, { merge: true });
     },
+    async setTeam(h, team){
+      const t = {}; t[h] = team;
+      await F.setDoc(F.doc(db, 'meta', 'app'), { teams: t, updatedAt: F.serverTimestamp() }, { merge: true });
+    },
     async listImports(){
       const q = F.query(F.collection(db, 'imports'), F.orderBy('at', 'desc'), F.limit(12));
       const s = await F.getDocs(q);
@@ -911,6 +932,7 @@ function makeTestBackend(){
     async getMonthOnce(ym){ return T.months[ym] ? JSON.parse(JSON.stringify(T.months[ym])) : null; },
     async saveMonth(ym, M, rec, monthsList){ T.saved = { ym, M, rec, monthsList }; T.months[ym] = M; T.meta.months = monthsList; },
     async setTarget(ym, a){ T.meta.targets = T.meta.targets || {}; T.meta.targets[ym] = a; },
+    async setTeam(h, team){ T.meta.teams = T.meta.teams || {}; T.meta.teams[h] = team; },
     async listImports(){ return T.imports || []; },
     async restorePrev(){ throw new Error('テストでは使えません'); }
   };
@@ -941,7 +963,7 @@ function selectMonth(ym){
   if (unsubMonth) { unsubMonth(); unsubMonth = null; }
   if (unsubPriv) { unsubPriv(); unsubPriv = null; } S.priv = null;
   if (unsubPrivPrev) { unsubPrivPrev(); unsubPrivPrev = null; } S.privPrev = null;
-  S.ym = ym; S.M = null; S.prevM = null; S.dd = null; S.dayDetail = null; S.loading = true; render();
+  S.ym = ym; S.M = null; S.prevM = null; S.prevM2 = null; S.dd = null; S.dayDetail = null; S.loading = true; render();
   unsubMonth = backend.subMonth(ym, (M, ts) => {
     S.loading = false; S.M = M; S.updatedAt = ts; pickDefaultDay();
     loadPrev(); render();
@@ -952,15 +974,17 @@ function selectMonth(ym){
   }
 }
 async function loadPrev(){
-  const p = prevYm(S.ym);
-  if (!S.meta.months.includes(p)) { S.prevM = null; return; }
+  const cur = S.ym, p = prevYm(cur), p2 = prevYm(p);
+  if (!S.meta.months.includes(p)) { S.prevM = null; S.prevM2 = null; return; }
   try { const m = await backend.getMonthOnce(p); S.prevM = m; render(); } catch (e) { S.prevM = null; }
+  if (S.meta.months.includes(p2)) { try { const m2 = await backend.getMonthOnce(p2); if (S.ym === cur) { S.prevM2 = m2; render(); } } catch (e) { S.prevM2 = null; } }
+  else S.prevM2 = null;
 }
 function startApp(role){
   S.role = role; S.phase = 'app'; render();
   if (role === 'member' && S.hex) unsubExtra = backend.subExtra(S.hex, (x) => { S.extra = x; render(); });
   unsubMeta = backend.subMeta((meta) => {
-    S.meta = { months: (meta.months || []).slice().sort(), targets: meta.targets || {}, updatedAt: meta.updatedAt };
+    S.meta = { months: (meta.months || []).slice().sort(), targets: meta.targets || {}, teams: meta.teams || {}, updatedAt: meta.updatedAt };
     const latest = S.meta.months[S.meta.months.length - 1];
     if (!S.ym || (latest && !S.meta.months.includes(S.ym))) { if (latest) selectMonth(latest); else { S.loading = false; render(); } }
     else render();
@@ -996,7 +1020,7 @@ function delta(cur, prev, unit){
 function grpHomeCard(){
   if (!grpOk()) return '';
   const row = (r) => `<div class="rk r${r[0] <= 3 ? r[0] : ''}"><div class="no">${r[0]}</div><div class="nm">${esc(r[1])}${r[2] ? `<small>${esc(r[2])}</small>` : ''}</div><div class="vl">${yen(r[4])}<small>${esc(r[3].replace(/^-|-$/g, ''))}</small></div></div>`;
-  return `<div class="card"><h2>総合売上ランキング TOP10</h2><div class="note" style="margin-top:0">${GRP_RANK.asof}</div>
+  return `<div class="card"><h2>総合売上ランキング TOP10</h2><div class="note" style="margin-top:0">${(GRP_RANK.lists[0].asof || GRP_RANK.asof)}</div>
     ${GRP_RANK.lists[0].rows.slice(0, 10).map(row).join('')}
     <div style="margin-top:10px"><button class="btn ghost small" data-a="grpgo" data-k="grp_a">総合をすべて見る</button> <button class="btn ghost small" data-a="grpgo" data-k="grp_b">HBR</button></div>
   </div>`;
@@ -1118,19 +1142,42 @@ function shokaiDaily(M){
     <div class="note">日付の行をタップすると、その日の内訳が見られます。管理者だけに出ます。</div>
   </div>`;
 }
-const STAFF_CARD_SKIP = ['しん', 'ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう']; // 運営のため増減の集計から外す
+const STAFF_CARD_SKIP = ['しん', 'ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう', 'のあ']; // 運営のため増減の集計から外す
 // 新規入店者：今月出勤があって、前月は出勤がなかった人（しんさんの個人ページにだけ出す）
 function newcomerCard(M, e){
   if (!e || !NEWCOMER_NAMES.includes(e.name)) return '';
   if (!(S.role === 'admin' || (S.role === 'member' && hexOf(e.name) === S.hex))) return '';
   if (!S.prevM) return `<div class="card"><h2>🆕 新規入店者</h2><div class="dim">前月のデータが入ると表示されます。</div></div>`;
   const keep = x => STAFF_CARD_SKIP.indexOf(x.name) < 0;
-  const pa = new Set(S.prevM.employees.filter(x => keep(x) && empMonth(S.prevM, x.id).days > 0).map(x => x.id));
-  const add = M.employees.filter(x => keep(x) && empMonth(M, x.id).days > 0 && !pa.has(x.id));
-  return `<div class="card"><h2>🆕 新規入店者（${ymLabel(M.ym)}）</h2>
-    <div class="big sm">${add.length}人</div>
-    <div class="chips" style="margin-top:8px">${add.length ? add.map(x => `<span class="chip">${esc(x.name)}　${empMonth(M, x.id).days}日</span>`).join('') : '<span class="dim">いません</span>'}</div>
-    <div class="note">今月に出勤があって、前月は出勤がなかった人です（日数は今月の出勤日数）。</div></div>`;
+  // 古い月 → 今月 の順（前々月のデータがあればそれも使う）
+  const chain = [S.prevM2, S.prevM, M].filter(Boolean);
+  const act = (X, id) => X.employees.some(x => x.id === id) && empMonth(X, id).days > 0;
+  const firstDay = (X, id) => { const ds = dayList(X).filter(dd => X.days[dd] && X.days[dd].rows && X.days[dd].rows[id]); return ds.length ? ds[0] : '01'; };
+  const lastDd = dayList(M).slice(-1)[0] || '01';
+  const [cy, cm] = M.ym.split('-').map(Number);
+  const now = new Date(cy, cm - 1, Number(lastDd));
+  const out = [];
+  M.employees.filter(keep).forEach(x => {
+    let ji = -1;
+    for (let i = 0; i < chain.length; i++) { if (act(chain[i], x.id)) { ji = i; break; } }
+    if (ji < 1) return;   // 最初のデータ月から出勤している人は、入店日が分からないので対象外
+    const JM = chain[ji], [jy, jm] = JM.ym.split('-').map(Number);
+    const jd = new Date(jy, jm - 1, Number(firstDay(JM, x.id)));
+    const lim = new Date(jd.getTime()); lim.setMonth(lim.getMonth() + 1);
+    if (now > lim) return;   // 入店から1ヶ月をこえたら外す
+    let total = 0; for (let i = ji; i < chain.length; i++) total += empMonth(chain[i], x.id).days;
+    out.push({ name: x.name, jd, total, settled: total >= 10 });
+  });
+  const fd = d => (d.getMonth() + 1) + '/' + d.getDate();
+  const nw = out.filter(o => !o.settled), st = out.filter(o => o.settled);
+  const chips = (L, mark) => L.length ? L.map(o => `<span class="chip">${mark}${esc(o.name)}　入店${fd(o.jd)}・${o.total}日</span>`).join('') : '<span class="dim">いません</span>';
+  return `<div class="card"><h2>🆕 新規入店者（入店1ヶ月以内）</h2>
+    <div class="big sm">${nw.length}人</div>
+    <div class="chips" style="margin-top:8px">${chips(nw, '')}</div>
+    <div class="hr"></div><div class="lbl">定着（10日以上出勤）</div>
+    <div class="big sm">${st.length}人</div>
+    <div class="chips" style="margin-top:8px">${chips(st, '✓ ')}</div>
+    <div class="note">入店日は、Excelで最初に出勤があった日です。入店から1ヶ月以内の人を表示し、10日出勤したら「定着」に移ります。日数は入店してからの出勤日数です。</div></div>`;
 }
 function staffChangeCard(M){
   const keep = e => STAFF_CARD_SKIP.indexOf(e.name) < 0;
@@ -1151,6 +1198,79 @@ function staffChangeCard(M){
     <div class="chips">${added.length ? added.map(nm).join('') : '<span class="dim">いません</span>'}</div>
     ${left.length ? `<div class="lbl" style="margin-top:12px">今月は出勤なし（前月は出勤）</div><div style="margin-top:4px"><span class="neg" style="font-family:Oswald;font-size:18px">−${left.length}人</span></div><div class="chips">${left.map(nm).join('')}</div>` : ''}
     <div class="note">出勤が1日以上ある人を数えています。るか・りお・かなたはプレイヤーと同じ扱いで数えます。この表示は管理者だけに出ます。</div>
+  </div>`;
+}
+
+/* ---------- 従業員タブ ---------- */
+function newcomerList(M){
+  const keep = x => STAFF_CARD_SKIP.indexOf(x.name) < 0;
+  const chain = [S.prevM2, S.prevM, M].filter(Boolean);
+  const act = (X, id) => X.employees.some(x => x.id === id) && empMonth(X, id).days > 0;
+  const firstDay = (X, id) => { const ds = dayList(X).filter(dd => X.days[dd] && X.days[dd].rows && X.days[dd].rows[id]); return ds.length ? ds[0] : '01'; };
+  const lastDd = dayList(M).slice(-1)[0] || '01';
+  const [cy, cm] = M.ym.split('-').map(Number);
+  const now = new Date(cy, cm - 1, Number(lastDd));
+  const out = [];
+  if (chain.length < 2) return { out, ok: false };
+  M.employees.filter(keep).forEach(x => {
+    let ji = -1;
+    for (let i = 0; i < chain.length; i++) { if (act(chain[i], x.id)) { ji = i; break; } }
+    if (ji < 1) return;
+    const JM = chain[ji], [jy, jm] = JM.ym.split('-').map(Number);
+    const jd = new Date(jy, jm - 1, Number(firstDay(JM, x.id)));
+    const lim = new Date(jd.getTime()); lim.setMonth(lim.getMonth() + 1);
+    if (now > lim) return;
+    let total = 0; for (let i = ji; i < chain.length; i++) total += empMonth(chain[i], x.id).days;
+    out.push({ id: x.id, name: x.name, jd, total, settled: total >= 10 });
+  });
+  return { out, ok: true };
+}
+function viewStaff(){
+  if (S.role !== 'admin') return '<div class="empty">管理者のみ使えます</div>';
+  const M = S.M; if (!M) return noData();
+  const keep = x => STAFF_CARD_SKIP.indexOf(x.name) < 0;
+  const emps = M.employees.filter(keep);
+  const teams = S.meta.teams || {};
+  const teamOf = e => teams[hexOf(e.name)] || '';
+  const entry = M.entry || {};
+  const WORKS = ['A出勤', 'B出勤', '遅刻'];
+  const days = dayList(M);
+  const cnt = days.map(dd => emps.filter(e => { const r = M.days[dd] && M.days[dd].rows && M.days[dd].rows[e.id]; return r && (WORKS.includes(r[8]) || (!r[8] && r.slice(0, 8).some(n => n !== 0))); }).length);
+  const avg = days.length ? (cnt.reduce((a, b) => a + b, 0) / days.length) : 0;
+  const nc = newcomerList(M);
+  const nw = nc.out.filter(o => !o.settled), st = nc.out.filter(o => o.settled);
+  const hasEntry = Object.keys(entry).some(k => entry[k]);
+  const taiken = emps.filter(e => entry[e.id] === '体験'), hon = emps.filter(e => entry[e.id] === '本入店');
+  const fd = d => (d.getMonth() + 1) + '/' + d.getDate();
+  const chip = o => `<span class="chip">${esc(o.name)}<small>入店${fd(o.jd)}・${o.total}日</small></span>`;
+  const chipN = e => `<span class="chip">${esc(e.name)}</span>`;
+  const none = '<span class="dim">いません</span>';
+  const kpi = (v, l) => `<div class="kpi"><div class="v" style="font-size:24px">${v}</div><div class="l">${l}</div></div>`;
+  const teamNames = Array.from(new Set(Object.values(teams).filter(Boolean))).sort();
+  const byTeam = {}; emps.forEach(e => { const t = teamOf(e) || ''; (byTeam[t] = byTeam[t] || []).push(e); });
+  const order = teamNames.concat(byTeam[''] ? [''] : []);
+  const tag = e => { const a = []; if (entry[e.id]) a.push(entry[e.id]); const n = nc.out.find(o => o.id === e.id); if (n) a.push(n.settled ? '定着' : '新規'); return a.length ? '<small>' + a.join('・') + '</small>' : ''; };
+  const row = e => { const d = empMonth(M, e.id).days; return `<div class="rk"><div class="nm">${esc(e.name)}${e.kind === 'ops' ? '<small>運営</small>' : tag(e)}</div><div class="vl" style="${d ? '' : 'color:var(--dim)'}">${d}<small>日出勤</small></div></div>`; };
+  return `
+  <div class="card"><h2>従業員（${ymLabel(M.ym)}）</h2>
+    <div class="kpis">${kpi(emps.length + '人', '従業員')}${kpi(emps.filter(e => empMonth(M, e.id).days > 0).length + '人', '今月出勤あり')}${kpi(avg.toFixed(1), '平均出勤者/日')}</div>
+    <div class="note">平均出勤者＝出勤した人数の、営業日ごとの平均です（営業${days.length}日）。</div></div>
+  <div class="card"><h2>🆕 新規入店者（入店1ヶ月以内）</h2>
+    ${nc.ok ? `<div class="big sm">${nw.length}人</div><div class="chips">${nw.length ? nw.map(chip).join('') : none}</div>
+    <div class="note">入店日は、Excelで最初に出勤があった日です。入店から1ヶ月以内の人が出ます。</div>` : '<div class="dim">前月のデータが入ると表示されます。</div>'}</div>
+  <div class="card"><h2>従業員定着（10日以上出勤）</h2>
+    ${nc.ok ? `<div class="big sm">${st.length}人</div><div class="chips">${st.length ? st.map(chip).join('') : none}</div>` : '<div class="dim">前月のデータが入ると表示されます。</div>'}</div>
+  <div class="card"><h2>体験入店・本入店</h2>
+    ${hasEntry ? `<div class="kpis">${kpi(taiken.length + '人', '体験入店')}${kpi(hon.length + '人', '本入店者')}</div>
+    <div class="lbl" style="margin-top:10px">体験入店</div><div class="chips">${taiken.length ? taiken.map(chipN).join('') : none}</div>
+    <div class="lbl" style="margin-top:10px">本入店</div><div class="chips">${hon.length ? hon.map(chipN).join('') : none}</div>`
+    : '<div class="dim">Excelの「設定」シートに「入店区分」の列（体験／本入店）が入ると、ここに出ます。</div>'}</div>
+  <div class="card"><h2>各チームメンバー</h2>
+    <datalist id="teamlist">${teamNames.map(t => `<option value="${esc(t)}">`).join('')}</datalist>
+    ${order.length ? order.map(t => `<div class="lbl" style="margin-top:10px">${t ? esc(t) : 'チーム未設定'}（${byTeam[t].length}人）</div><div class="chips">${byTeam[t].map(chipN).join('')}</div>`).join('') : none}
+    <div class="note">チーム名は、下の全員一覧で手打ちして入れます（同じ名前を入れるとまとまります）。</div></div>
+  <div class="card"><h2>全員一覧（出勤なしも表示）</h2>
+    ${emps.map(e => `<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)">${row(e)}<input type="text" list="teamlist" data-team="${esc(hexOf(e.name))}" value="${esc(teamOf(e))}" placeholder="チーム名を入れる" style="padding:8px 10px;font-size:14px;margin-bottom:4px"></div>`).join('')}
   </div>`;
 }
 function viewHome(){
@@ -1322,7 +1442,7 @@ function viewRank(){
 function viewGrp(key){
   const L = GRP_RANK.lists.find(x => x.k === key) || GRP_RANK.lists[0];
   const row = (r) => `<div class="rk r${r[0] <= 3 ? r[0] : ''}"><div class="no">${r[0]}</div><div class="nm">${esc(r[1])}${r[2] ? `<small>${esc(r[2])}</small>` : ''}</div><div class="vl">${yen(r[4])}<small>${esc(r[3].replace(/^-|-$/g, ''))}</small></div></div>`;
-  return `<div class="card"><h2>X8 総合売上ランキング${L.k === 'b' ? '（HBR）' : ''}</h2><div class="note" style="margin-top:0">${GRP_RANK.asof}</div>
+  return `<div class="card"><h2>X8 総合売上ランキング${L.k === 'b' ? '（HBR）' : ''}</h2><div class="note" style="margin-top:0">${(L.asof || GRP_RANK.asof)}</div>
     ${L.rows.map(row).join('')}
   </div>
   `;
@@ -1834,7 +1954,7 @@ function mergeMonth(oldM, newM, allowRemove){
 function lockGate(){
   if (ME_MODE || S.role !== 'admin' || S.unlocked) return '';
   return `<div class="card"><h2>🔒 パスワードを入れてください</h2>
-    <div class="note" style="margin-top:0">「日別」「個人」「管理」は、管理者パスワードをもう一度入れると開けます。</div>
+    <div class="note" style="margin-top:0">「日別」「個人」「従業員」「管理」は、管理者パスワードをもう一度入れると開けます。</div>
     <input type="password" id="lockpw" placeholder="管理者パスワード" autocomplete="current-password" style="margin-top:10px">
     <div style="margin-top:10px"><button class="btn" data-a="unlock">開く</button></div></div>`;
 }
@@ -1877,14 +1997,16 @@ function render(){
   const canGrp = false;
   const tabs = ME_MODE ? ((canRank || canGrp) ? [['rank', '🏆', 'ランキング'], ['pers', '👤', '自分の実績']] : [['pers', '👤', '自分の実績']]) : [['home', '🏠', 'ホーム'], ['rank', '🏆', 'ランキング']];
   if (!ME_MODE) { if (S.role === 'admin') tabs.push(['days', '📅', '日別']); tabs.push(['pers', '👤', '個人']); }
+  if (!ME_MODE && S.role === 'admin') tabs.push(['staff', '👥', '従業員']);
   if (S.role === 'admin') tabs.push(['admin', '⚙️', '管理']);
   if (ME_MODE) S.tab = ((canRank || canGrp) && S.tab === 'rank') ? 'rank' : 'pers';
-  if (S.role !== 'admin' && (S.tab === 'days' || S.tab === 'admin')) S.tab = 'home';
+  if (S.role !== 'admin' && (S.tab === 'days' || S.tab === 'admin' || S.tab === 'staff')) S.tab = 'home';
   let body = '';
   if (S.tab === 'home') body = viewHome();
   else if (S.tab === 'rank') body = viewRank();
   else if (S.tab === 'days') body = lockGate() || viewDays();
   else if (S.tab === 'pers') body = lockGate() || viewPerson();
+  else if (S.tab === 'staff') body = lockGate() || viewStaff();
   else if (S.tab === 'admin') body = lockGate() || viewAdmin();
   const active = document.activeElement; const keepId = active && active.id; const keepSel = active && active.selectionStart;
   const sx = window.scrollX, sy = window.scrollY;
@@ -1900,6 +2022,11 @@ function render(){
 }
 
 /* ---------- events ---------- */
+document.addEventListener('change', async (ev) => {
+  const el = ev.target; if (!el || !el.dataset || el.dataset.team === undefined) return;
+  const v = el.value.normalize('NFKC').trim();
+  try { await backend.setTeam(el.dataset.team, v); S.meta.teams = Object.assign({}, S.meta.teams, { [el.dataset.team]: v }); toast('チームを保存しました'); render(); } catch (e) { toast('保存に失敗しました'); }
+});
 document.addEventListener('click', async (ev) => {
   const el = ev.target.closest('[data-a]'); if (!el) return;
   const a = el.dataset.a;
