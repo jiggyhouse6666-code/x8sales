@@ -1225,12 +1225,20 @@ function newcomerList(M){
   });
   return { out, ok: true };
 }
+const TEAM_DEFAULT = (() => {
+  const m = {};
+  [['るか班', 'るか', ['そら', 'いぶ', 'ざくろ', 'かなで', 'みかげ', 'のあ', 'だいまおう', 'こーき', 'おとぎ', 'ゆきね']],
+   ['こうや班', 'こうや', ['かなた', 'めい', 'とむ', 'ときな', 'あおい', 'とうや', 'にいな', 'はいる', 'りゅう', 'まお']]]
+  .forEach(([t, l, ms]) => { m[hexOf(l)] = t; ms.forEach(n => { m[hexOf(n)] = t; }); });
+  return m;
+})();
+const TEAM_LEADER = { 'るか班': 'るか', 'こうや班': 'こうや' };
 function viewStaff(){
   if (S.role !== 'admin') return '<div class="empty">管理者のみ使えます</div>';
   const M = S.M; if (!M) return noData();
   const keep = x => STAFF_CARD_SKIP.indexOf(x.name) < 0;
   const emps = M.employees.filter(keep);
-  const teams = S.meta.teams || {};
+  const teams = Object.assign({}, TEAM_DEFAULT, S.meta.teams || {});
   const teamOf = e => teams[hexOf(e.name)] || '';
   const entry = M.entry || {};
   const WORKS = ['A出勤', 'B出勤', '遅刻'];
@@ -1243,11 +1251,12 @@ function viewStaff(){
   const taiken = emps.filter(e => entry[e.id] === '体験'), hon = emps.filter(e => entry[e.id] === '本入店');
   const fd = d => (d.getMonth() + 1) + '/' + d.getDate();
   const chip = o => `<span class="chip">${esc(o.name)}<small>入店${fd(o.jd)}・${o.total}日</small></span>`;
-  const chipN = e => `<span class="chip">${esc(e.name)}</span>`;
+  const chipN = e => `<span class="chip">${TEAM_LEADER[teamOf(e)] === e.name ? '◎' : ''}${esc(e.name)}</span>`;
   const none = '<span class="dim">いません</span>';
   const kpi = (v, l) => `<div class="kpi"><div class="v" style="font-size:24px">${v}</div><div class="l">${l}</div></div>`;
-  const teamNames = Array.from(new Set(Object.values(teams).filter(Boolean))).sort();
-  const byTeam = {}; emps.forEach(e => { const t = teamOf(e) || ''; (byTeam[t] = byTeam[t] || []).push(e); });
+  const teamNames = Array.from(new Set(['るか班', 'こうや班'].concat(Object.values(teams).filter(Boolean).sort())));
+  const byTeam = {}; M.employees.filter(e => emps.includes(e) || teamOf(e)).forEach(e => { const t = teamOf(e) || ''; (byTeam[t] = byTeam[t] || []).push(e); });
+  [['るか班', ['そら', 'ゆきね']]].forEach(([t, ns]) => ns.forEach(n => { if (!M.employees.some(x => x.name === n) && teamOf({ name: n }) === t) (byTeam[t] = byTeam[t] || []).push({ id: 'x' + n, name: n, kind: 'ops' }); }));
   const order = teamNames.concat(byTeam[''] ? [''] : []);
   const tag = e => { const a = []; if (entry[e.id]) a.push(entry[e.id]); const n = nc.out.find(o => o.id === e.id); if (n) a.push(n.settled ? '定着' : '新規'); return a.length ? '<small>' + a.join('・') + '</small>' : ''; };
   const row = e => { const d = empMonth(M, e.id).days; return `<div class="rk"><div class="nm">${esc(e.name)}${e.kind === 'ops' ? '<small>運営</small>' : tag(e)}</div><div class="vl" style="${d ? '' : 'color:var(--dim)'}">${d}<small>日出勤</small></div></div>`; };
