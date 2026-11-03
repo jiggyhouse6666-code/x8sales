@@ -451,7 +451,8 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
     var wb = XLSX.read(data, { type: 'array', sheets: need.concat(['達成率']).filter(function (n) { return names.indexOf(n) >= 0; }) });
     var set = wb.Sheets['設定'];
 
-    var year = num(val(set, 1, 2)), mon = num(val(set, 2, 2));
+    var ymNum = function (v) { return typeof v === 'string' ? num(v.replace(/[年月\s　]/g, '').replace(/[０-９]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 65248); })) : num(v); };
+    var year = ymNum(val(set, 1, 2)), mon = ymNum(val(set, 2, 2));
     if (!year || !mon || mon < 1 || mon > 12) {
       report.errors.push({ level: 'error', msg: '「設定」シートの年(B1)・月(B2)を読めません。' });
       return { month: null, report: report };
