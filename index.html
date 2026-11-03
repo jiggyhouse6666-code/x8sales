@@ -1257,6 +1257,18 @@ function viewStaff(){
   const teamNames = Array.from(new Set(['るか班', 'こうや班'].concat(Object.values(teams).filter(Boolean).sort())));
   const byTeam = {}; M.employees.filter(e => emps.includes(e) || teamOf(e)).forEach(e => { const t = teamOf(e) || ''; (byTeam[t] = byTeam[t] || []).push(e); });
   [['るか班', ['そら', 'ゆきね']]].forEach(([t, ns]) => ns.forEach(n => { if (!M.employees.some(x => x.name === n) && teamOf({ name: n }) === t) (byTeam[t] = byTeam[t] || []).push({ id: 'x' + n, name: n, kind: 'ops' }); }));
+  const teamBox = t => {
+    const ms = byTeam[t] || [], lead = TEAM_LEADER[t];
+    const L = ms.filter(e => e.name === lead), R = ms.filter(e => e.name !== lead);
+    const mem = e => { const d = e.id.charAt(0) === 'x' ? null : empMonth(M, e.id).days; return `<div style="background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px;${d === 0 ? 'opacity:.55' : ''}">${esc(e.name === 'のあ' ? 'じゅうぞう' : e.name)}${d === null ? '' : `<small style="display:block;color:var(--dim);font-size:10px">${d}日出勤</small>`}</div>`; };
+    return `<div style="border:1px solid ${t ? 'rgba(212,175,95,.45)' : 'var(--line)'};border-radius:14px;padding:12px;margin-top:12px;background:rgba(255,255,255,.02)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:8px;margin-bottom:10px">
+        <div style="font-size:17px;font-weight:700;color:${t ? 'var(--gold)' : 'var(--dim)'}">${t ? esc(t) : 'チーム未設定'}</div>
+        <div style="font-family:Oswald;font-size:18px">${ms.length}<small style="font-family:inherit;font-size:11px;color:var(--dim)"> 人</small></div></div>
+      ${L.length ? `<div style="margin-bottom:8px"><div class="lbl" style="margin:0 0 4px">◎ リーダー</div><div style="display:inline-block;background:linear-gradient(135deg,#f3d58a,#b8872b);color:#2a1c00;font-weight:700;border-radius:10px;padding:8px 16px;font-size:15px">${esc(L[0].name)}</div></div>` : ''}
+      <div class="lbl" style="margin:6px 0 4px">メンバー</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">${R.map(mem).join('')}</div></div>`;
+  };
   const order = teamNames.concat(byTeam[''] ? [''] : []);
   const tag = e => { const a = []; if (entry[e.id]) a.push(entry[e.id]); const n = nc.out.find(o => o.id === e.id); if (n) a.push(n.settled ? '定着' : '新規'); return a.length ? '<small>' + a.join('・') + '</small>' : ''; };
   const row = e => { const d = empMonth(M, e.id).days; return `<div class="rk"><div class="nm">${esc(e.name)}${e.kind === 'ops' ? '<small>運営</small>' : tag(e)}</div><div class="vl" style="${d ? '' : 'color:var(--dim)'}">${d}<small>日出勤</small></div></div>`; };
@@ -1276,7 +1288,7 @@ function viewStaff(){
     : '<div class="dim">Excelの「設定」シートに「入店区分」の列（体験／本入店）が入ると、ここに出ます。</div>'}</div>
   <div class="card"><h2>各チームメンバー</h2>
     <datalist id="teamlist">${teamNames.map(t => `<option value="${esc(t)}">`).join('')}</datalist>
-    ${order.length ? order.map(t => `<div class="lbl" style="margin-top:10px">${t ? esc(t) : 'チーム未設定'}（${byTeam[t].length}人）</div><div class="chips">${byTeam[t].map(chipN).join('')}</div>`).join('') : none}
+    ${order.length ? order.map(t => teamBox(t)).join('') : none}
     <div class="note">チーム名は、下の全員一覧で手打ちして入れます（同じ名前を入れるとまとまります）。</div></div>
   <div class="card"><h2>全員一覧（出勤なしも表示）</h2>
     ${emps.map(e => `<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)">${row(e)}<input type="text" list="teamlist" data-team="${esc(hexOf(e.name))}" value="${esc(teamOf(e))}" placeholder="チーム名を入れる" style="padding:8px 10px;font-size:14px;margin-bottom:4px"></div>`).join('')}
