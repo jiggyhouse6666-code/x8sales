@@ -198,7 +198,7 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
   ];
   var ATT_HEADER = '出勤';
   // 運営メンバーのうち、一覧・ランキングに載せる人(しんさんの指定)
-  var OPS_SHOWN = ['るか', 'りお', 'かなた', 'しん'];  // しん: 個人ページ・給料明細用（ランキングには出さない）
+  var OPS_SHOWN = ['るか', 'りお', 'かなた', 'しん', 'そら', 'ひそか'];  // しん: 個人ページ・給料明細用（ランキングには出さない）
 
   // 名前の表記ゆれをそろえる（「（運営）」の注記を外し、全角半角をそろえる）
   function cleanName(s) { return String(s == null ? '' : s).normalize('NFKC').replace(/\(運営\)\s*$/, '').trim(); }
@@ -1227,12 +1227,13 @@ function newcomerList(M){
 }
 const TEAM_DEFAULT = (() => {
   const m = {};
-  [['るか班', 'るか', ['そら', 'いぶ', 'ざくろ', 'かなで', 'みかげ', 'のあ', 'だいまおう', 'こーき', 'おとぎ', 'ゆきね']],
-   ['こうや班', 'こうや', ['かなた', 'めい', 'とむ', 'ときな', 'あおい', 'とうや', 'にいな', 'はいる', 'りゅう', 'まお']]]
+  [['るか班', 'るか', ['そら', 'いぶ', 'ざくろ', 'かなで', 'みかげ', 'のあ', 'だいまおう', 'こーき', 'おとぎ']],
+   ['こうや班', 'こうや', ['かなた', 'めい', 'とむ', 'ときな', 'あおい', 'とうや', 'にいな', 'はいる', 'りゅう', 'まお']],
+   ['るい班', 'るい', ['りお', 'ふく', 'はるの', 'れい', 'かえで', 'れお', 'ひそか', 'じん']]]
   .forEach(([t, l, ms]) => { m[hexOf(l)] = t; ms.forEach(n => { m[hexOf(n)] = t; }); });
   return m;
 })();
-const TEAM_LEADER = { 'るか班': 'るか', 'こうや班': 'こうや' };
+const TEAM_LEADER = { 'るか班': 'るか', 'こうや班': 'こうや', 'るい班': 'るい' };
 function viewStaff(){
   if (S.role !== 'admin') return '<div class="empty">管理者のみ使えます</div>';
   const M = S.M; if (!M) return noData();
@@ -1254,20 +1255,27 @@ function viewStaff(){
   const chipN = e => `<span class="chip">${TEAM_LEADER[teamOf(e)] === e.name ? '◎' : ''}${esc(e.name)}</span>`;
   const none = '<span class="dim">いません</span>';
   const kpi = (v, l) => `<div class="kpi"><div class="v" style="font-size:24px">${v}</div><div class="l">${l}</div></div>`;
-  const teamNames = Array.from(new Set(['るか班', 'こうや班'].concat(Object.values(teams).filter(Boolean).sort())));
+  const teamNames = Array.from(new Set(['るか班', 'こうや班', 'るい班'].concat(Object.values(teams).filter(Boolean).sort())));
   const byTeam = {}; M.employees.filter(e => emps.includes(e) || teamOf(e)).forEach(e => { const t = teamOf(e) || ''; (byTeam[t] = byTeam[t] || []).push(e); });
-  [['るか班', ['そら', 'ゆきね']]].forEach(([t, ns]) => ns.forEach(n => { if (!M.employees.some(x => x.name === n) && teamOf({ name: n }) === t) (byTeam[t] = byTeam[t] || []).push({ id: 'x' + n, name: n, kind: 'ops' }); }));
+  [['るか班', ['そら']], ['るい班', ['ひそか']]].forEach(([t, ns]) => ns.forEach(n => { if (!M.employees.some(x => x.name === n) && teamOf({ name: n }) === t) (byTeam[t] = byTeam[t] || []).push({ id: 'x' + n, name: n, kind: 'ops' }); }));
   const teamBox = t => {
     const ms = byTeam[t] || [], lead = TEAM_LEADER[t];
-    const L = ms.filter(e => e.name === lead), R = ms.filter(e => e.name !== lead);
-    const mem = e => { const d = e.id.charAt(0) === 'x' ? null : empMonth(M, e.id).days; return `<div style="background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px;${d === 0 ? 'opacity:.55' : ''}">${esc(e.name === 'のあ' ? 'じゅうぞう' : e.name)}${d === null ? '' : `<small style="display:block;color:var(--dim);font-size:10px">${d}日出勤</small>`}</div>`; };
-    return `<div style="border:1px solid ${t ? 'rgba(212,175,95,.45)' : 'var(--line)'};border-radius:14px;padding:12px;margin-top:12px;background:rgba(255,255,255,.02)">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:8px;margin-bottom:10px">
-        <div style="font-size:17px;font-weight:700;color:${t ? 'var(--gold)' : 'var(--dim)'}">${t ? esc(t) : 'チーム未設定'}</div>
-        <div style="font-family:Oswald;font-size:18px">${ms.length}<small style="font-family:inherit;font-size:11px;color:var(--dim)"> 人</small></div></div>
-      ${L.length ? `<div style="margin-bottom:8px"><div class="lbl" style="margin:0 0 4px">◎ リーダー</div><div style="display:inline-block;background:linear-gradient(135deg,#f3d58a,#b8872b);color:#2a1c00;font-weight:700;border-radius:10px;padding:8px 16px;font-size:15px">${esc(L[0].name)}</div></div>` : ''}
-      <div class="lbl" style="margin:6px 0 4px">メンバー</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">${R.map(mem).join('')}</div></div>`;
+    const real = e => e.id.charAt(0) !== 'x';
+    const dOf = e => real(e) ? empMonth(M, e.id).days : null;
+    const gOf = e => real(e) ? (empMonth(M, e.id)[1] || 0) : 0;
+    const L = ms.filter(e => e.name === lead), R = ms.filter(e => e.name !== lead).sort((a, b) => (dOf(b) || 0) - (dOf(a) || 0));
+    const working = ms.filter(e => (dOf(e) || 0) > 0).length, rest = ms.filter(e => real(e) && !dOf(e)).length;
+    const gross = ms.reduce((a, e) => a + gOf(e), 0);
+    const maxD = Math.max(1, days.length);
+    const nm = e => e.name === 'のあ' ? 'じゅうぞう' : e.name;
+    const badge = e => { const a = []; if (entry[e.id]) a.push(entry[e.id]); const n = nc.out.find(o => o.id === e.id); if (n) a.push(n.settled ? '定着' : '新規'); return a.map(x => `<span style="font-size:10px;padding:1px 6px;border-radius:999px;background:${x === '新規' ? '#2a5d4a' : x === '定着' ? '#5a4a1c' : '#3a3550'};margin-left:4px">${x}</span>`).join(''); };
+    const card = (e, isLead) => { const d = dOf(e); const bg = isLead ? 'background:linear-gradient(135deg,#f3d58a,#b8872b);color:#2a1c00;border-color:transparent' : 'background:var(--card2);border:1px solid var(--line)';
+      return `<div style="${bg};border-radius:12px;padding:10px 12px;${d === 0 ? 'opacity:.55' : ''}"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:700;font-size:${isLead ? 17 : 15}px">${isLead ? '◎ ' : ''}${esc(nm(e))}${badge(e)}</div><div style="font-family:Oswald;font-size:16px">${d === null ? '<span style="font-size:11px;font-family:inherit;opacity:.7">データなし</span>' : d + '<small style="font-family:inherit;font-size:10px;opacity:.7">日</small>'}</div></div>${d === null ? '' : `<div style="height:4px;border-radius:2px;background:rgba(0,0,0,.25);margin-top:7px"><i style="display:block;height:100%;width:${Math.min(100, d / maxD * 100)}%;border-radius:2px;background:${isLead ? '#2a1c00' : 'var(--gold)'}"></i></div>`}</div>`; };
+    const stat = (v, l) => `<div style="flex:1;text-align:center"><div style="font-family:Oswald;font-size:20px">${v}</div><div style="font-size:10px;color:var(--dim)">${l}</div></div>`;
+    return `<div style="border:1px solid ${t ? 'rgba(212,175,95,.5)' : 'var(--line)'};border-radius:16px;padding:14px;margin-top:14px;background:rgba(255,255,255,.02)">
+      <div style="font-size:18px;font-weight:700;color:${t ? 'var(--gold)' : 'var(--dim)'};margin-bottom:10px">${t ? esc(t) : 'チーム未設定'}</div>
+      <div style="display:flex;background:rgba(0,0,0,.25);border-radius:10px;padding:8px 4px;margin-bottom:12px">${stat(ms.length + '人', 'メンバー')}${stat(working + '人', '今月出勤あり')}${stat(rest + '人', '出勤なし')}${t ? stat(yen(gross), '総売（出勤分）') : ''}</div>
+      <div style="display:grid;gap:8px">${L.map(e => card(e, true)).join('')}${R.map(e => card(e, false)).join('')}</div></div>`;
   };
   const order = teamNames.concat(byTeam[''] ? [''] : []);
   const tag = e => { const a = []; if (entry[e.id]) a.push(entry[e.id]); const n = nc.out.find(o => o.id === e.id); if (n) a.push(n.settled ? '定着' : '新規'); return a.length ? '<small>' + a.join('・') + '</small>' : ''; };
@@ -1293,6 +1301,31 @@ function viewStaff(){
   <div class="card"><h2>全員一覧（出勤なしも表示）</h2>
     ${emps.map(e => `<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)">${row(e)}<input type="text" list="teamlist" data-team="${esc(hexOf(e.name))}" value="${esc(teamOf(e))}" placeholder="チーム名を入れる" style="padding:8px 10px;font-size:14px;margin-bottom:4px"></div>`).join('')}
   </div>`;
+}
+function compareCard(M, tot, prevTo, prevTot, lastN, prevToN){
+  if (!S.prevM || !prevTo || !prevTot) return '';
+  const pm = ymLabel(S.prevM.ym);
+  const items = [['本数', 'shimei'], ['新規', 'shinki'], ['飲み直し', 'nomi'], ['送り', 'okuri'], ['ヘルプ指名', 'help'], ['同伴', 'douhan']].map(([l, k]) => [l, tot[k], prevTo[k], prevTot[k]]);
+  if (hasShokai(M) && hasShokai(S.prevM)) {
+    const a = shokaiSum(M), b = shokaiSum(S.prevM, dayList(S.prevM).filter(d => Number(d) <= lastN)), c = shokaiSum(S.prevM);
+    items.push(['初回組数', a.kumi, b.kumi, c.kumi], ['初回人数', a.nin, b.nin, c.nin]);
+  }
+  const money = { gross: [tot.gross, prevTo.gross, prevTot.gross] };
+  const g = 'display:grid;grid-template-columns:.9fr 1.1fr 1.1fr 1.2fr;gap:4px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px';
+  const head = (a, b, c) => `<div style="${g};color:var(--dim);font-size:11px"><div></div><div style="text-align:right">${a}</div><div style="text-align:right">${b}</div><div style="text-align:right">差</div></div>`;
+  const row = (l, cur, pv, f) => `<div style="${g}"><div>${l}</div><div style="text-align:right;font-family:Oswald;font-size:16px">${(f || fmt)(cur)}</div><div style="text-align:right;color:var(--dim)">${(f || fmt)(pv)}</div><div style="text-align:right;white-space:nowrap;font-size:13px">${delta(cur, pv, f ? 'yen' : '')}</div></div>`;
+  const pct = (cur, pv) => pv ? Math.round(cur / pv * 100) + '%' : '-';
+  return `<div class="card"><h2>${pm}との比較</h2>
+    <div class="lbl">① ${pm}の同じ日まで（${lastN}日まで・営業${prevToN}日）との比較</div>
+    ${head('今月', pm + '同日', '')}
+    ${items.map(([l, c, p]) => row(l, c, p)).join('')}
+    ${row('総売', money.gross[0], money.gross[1], yen)}
+    <div class="hr"></div>
+    <div class="lbl">② ${pm}ぜんぶ（月まるごと・営業${dayList(S.prevM).length}日）との比較</div>
+    ${head('今月', pm + '全体', '')}
+    ${items.map(([l, c, p, a]) => row(l, c, a)).join('')}
+    ${row('総売', money.gross[0], money.gross[2], yen)}
+    <div class="note">②は、今月の累計が${pm}の月間合計のどれくらいまで来たかです（総売 ${pct(money.gross[0], money.gross[2])}）。この表示は管理者だけに出ます。</div></div>`;
 }
 function viewHome(){
   if (S.role !== 'admin') return viewHomeLite();
@@ -1320,6 +1353,7 @@ function viewHome(){
     ${prevTo ? `<div class="dim" style="margin-top:4px">本数 ${delta(tot.shimei, prevTo.shimei)}　新規 ${delta(tot.shinki, prevTo.shinki)}　送り ${delta(tot.okuri, prevTo.okuri)}　同伴 ${delta(tot.douhan, prevTo.douhan)}</div>`
       : '<div class="dim" style="margin-top:4px">前月のデータがまだありません</div>'}
   </div>
+  ${compareCard(M, tot, prevTo, prevTot, lastN, prevToN)}
   ${shokaiCard(M, days, dd, prevTo, lastN, prevToN)}
   <div class="card">
     <h2>${ymLabel(M.ym)} 累計の件数</h2>
