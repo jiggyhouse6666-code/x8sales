@@ -541,6 +541,42 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
       .sort(function (a, b) { return a.no - b.no; });
     var payMap = {};
     try { payMap = parsePayslips(XLSX, data, names, employees, mon, report); } catch (e) { report.warnings.push({ level: 'warn', msg: '給料明細を読み込めませんでした: ' + (e && e.message || e) }); }
+    var parseJoinDate = function (t) {
+      t = String(t).normalize('NFKC');
+      var m = t.match(/(\d{4})\s*[.\/,\-年]\s*(\d{1,2})\s*[.\/,\-月]\s*(\d{1,2})/) || t.match(/(\d{4})[.\/,]?(\d{2})(\d{2})/);
+      if (!m) return null;
+      var y = Number(m[1]), mo = Number(m[2]), d = Number(m[3]);
+      if (y < 2000 || y > 2100 || mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+      return y + '-' + (mo < 10 ? '0' : '') + mo + '-' + (d < 10 ? '0' : '') + d;
+    };
+    var joined = {}, wbJ = { Sheets: {} };
+    try { wbJ = XLSX.read(data, { type: 'array', sheets: ['本部報告'].concat(employees.map(function (e) { return e.name; })).filter(function (n) { return names.indexOf(n) >= 0; }) }); } catch (e) {}
+    try {
+      employees.forEach(function (e) {
+        var w = wbJ.Sheets[e.name]; if (!w) return;
+        for (var r1 = 28; r1 <= 62; r1++) {
+          for (var c1 = 1; c1 <= 3; c1++) {
+            var tx = str(val(w, r1, c1));
+            if (!tx || tx.indexOf('本入店') < 0) continue;
+            var jd0 = parseJoinDate(tx);
+            if (jd0) { joined[e.id] = jd0; return; }
+          }
+        }
+      });
+    } catch (e) {}
+    var hq = {};
+    try {
+      var wh = wbJ.Sheets['本部報告'];
+      if (wh) for (var r2 = 15; r2 <= 60; r2++) {
+        var lb = str(val(wh, r2, 2)), hv = num(val(wh, r2, 4));
+        if (hv === null) continue;
+        if (lb.indexOf('体験入店数') >= 0) hq.taiken = hv;
+        else if (lb.indexOf('本入店数') >= 0) hq.hon = hv;
+        else if (lb.indexOf('退職者数') >= 0) hq.taishoku = hv;
+        else if (lb.indexOf('定着者数') >= 0) hq.teichaku = hv;
+        else if (lb.indexOf('在籍人数') >= 0) hq.zaiseki = hv;
+      }
+    } catch (e) {}
     var entry = {};
     try {
       var wsS = wb.Sheets['設定'];
@@ -560,7 +596,7 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
     } catch (e) {}
     var achObj = null; try { achObj = parseAch(XLSX, wb); } catch (e) { report.warnings.push({ level: 'warn', msg: '達成率シートを読み込めませんでした: ' + (e && e.message || e) }); }
     var monthObj = {
-      pay: payMap, ach: achObj, entry: entry,
+      pay: payMap, ach: achObj, entry: entry, joined: joined, hq: hq,
       ym: ym, year: year, month: mon, daysInMonth: daysInMonth,
       employees: employees.map(function (e) { return { id: e.id, name: e.name, kind: e.kind }; }),
       days: days,
@@ -772,7 +808,7 @@ function hiddenSum(M){ const t = {}; KEYS8.forEach(k => t[k] = 0); dayList(M).fo
 const hexOf = (name) => { const s = String(name == null ? '' : name).normalize('NFKC').trim(); let h = 'u'; for (let i = 0; i < s.length; i++) h += s.charCodeAt(i).toString(16).padStart(4, '0'); return h; };
 // 公開用の月データ（個人の日別は入れない）と、個人ごとの日別データに分ける
 function splitMonth(M){
-  const pub = { ym: M.ym, year: M.year, month: M.month, daysInMonth: M.daysInMonth, employees: M.employees, metrics: M.metrics, entry: M.entry || {}, days: {}, totals: {} };
+  const pub = { ym: M.ym, year: M.year, month: M.month, daysInMonth: M.daysInMonth, employees: M.employees, metrics: M.metrics, entry: M.entry || {}, joined: M.joined || {}, hq: M.hq || {}, days: {}, totals: {} };
   const privs = {};
   M.employees.forEach(e => { privs[e.id] = { days: {} }; if (M.pay && M.pay[e.id]) privs[e.id].pay = M.pay[e.id]; const t = new Array(9).fill(0); pub.totals[e.id] = t; });
   Object.keys(M.days).forEach(dd => {
@@ -963,7 +999,7 @@ function selectMonth(ym){
   if (unsubMonth) { unsubMonth(); unsubMonth = null; }
   if (unsubPriv) { unsubPriv(); unsubPriv = null; } S.priv = null;
   if (unsubPrivPrev) { unsubPrivPrev(); unsubPrivPrev = null; } S.privPrev = null;
-  S.ym = ym; S.M = null; S.prevM = null; S.prevM2 = null; S.dd = null; S.dayDetail = null; S.loading = true; render();
+  S.ym = ym; S.M = null; S.prevM = null; S.prevM2 = null; S.rgFrom = null; S.rgTo = null; S.dd = null; S.dayDetail = null; S.loading = true; render();
   unsubMonth = backend.subMonth(ym, (M, ts) => {
     S.loading = false; S.M = M; S.updatedAt = ts; pickDefaultDay();
     loadPrev(); render();
@@ -1143,44 +1179,25 @@ function shokaiDaily(M){
   </div>`;
 }
 const STAFF_CARD_SKIP = ['しん', 'ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう', 'のあ']; // 運営のため増減の集計から外す
+const NOT_NEW = ['そら', 'ひそか'];  // 運営で前からいる人。10月を取り込んだ時は集計の対象外だったので、新規扱いにしない
 // 新規入店者：今月出勤があって、前月は出勤がなかった人（しんさんの個人ページにだけ出す）
 function newcomerCard(M, e){
   if (!e || !NEWCOMER_NAMES.includes(e.name)) return '';
   if (!(S.role === 'admin' || (S.role === 'member' && hexOf(e.name) === S.hex))) return '';
-  if (!S.prevM) return `<div class="card"><h2>🆕 新規入店者</h2><div class="dim">前月のデータが入ると表示されます。</div></div>`;
-  const keep = x => STAFF_CARD_SKIP.indexOf(x.name) < 0;
-  // 古い月 → 今月 の順（前々月のデータがあればそれも使う）
-  const chain = [S.prevM2, S.prevM, M].filter(Boolean);
-  const act = (X, id) => X.employees.some(x => x.id === id) && empMonth(X, id).days > 0;
-  const firstDay = (X, id) => { const ds = dayList(X).filter(dd => X.days[dd] && X.days[dd].rows && X.days[dd].rows[id]); return ds.length ? ds[0] : '01'; };
-  const lastDd = dayList(M).slice(-1)[0] || '01';
-  const [cy, cm] = M.ym.split('-').map(Number);
-  const now = new Date(cy, cm - 1, Number(lastDd));
-  const out = [];
-  M.employees.filter(keep).forEach(x => {
-    let ji = -1;
-    for (let i = 0; i < chain.length; i++) { if (act(chain[i], x.id)) { ji = i; break; } }
-    if (ji < 1) return;   // 最初のデータ月から出勤している人は、入店日が分からないので対象外
-    const JM = chain[ji], [jy, jm] = JM.ym.split('-').map(Number);
-    const jd = new Date(jy, jm - 1, Number(firstDay(JM, x.id)));
-    const lim = new Date(jd.getTime()); lim.setMonth(lim.getMonth() + 1);
-    if (now > lim) return;   // 入店から1ヶ月をこえたら外す
-    let total = 0; for (let i = ji; i < chain.length; i++) total += empMonth(chain[i], x.id).days;
-    out.push({ name: x.name, jd, total, settled: total >= 10 });
-  });
+  const nl = newcomerList(M);
   const fd = d => (d.getMonth() + 1) + '/' + d.getDate();
-  const nw = out.filter(o => !o.settled), st = out.filter(o => o.settled);
-  const chips = (L, mark) => L.length ? L.map(o => `<span class="chip">${mark}${esc(o.name)}　入店${fd(o.jd)}・${o.total}日</span>`).join('') : '<span class="dim">いません</span>';
-  return `<div class="card"><h2>🆕 新規入店者（入店1ヶ月以内）</h2>
+  const nw = nl.out.filter(o => !o.settled), st = nl.out.filter(o => o.settled);
+  const chips = (L, mark) => L.length ? L.map(o => `<span class="chip">${mark}${esc(o.name)}　本入店${fd(o.jd)}・${o.total}日</span>`).join('') : '<span class="dim">いません</span>';
+  return `<div class="card"><h2>🆕 新規入店者（本入店から1ヶ月以内）</h2>
     <div class="big sm">${nw.length}人</div>
     <div class="chips" style="margin-top:8px">${chips(nw, '')}</div>
-    <div class="hr"></div><div class="lbl">定着（10日以上出勤）</div>
+    <div class="hr"></div><div class="lbl">定着（本入店から10日以上出勤）</div>
     <div class="big sm">${st.length}人</div>
     <div class="chips" style="margin-top:8px">${chips(st, '✓ ')}</div>
-    <div class="note">入店日は、Excelで最初に出勤があった日です。入店から1ヶ月以内の人を表示し、10日出勤したら「定着」に移ります。日数は入店してからの出勤日数です。</div></div>`;
+    <div class="note">${nl.hasJoin ? '本入店の日付は、Excelの個人シートの「本入店」のメモから読みます。' : '本入店の日付がまだ入っていません。Excelの個人シートに「2026.10.27本入店」のように書いて、取り込むと出ます。'}</div></div>`;
 }
 function staffChangeCard(M){
-  const keep = e => STAFF_CARD_SKIP.indexOf(e.name) < 0;
+  const keep = e => STAFF_CARD_SKIP.indexOf(e.name) < 0 && NOT_NEW.indexOf(e.name) < 0;
   const act = (X) => new Set(X.employees.filter(e => keep(e) && empMonth(X, e.id).days > 0).map(e => e.id));
   const cur = M.employees.filter(e => keep(e) && empMonth(M, e.id).days > 0);
   if (!S.prevM) return `<div class="card"><h2>従業員の増減</h2><div class="dim">前月のデータが入ると、増えた従業員が表示されます。</div></div>`;
@@ -1202,28 +1219,28 @@ function staffChangeCard(M){
 }
 
 /* ---------- 従業員タブ ---------- */
+function joinedMap(M){ const j = {}; [S.prevM2, S.prevM, M].forEach(X => { if (X && X.joined) Object.assign(j, X.joined); }); return j; }
+// 新規入店者＝個人シートに「本入店」の日付が書いてある人のうち、本入店から1ヶ月以内の人。
+// 本入店してから10日出勤したら「定着」
 function newcomerList(M){
-  const keep = x => STAFF_CARD_SKIP.indexOf(x.name) < 0;
+  const keep = x => STAFF_CARD_SKIP.indexOf(x.name) < 0 && NOT_NEW.indexOf(x.name) < 0;
+  const J = joinedMap(M), out = [];
   const chain = [S.prevM2, S.prevM, M].filter(Boolean);
-  const act = (X, id) => X.employees.some(x => x.id === id) && empMonth(X, id).days > 0;
-  const firstDay = (X, id) => { const ds = dayList(X).filter(dd => X.days[dd] && X.days[dd].rows && X.days[dd].rows[id]); return ds.length ? ds[0] : '01'; };
   const lastDd = dayList(M).slice(-1)[0] || '01';
   const [cy, cm] = M.ym.split('-').map(Number);
   const now = new Date(cy, cm - 1, Number(lastDd));
-  const out = [];
-  if (chain.length < 2) return { out, ok: false };
+  const ids = Object.keys(J);
   M.employees.filter(keep).forEach(x => {
-    let ji = -1;
-    for (let i = 0; i < chain.length; i++) { if (act(chain[i], x.id)) { ji = i; break; } }
-    if (ji < 1) return;
-    const JM = chain[ji], [jy, jm] = JM.ym.split('-').map(Number);
-    const jd = new Date(jy, jm - 1, Number(firstDay(JM, x.id)));
+    if (!J[x.id]) return;
+    const [jy, jm, jdn] = J[x.id].split('-').map(Number);
+    const jd = new Date(jy, jm - 1, jdn);
     const lim = new Date(jd.getTime()); lim.setMonth(lim.getMonth() + 1);
-    if (now > lim) return;
-    let total = 0; for (let i = ji; i < chain.length; i++) total += empMonth(chain[i], x.id).days;
+    if (now > lim || jd > now) return;
+    let total = 0;
+    chain.forEach(X => { const [xy, xm] = X.ym.split('-').map(Number); dayList(X).forEach(dd => { if (new Date(xy, xm - 1, Number(dd)) >= jd && X.days[dd] && X.days[dd].rows && X.days[dd].rows[x.id]) total++; }); });
     out.push({ id: x.id, name: x.name, jd, total, settled: total >= 10 });
   });
-  return { out, ok: true };
+  return { out, ok: true, hasJoin: ids.length > 0 };
 }
 const TEAM_DEFAULT = (() => {
   const m = {};
@@ -1248,10 +1265,12 @@ function viewStaff(){
   const avg = days.length ? (cnt.reduce((a, b) => a + b, 0) / days.length) : 0;
   const nc = newcomerList(M);
   const nw = nc.out.filter(o => !o.settled), st = nc.out.filter(o => o.settled);
-  const hasEntry = Object.keys(entry).some(k => entry[k]);
-  const taiken = emps.filter(e => entry[e.id] === '体験'), hon = emps.filter(e => entry[e.id] === '本入店');
+  const hq = M.hq || {};
+  const hasHq = hq.taiken != null || hq.hon != null;
+  const JM = joinedMap(M);
+  const honNames = emps.filter(e => JM[e.id] && JM[e.id].slice(0, 7) === M.ym);
   const fd = d => (d.getMonth() + 1) + '/' + d.getDate();
-  const chip = o => `<span class="chip">${esc(o.name)}<small>入店${fd(o.jd)}・${o.total}日</small></span>`;
+  const chip = o => `<span class="chip">${esc(o.name)}<small>本入店${fd(o.jd)}・${o.total}日</small></span>`;
   const chipN = e => `<span class="chip">${TEAM_LEADER[teamOf(e)] === e.name ? '◎' : ''}${esc(e.name)}</span>`;
   const none = '<span class="dim">いません</span>';
   const kpi = (v, l) => `<div class="kpi"><div class="v" style="font-size:24px">${v}</div><div class="l">${l}</div></div>`;
@@ -1285,15 +1304,15 @@ function viewStaff(){
     <div class="kpis">${kpi(emps.length + '人', '従業員')}${kpi(emps.filter(e => empMonth(M, e.id).days > 0).length + '人', '今月出勤あり')}${kpi(avg.toFixed(1), '平均出勤者/日')}</div>
     <div class="note">平均出勤者＝出勤した人数の、営業日ごとの平均です（営業${days.length}日）。</div></div>
   <div class="card"><h2>🆕 新規入店者（入店1ヶ月以内）</h2>
-    ${nc.ok ? `<div class="big sm">${nw.length}人</div><div class="chips">${nw.length ? nw.map(chip).join('') : none}</div>
-    <div class="note">入店日は、Excelで最初に出勤があった日です。入店から1ヶ月以内の人が出ます。</div>` : '<div class="dim">前月のデータが入ると表示されます。</div>'}</div>
+    <div class="big sm">${nw.length}人</div><div class="chips">${nw.length ? nw.map(chip).join('') : none}</div>
+    <div class="note">${nc.hasJoin ? '本入店の日付（Excelの個人シートの「本入店」のメモ）から1ヶ月以内の人が出ます。' : '本入店の日付がまだ入っていません。Excelの個人シートに「2026.10.27本入店」のように書いて、取り込むと出ます。'}</div></div>
   <div class="card"><h2>従業員定着（10日以上出勤）</h2>
-    ${nc.ok ? `<div class="big sm">${st.length}人</div><div class="chips">${st.length ? st.map(chip).join('') : none}</div>` : '<div class="dim">前月のデータが入ると表示されます。</div>'}</div>
+    <div class="big sm">${st.length}人</div><div class="chips">${st.length ? st.map(chip).join('') : none}</div>
+    <div class="note">本入店してから10日以上出勤した人です（本入店から1ヶ月以内の間）。</div></div>
   <div class="card"><h2>体験入店・本入店</h2>
-    ${hasEntry ? `<div class="kpis">${kpi(taiken.length + '人', '体験入店')}${kpi(hon.length + '人', '本入店者')}</div>
-    <div class="lbl" style="margin-top:10px">体験入店</div><div class="chips">${taiken.length ? taiken.map(chipN).join('') : none}</div>
-    <div class="lbl" style="margin-top:10px">本入店</div><div class="chips">${hon.length ? hon.map(chipN).join('') : none}</div>`
-    : '<div class="dim">Excelの「設定」シートに「入店区分」の列（体験／本入店）が入ると、ここに出ます。</div>'}</div>
+    ${hasHq ? `<div class="kpis">${kpi((hq.taiken || 0) + '人', '体験入店')}${kpi((hq.hon || 0) + '人', '本入店')}${hq.taishoku != null ? kpi(hq.taishoku + '人', '退職') : ''}</div>
+    <div class="lbl" style="margin-top:10px">今月、本入店した人</div><div class="chips">${honNames.length ? honNames.map(chipN).join('') : none}</div>
+    <div class="note">人数は、Excelの「本部報告」の数字です。名前は、個人シートの「本入店」の日付が今月の人です。</div>` : '<div class="dim">Excelの「本部報告」シートが入ると、ここに出ます。</div>'}</div>
   <div class="card"><h2>各チームメンバー</h2>
     <datalist id="teamlist">${teamNames.map(t => `<option value="${esc(t)}">`).join('')}</datalist>
     ${order.length ? order.map(t => teamBox(t)).join('') : none}
@@ -1526,6 +1545,21 @@ function viewGrid(M){
   </div>`;
 }
 
+function rangeCard(M){
+  const ds = dayList(M); if (!ds.length) return '';
+  const a = (S.rgFrom && ds.includes(S.rgFrom)) ? S.rgFrom : ds[0];
+  const b = (S.rgTo && ds.includes(S.rgTo)) ? S.rgTo : ds[ds.length - 1];
+  const lo = Math.min(Number(a), Number(b)), hi = Math.max(Number(a), Number(b));
+  const sel = ds.filter(d => Number(d) >= lo && Number(d) <= hi);
+  const t = storeSum(M, sel), sh = hasShokai(M) ? shokaiSum(M, sel) : null;
+  const opt = v => ds.map(d => `<option value="${d}" ${d === v ? 'selected' : ''}>${Number(d)}日</option>`).join('');
+  const kp = (v, l) => `<div class="kpi"><div class="v">${fmt(v)}</div><div class="l">${l}</div></div>`;
+  return `<div class="card"><h2>期間でまとめる（${ymLabel(M.ym)}）</h2>
+    <div style="display:flex;gap:8px;align-items:center"><select data-rg="from">${opt(a)}</select><span>〜</span><select data-rg="to">${opt(b)}</select></div>
+    <div class="lbl" style="margin-top:12px">${Number(sel[0])}日〜${Number(sel[sel.length - 1])}日の合計（営業${sel.length}日）</div>
+    <div class="kpis" style="margin-top:8px">${kp(t.shinki, '新規')}${sh ? kp(sh.kumi, '初回組数') : ''}${sh ? kp(sh.nin, '初回人数') : ''}${kp(t.nomi, '飲み直し')}${kp(t.shimei, '本数')}${kp(t.okuri, '送り')}</div>
+    <div class="note">月は上の ◀ ▶ で切り替えます。新規は「件数」です。初回組数＝Excelの「初回フリー」、初回人数＝「初回人数」。営業のなかった日は入りません。</div></div>`;
+}
 function viewDays(){
   const M = S.M; if (!M) return noData();
   if (S.dayDetail && M.days[S.dayDetail]) return viewDayDetail(S.dayDetail);
@@ -1538,8 +1572,8 @@ function viewDays(){
                : `<div class="d none"><b>${i}</b><span style="color:#5d576a">—</span></div>`;
   }
   const toggle = `<div class="seg2"><button class="${S.dayView === 'cal' ? 'on' : ''}" data-a="dview" data-v="cal">カレンダー</button><button class="${S.dayView === 'grid' ? 'on' : ''}" data-a="dview" data-v="grid">一覧表（日×人）</button></div>`;
-  if (S.role === 'admin' && S.dayView === 'grid') return toggle + storeGrossCard(M) + viewGrid(M) + shokaiDaily(M) + shokaiSrcCard(M) + updatedLine();
-  return (S.role === 'admin' ? toggle + storeGrossCard(M) : '') + `
+  if (S.role === 'admin' && S.dayView === 'grid') return toggle + rangeCard(M) + storeGrossCard(M) + viewGrid(M) + shokaiDaily(M) + shokaiSrcCard(M) + updatedLine();
+  return (S.role === 'admin' ? toggle + rangeCard(M) + storeGrossCard(M) : '') + `
   <div class="card"><h2>${ymLabel(M.ym)} カレンダー（総売）</h2>
     <div class="cal">${'日月火水木金土'.split('').map(w => `<div class="dw">${w}</div>`).join('')}${cells}</div>
     <div class="note">日付をタップすると、その日の内訳が見られます。「—」はデータ未入力（または営業なし）の日で、集計には含めていません。</div>
@@ -2078,6 +2112,7 @@ function render(){
 
 /* ---------- events ---------- */
 document.addEventListener('change', async (ev) => {
+  if (ev.target && ev.target.dataset && ev.target.dataset.rg) { if (ev.target.dataset.rg === 'from') S.rgFrom = ev.target.value; else S.rgTo = ev.target.value; render(); return; }
   const el = ev.target; if (!el || !el.dataset || el.dataset.team === undefined) return;
   const v = el.value.normalize('NFKC').trim();
   try { await backend.setTeam(el.dataset.team, v); S.meta.teams = Object.assign({}, S.meta.teams, { [el.dataset.team]: v }); toast('チームを保存しました'); render(); } catch (e) { toast('保存に失敗しました'); }
