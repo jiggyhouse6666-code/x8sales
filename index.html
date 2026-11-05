@@ -1774,7 +1774,9 @@ function reportHtml(){
   const dl = (a, b) => { if (a == null || b == null) return '-'; const d = a - b; return `<span style="font-weight:700;color:${d > 0 ? '#1a8a5a' : d < 0 ? '#c0392b' : '#777'}">${d > 0 ? '+' : d < 0 ? '−' : ''}${fmt(Math.abs(d))}</span>`; };
   const dly = (a, b) => { if (a == null || b == null) return '-'; const d = a - b; return `<span style="font-weight:700;color:${d > 0 ? '#1a8a5a' : d < 0 ? '#c0392b' : '#777'}">${d > 0 ? '+' : d < 0 ? '−' : ''}¥${fmt(Math.abs(d))}</span>`; };
   const pc = (a, b) => (b ? Math.round(a / b * 100) + '%' : '-');
-  const items = [['総売上', tot.gross, pAll && pAll.gross, pTo && pTo.gross, true], ['全体の本数', tot.shimei, pAll && pAll.shimei, pTo && pTo.shimei], ['新規（件数）', tot.shinki, pAll && pAll.shinki, pTo && pTo.shinki], ['初回組数', sh && sh.kumi, pShAll && pShAll.kumi, pShTo && pShTo.kumi], ['初回人数', sh && sh.nin, pShAll && pShAll.nin, pShTo && pShTo.nin], ['飲み直し', tot.nomi, pAll && pAll.nomi, pTo && pTo.nomi]];
+  const achV = (X) => { const r = X && X.ach && X.ach.rows ? X.ach.rows.find(x => x.l === '全体組数') : null; return r && r.cur != null ? r.cur : null; };
+  const kumiAll = achV(M), pKumiAll = achV(P);
+  const items = [['総売上', tot.gross, pAll && pAll.gross, pTo && pTo.gross, true], ['総組数', kumiAll, pKumiAll, null], ['新規（件数）', tot.shinki, pAll && pAll.shinki, pTo && pTo.shinki], ['初回組数', sh && sh.kumi, pShAll && pShAll.kumi, pShTo && pShTo.kumi], ['初回人数', sh && sh.nin, pShAll && pShAll.nin, pShTo && pShTo.nin], ['飲み直し', tot.nomi, pAll && pAll.nomi, pTo && pTo.nomi]];
   const th = 'padding:10px 10px;background:#1b1824;color:#f3d58a;font-size:13px;font-weight:700;text-align:right;white-space:nowrap';
   const td = 'padding:10px 10px;border-bottom:1px solid #e5e1d8;font-size:15px;text-align:right;white-space:nowrap';
   const tdl = 'padding:10px 10px;border-bottom:1px solid #e5e1d8;font-size:15px;font-weight:700;text-align:left';
@@ -1820,7 +1822,7 @@ function reportHtml(){
       <tr><th style="${th};text-align:left">項目</th><th style="${th}">${cm}${complete ? '' : '（途中）'}</th>${P ? `<th style="${th}">${pm} 全体</th><th style="${th}">全体に対して</th><th style="${th}">${pm} 同日比</th><th style="${th}">同日比との差</th>` : ''}</tr>
       ${items.map(([l, c, pa, pt, m], i) => `<tr style="background:${i % 2 ? '#faf8f3' : '#fff'}"><td style="${tdl}">${l}</td><td style="${td};font-weight:700">${m ? y(c) : f(c)}</td>${P ? `<td style="${td}">${m ? y(pa) : f(pa)}</td><td style="${td}">${pc(c, pa)}</td><td style="${td}">${m ? y(pt) : f(pt)}</td><td style="${td}">${m ? dly(c, pt) : dl(c, pt)}</td>` : ''}</tr>`).join('')}
     </table>
-    ${P ? `<div style="font-size:11px;color:#777;margin-top:6px">「${pm} 同日比」は、${pm}の${lastN}日まで（営業${pds.length}日）の数字と、その差です。新規は件数です。</div>` : ''}
+    ${P ? `<div style="font-size:11px;color:#777;margin-top:6px">「${pm} 同日比」は、${pm}の${lastN}日まで（営業${pds.length}日）の数字と、その差です。新規は件数です。総組数は同日の数字がないので、差は出ません。</div>` : ''}
     ${P ? sec(`${pm} 結果（月まるごと・営業${dayList(P).length}日）`) + `<table style="width:100%;border-collapse:collapse"><tr><th style="${th};text-align:left">項目</th><th style="${th}">合計</th><th style="${th}">1営業日あたり</th></tr>${items.map(([l, c, pa, pt, m], i) => `<tr style="background:${i % 2 ? '#faf8f3' : '#fff'}"><td style="${tdl}">${l}</td><td style="${td};font-weight:700">${m ? y(pa) : f(pa)}</td><td style="${td}">${pa == null ? '-' : (m ? yen(Math.round(pa / Math.max(1, dayList(P).length))) : (pa / Math.max(1, dayList(P).length)).toFixed(1))}</td></tr>`).join('')}</table>` : ''}
     ${sec('従業員')}
     <table style="width:100%;border-collapse:collapse">
