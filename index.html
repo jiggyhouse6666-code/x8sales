@@ -559,6 +559,15 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
             var tx = str(val(w, r1, c1));
             if (!tx || tx.indexOf('本入店') < 0) continue;
             var jd0 = parseJoinDate(tx);
+            // 「本入店」だけの欄の下（や右）に日付が別の欄で書いてある場合も読む
+            if (!jd0) {
+              var nb = [[r1 + 1, c1], [r1 + 2, c1], [r1, c1 + 1], [r1, c1 + 2]];
+              for (var k1 = 0; k1 < nb.length && !jd0; k1++) {
+                var cv = val(w, nb[k1][0], nb[k1][1]);
+                if (typeof cv === 'number' && cv > 40000 && cv < 60000) { var dd0 = new Date(Math.round((cv - 25569) * 86400000)); jd0 = dd0.getUTCFullYear() + '-' + ('0' + (dd0.getUTCMonth() + 1)).slice(-2) + '-' + ('0' + dd0.getUTCDate()).slice(-2); }
+                else if (cv != null && cv !== '') jd0 = parseJoinDate(String(cv));
+              }
+            }
             if (jd0) { joined[e.id] = jd0; return; }
           }
         }
@@ -753,7 +762,7 @@ const FIREBASE_CONFIG = {
 const ME_MODE = /*ME_MODE*/false;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
 const RANK_VIEW_NAMES = ['るか'];  // 個人ページ（me.html）でランキングも見られる人
 const NEWCOMER_NAMES = ['しん'];  // 新規入店者を見られる人
-const RANK_HIDE = ['しん'];  // 個人ページ・給料明細だけ。ランキングには出さない
+const RANK_HIDE = ['しん', 'そら'];  // 個人ページ・給料明細だけ。ランキングには出さない
 const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや'];  // 店の達成率を個人ページで見られる人
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
@@ -781,6 +790,8 @@ const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = (n) => Math.round(n || 0).toLocaleString('ja-JP');
 const yen = (n) => '¥' + fmt(n);
+// 出勤した日＝A出勤・B出勤・遅刻（または出勤の欄が空で数字がある日）。当欠・無欠・休み・欠勤は出勤に数えない
+const isWorkRow = (r) => !!r && (['A出勤', 'B出勤', '遅刻'].includes(r[8]) || (!r[8] && r.slice(0, 8).some(n => n)));
 const man = (n) => n >= 10000 ? (Math.round(n / 1000) / 10) + '万' : fmt(n);
 const manS = (n) => n >= 10000000 ? Math.round(n / 10000) + '万' : man(n);
 const pair = (g, sb, extraG, extraS) => `<div class="pair"><div class="lbl">総売</div><div class="big">${yen(g)}</div>${extraG || ''}<div class="sl"><span class="lbl">小計</span><b>${yen(sb)}</b></div>${extraS || ''}</div>`;
@@ -817,7 +828,7 @@ function splitMonth(M){
     Object.keys(d.rows).forEach(id => {
       if (!privs[id]) return;
       privs[id].days[dd] = d.rows[id];
-      const t = pub.totals[id]; for (let i = 0; i < 8; i++) t[i] += d.rows[id][i] || 0; t[8]++;
+      const t = pub.totals[id]; for (let i = 0; i < 8; i++) t[i] += d.rows[id][i] || 0; if (isWorkRow(d.rows[id])) t[8]++;
     });
   });
   Object.keys(pub.totals).forEach(id => { pub.totals[id][1] = 0; });
@@ -826,7 +837,7 @@ function splitMonth(M){
 }
 function empMonth(M, id){
   if (M.totals) { const a = M.totals[id] || new Array(9).fill(0); const t = a.slice(0, 8); t.days = a[8] || 0; return t; }
-  const t = new Array(8).fill(0); let n = 0; dayList(M).forEach(dd => { const r = M.days[dd].rows[id]; if (r) { for (let i = 0; i < 8; i++) t[i] += r[i] || 0; n++; } }); t.days = n; return t; }
+  const t = new Array(8).fill(0); let n = 0; dayList(M).forEach(dd => { const r = M.days[dd].rows[id]; if (r) { for (let i = 0; i < 8; i++) t[i] += r[i] || 0; if (isWorkRow(r)) n++; } }); t.days = n; return t; }
 function ranking(M, i, dd){
   const list = M.employees.filter(e => !RANK_HIDE.includes(e.name)).map((e, idx) => ({ id: e.id, name: e.name, kind: e.kind, idx, v: dd ? (((M.days[dd] && M.days[dd].rows[e.id]) || [])[i] || 0) : empMonth(M, e.id)[i] }));
   list.sort((a, b) => b.v - a.v || a.idx - b.idx);
@@ -1222,6 +1233,18 @@ function staffChangeCard(M){
 function joinedMap(M){ const j = {}; [S.prevM2, S.prevM, M].forEach(X => { if (X && X.joined) Object.assign(j, X.joined); }); return j; }
 // 新規入店者＝個人シートに「本入店」の日付が書いてある人のうち、本入店から1ヶ月以内の人。
 // 本入店してから10日出勤したら「定着」
+// 本入店から1ヶ月以内に10日出勤した月＝定着した月（いちど定着したら、そのあとはずっと定着）
+function settleYmOf(id, jstr, chain){
+  const [jy, jm, jdn] = jstr.split('-').map(Number);
+  const jd = new Date(jy, jm - 1, jdn), lim = new Date(jd.getTime()); lim.setMonth(lim.getMonth() + 1);
+  let cum = 0;
+  for (const X of chain) {
+    const [xy, xm] = X.ym.split('-').map(Number);
+    dayList(X).forEach(dd => { const t = new Date(xy, xm - 1, Number(dd)); if (t >= jd && t <= lim && X.days[dd] && X.days[dd].rows && isWorkRow(X.days[dd].rows[id])) cum++; });
+    if (cum >= 10) return X.ym;
+  }
+  return null;
+}
 function newcomerList(M){
   const keep = x => STAFF_CARD_SKIP.indexOf(x.name) < 0 && NOT_NEW.indexOf(x.name) < 0;
   const J = joinedMap(M), out = [];
@@ -1237,8 +1260,8 @@ function newcomerList(M){
     const lim = new Date(jd.getTime()); lim.setMonth(lim.getMonth() + 1);
     if (now > lim || jd > now) return;
     let total = 0;
-    chain.forEach(X => { const [xy, xm] = X.ym.split('-').map(Number); dayList(X).forEach(dd => { if (new Date(xy, xm - 1, Number(dd)) >= jd && X.days[dd] && X.days[dd].rows && X.days[dd].rows[x.id]) total++; }); });
-    out.push({ id: x.id, name: x.name, jd, total, settled: total >= 10 });
+    chain.forEach(X => { const [xy, xm] = X.ym.split('-').map(Number); dayList(X).forEach(dd => { if (new Date(xy, xm - 1, Number(dd)) >= jd && X.days[dd] && X.days[dd].rows && isWorkRow(X.days[dd].rows[x.id])) total++; }); });
+    out.push({ id: x.id, name: x.name, jd, total, settled: total >= 10, settleYm: settleYmOf(x.id, J[x.id], chain) });
   });
   return { out, ok: true, hasJoin: ids.length > 0 };
 }
@@ -1264,7 +1287,7 @@ function viewStaff(){
   const cnt = days.map(dd => emps.filter(e => { const r = M.days[dd] && M.days[dd].rows && M.days[dd].rows[e.id]; return r && (WORKS.includes(r[8]) || (!r[8] && r.slice(0, 8).some(n => n !== 0))); }).length);
   const avg = days.length ? (cnt.reduce((a, b) => a + b, 0) / days.length) : 0;
   const nc = newcomerList(M);
-  const nw = nc.out.filter(o => !o.settled), st = nc.out.filter(o => o.settled);
+  const nw = nc.out.filter(o => !o.settled), st = nc.out.filter(o => o.settled && o.settleYm === M.ym);
   const hq = M.hq || {};
   const hasHq = hq.taiken != null || hq.hon != null;
   const JM = joinedMap(M);
@@ -1373,6 +1396,7 @@ function viewHome(){
       : '<div class="dim" style="margin-top:4px">前月のデータがまだありません</div>'}
   </div>
   ${compareCard(M, tot, prevTo, prevTot, lastN, prevToN)}
+  <div class="card"><h2>月次レポート</h2><button class="btn" data-a="reportpdf">${ymLabel(M.ym)}のレポートをPDFにする</button><div class="note">前月との比較・ランキング・従業員をまとめたPDFです。</div></div>
   ${shokaiCard(M, days, dd, prevTo, lastN, prevToN)}
   <div class="card">
     <h2>${ymLabel(M.ym)} 累計の件数</h2>
@@ -1735,6 +1759,109 @@ function psPaper(zoom){
   root.appendChild(cl); document.body.appendChild(root); return root;
 }
 function loadJs(u){ return new Promise((ok, ng) => { const x = document.createElement('script'); x.src = u; x.onload = ok; x.onerror = () => ng(new Error('load')); document.head.appendChild(x); }); }
+
+/* ---------- 月次レポート（PDF） ---------- */
+const EXCL3 = ['えぬ', 'るーかす', 'まぁきゅん'];  // 従業員数に入れない人
+function reportHtml(){
+  const M = S.M, P = S.prevM; if (!M) return null;
+  const days = dayList(M), lastDd = days.length ? days[days.length - 1] : null, lastN = lastDd ? Number(lastDd) : 0;
+  const tot = storeSum(M), sh = hasShokai(M) ? shokaiSum(M) : null;
+  const pAll = P ? storeSum(P) : null, pShAll = (P && hasShokai(P)) ? shokaiSum(P) : null;
+  const pds = P ? dayList(P).filter(d => Number(d) <= lastN) : [];
+  const pTo = P ? storeSum(P, pds) : null, pShTo = (P && hasShokai(P)) ? shokaiSum(P, pds) : null;
+  const complete = M.daysInMonth && days.length && lastN >= M.daysInMonth;
+  const f = n => (n == null ? '-' : fmt(n)), y = n => (n == null ? '-' : yen(n));
+  const dl = (a, b) => { if (a == null || b == null) return '-'; const d = a - b; return `<span style="font-weight:700;color:${d > 0 ? '#1a8a5a' : d < 0 ? '#c0392b' : '#777'}">${d > 0 ? '+' : d < 0 ? '−' : ''}${fmt(Math.abs(d))}</span>`; };
+  const dly = (a, b) => { if (a == null || b == null) return '-'; const d = a - b; return `<span style="font-weight:700;color:${d > 0 ? '#1a8a5a' : d < 0 ? '#c0392b' : '#777'}">${d > 0 ? '+' : d < 0 ? '−' : ''}¥${fmt(Math.abs(d))}</span>`; };
+  const pc = (a, b) => (b ? Math.round(a / b * 100) + '%' : '-');
+  const items = [['総売上', tot.gross, pAll && pAll.gross, pTo && pTo.gross, true], ['全体の本数', tot.shimei, pAll && pAll.shimei, pTo && pTo.shimei], ['新規（件数）', tot.shinki, pAll && pAll.shinki, pTo && pTo.shinki], ['初回組数', sh && sh.kumi, pShAll && pShAll.kumi, pShTo && pShTo.kumi], ['初回人数', sh && sh.nin, pShAll && pShAll.nin, pShTo && pShTo.nin], ['飲み直し', tot.nomi, pAll && pAll.nomi, pTo && pTo.nomi]];
+  const th = 'padding:10px 10px;background:#1b1824;color:#f3d58a;font-size:13px;font-weight:700;text-align:right;white-space:nowrap';
+  const td = 'padding:10px 10px;border-bottom:1px solid #e5e1d8;font-size:15px;text-align:right;white-space:nowrap';
+  const tdl = 'padding:10px 10px;border-bottom:1px solid #e5e1d8;font-size:15px;font-weight:700;text-align:left';
+  const pm = P ? ymLabel(P.ym) : '前月', cm = ymLabel(M.ym);
+  const range = lastDd ? `${dayLabel(M.ym, days[0])}〜${dayLabel(M.ym, lastDd)}（営業${days.length}日）` : '';
+  const prank = P ? ranking(P, 0, null).filter(x => x.v > 0).slice(0, 10) : [];
+  const crank = ranking(M, 0, null).filter(x => x.v > 0).slice(0, 10);
+  const rk = (L) => L.length ? `<table style="width:100%;border-collapse:collapse">${L.map((x, i) => `<tr><td style="${tdl};width:34px;color:#b8872b">${i + 1}</td><td style="${tdl}">${esc(x.name)}</td><td style="${td}">${yen(x.v)}</td></tr>`).join('')}</table>` : '<div style="color:#999;font-size:12px">データなし</div>';
+  const sec = (t) => `<div style="margin:20px 0 8px;padding-left:10px;border-left:4px solid #b8872b;font-size:15px;font-weight:700">${t}</div>`;
+  const nl = (typeof newcomerList === 'function') ? newcomerList(M) : { out: [] };
+  const hq = M.hq || {};
+  const JMr = joinedMap(M); const honNames = M.employees.filter(e => JMr[e.id] && JMr[e.id].slice(0, 7) === M.ym).map(e => e.name);
+  const ALIAS = { 'じゅうぞう': 'のあ', 'のあ': 'じゅうぞう' };
+  const curDays = name => { const e = M.employees.find(x => x.name === name); return e ? empMonth(M, e.id).days : null; };
+  const gone = { out: [], stay: [] };
+  if (P) P.employees.forEach(e => {
+    if (STAFF_CARD_SKIP.indexOf(e.name) >= 0 && e.name !== 'じゅうぞう') return;
+    const pd = empMonth(P, e.id).days; if (!(pd > 0)) return;
+    const cd = curDays(e.name), ad = ALIAS[e.name] ? curDays(ALIAS[e.name]) : null;
+    if ((cd || 0) > 0 || (ad || 0) > 0) return;
+    const ld = dayList(P).filter(d => P.days[d] && P.days[d].rows && isWorkRow(P.days[d].rows[e.id])).slice(-1)[0];
+    const it = { name: e.name, pd, last: ld ? Number(P.ym.split('-')[1]) + '/' + Number(ld) : '' };
+    (cd === null && ad === null ? gone.out : gone.stay).push(it);
+  });
+  const goneTxt = L => L.length ? L.map(x => esc(x.name) + '（' + (P ? Number(P.ym.split('-')[1]) + '月' : '') + x.pd + '日' + (x.last ? '・最終' + x.last : '') + '）').join('、') : 'なし';
+  const pHon = [], pSet = [];
+  if (P) {
+    const chainP = [S.prevM2, P].filter(Boolean), Jp = Object.assign({}, S.prevM2 && S.prevM2.joined, P.joined);
+    P.employees.forEach(e => {
+      const j = Jp[e.id]; if (!j) return;
+      if (j.slice(0, 7) === P.ym) pHon.push(e.name);
+      if (settleYmOf(e.id, j, chainP) === P.ym) pSet.push(e.name);
+    });
+  }
+  const curSet = nl.out.filter(o => o.settled && o.settleYm === M.ym).map(o => o.name);
+  const now = new Date();
+  return `<div id="reportpaper" style="width:794px;box-sizing:border-box;padding:40px 44px;background:#fff;color:#1a1a1a;font-family:'Noto Sans JP',sans-serif">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #1b1824;padding-bottom:10px">
+      <div><div style="font-family:Oswald,sans-serif;font-size:30px;font-weight:700;letter-spacing:3px;color:#b8872b">X8</div><div style="font-size:20px;font-weight:700">本店 月次レポート</div></div>
+      <div style="text-align:right;font-size:12px;color:#666">作成日 ${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}</div></div>
+    ${sec(`${cm} ${complete ? '結果' : '途中経過'}　<span style="font-size:12px;font-weight:400;color:#666">${range}</span>`)}
+    <table style="width:100%;border-collapse:collapse">
+      <tr><th style="${th};text-align:left">項目</th><th style="${th}">${cm}${complete ? '' : '（途中）'}</th>${P ? `<th style="${th}">${pm} 全体</th><th style="${th}">全体に対して</th><th style="${th}">${pm} 同日比</th><th style="${th}">同日比との差</th>` : ''}</tr>
+      ${items.map(([l, c, pa, pt, m], i) => `<tr style="background:${i % 2 ? '#faf8f3' : '#fff'}"><td style="${tdl}">${l}</td><td style="${td};font-weight:700">${m ? y(c) : f(c)}</td>${P ? `<td style="${td}">${m ? y(pa) : f(pa)}</td><td style="${td}">${pc(c, pa)}</td><td style="${td}">${m ? y(pt) : f(pt)}</td><td style="${td}">${m ? dly(c, pt) : dl(c, pt)}</td>` : ''}</tr>`).join('')}
+    </table>
+    ${P ? `<div style="font-size:11px;color:#777;margin-top:6px">「${pm} 同日比」は、${pm}の${lastN}日まで（営業${pds.length}日）の数字と、その差です。新規は件数です。</div>` : ''}
+    ${P ? sec(`${pm} 結果（月まるごと・営業${dayList(P).length}日）`) + `<table style="width:100%;border-collapse:collapse"><tr><th style="${th};text-align:left">項目</th><th style="${th}">合計</th><th style="${th}">1営業日あたり</th></tr>${items.map(([l, c, pa, pt, m], i) => `<tr style="background:${i % 2 ? '#faf8f3' : '#fff'}"><td style="${tdl}">${l}</td><td style="${td};font-weight:700">${m ? y(pa) : f(pa)}</td><td style="${td}">${pa == null ? '-' : (m ? yen(Math.round(pa / Math.max(1, dayList(P).length))) : (pa / Math.max(1, dayList(P).length)).toFixed(1))}</td></tr>`).join('')}</table>` : ''}
+    ${sec('従業員')}
+    <table style="width:100%;border-collapse:collapse">
+      <tr><th style="${th};text-align:left">項目</th>${P ? `<th style="${th};text-align:left">${pm}</th>` : ''}<th style="${th};text-align:left">${cm}${complete ? '' : '（途中）'}</th></tr>
+      <tr><td style="${tdl};width:130px">全体の従業員数</td>${P ? `<td style="${td};text-align:left;white-space:normal">${P.employees.filter(e => e.kind !== 'ops' && NOT_NEW.indexOf(e.name) < 0 && EXCL3.indexOf(e.name) < 0 && empMonth(P, e.id).days > 0).length}人<span style="font-size:10px;color:#777">（キャストで出勤した人）</span></td>` : ''}<td style="${td};text-align:left;white-space:normal">${hq.zaiseki != null ? (hq.zaiseki - M.employees.filter(e => EXCL3.indexOf(e.name) >= 0).length) + '人' : (M.employees.filter(e => EXCL3.indexOf(e.name) < 0 && empMonth(M, e.id).days > 0).length + '人')}${hq.zaiseki != null ? '' : '<span style="font-size:10px;color:#777">（出勤した人）</span>'}</td></tr>
+      <tr><td style="${tdl}">本入店</td>${P ? `<td style="${td};text-align:left;white-space:normal">${pHon.length}人${pHon.length ? '　' + pHon.map(esc).join('、') : ''}</td>` : ''}<td style="${td};text-align:left;white-space:normal">${hq.hon != null ? Math.max(hq.hon, honNames.length) : honNames.length}人${honNames.length ? '　' + honNames.map(esc).join('、') : ''}</td></tr>
+      <tr><td style="${tdl}">定着</td>${P ? `<td style="${td};text-align:left;white-space:normal">${pSet.length}人${pSet.length ? '　' + pSet.map(esc).join('、') : ''}</td>` : ''}<td style="${td};text-align:left;white-space:normal">${curSet.length}人${curSet.length ? '　' + curSet.map(esc).join('、') : ''}</td></tr>
+      ${P ? `<tr><td style="${tdl}">来なくなった従業員<br><span style="font-size:10px;font-weight:400;color:#777">名簿から消えた人</span></td><td style="${td};text-align:left;white-space:normal" colspan="2">${gone.out.length}人　${goneTxt(gone.out)}</td></tr>
+      <tr><td style="${tdl}">今月まだ出勤なし<br><span style="font-size:10px;font-weight:400;color:#777">名簿にはいる人</span></td><td style="${td};text-align:left;white-space:normal" colspan="2">${gone.stay.length}人　${goneTxt(gone.stay)}</td></tr>` : ''}
+    </table>
+    <div style="font-size:11px;color:#777;margin-top:6px">本入店＝その月に本入店した人（個人シートの「本入店」の日付）。定着＝本入店から1ヶ月以内に10日出勤した人（定着した月にだけ載せます。いちど定着した人は、その後ずっと定着です）。従業員数は、11月がExcelの「本部報告」の在籍人数、10月は、キャストで出勤した人の数です（運営のるか・りお・かなた・しん・そら・ひそかは、どちらにも入れていません。えぬ・るーかす・まぁきゅんも入れていません）。来なくなった従業員＝前月に出勤があって、今月の名簿から消えた人。今月まだ出勤なしの人は、月の途中なので、まだ辞めたとは限りません。</div>
+  </div>`;
+}
+async function reportPdf(btn){
+  const label = btn.textContent; btn.disabled = true; btn.textContent = '作成中…';
+  let root = null;
+  try {
+    const html = reportHtml(); if (!html) throw new Error('nodata');
+    if (!window.html2canvas) await loadJs('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    if (!window.jspdf) await loadJs('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    root = document.createElement('div'); root.style.cssText = 'position:fixed;left:-10000px;top:0;z-index:-1'; root.innerHTML = html; document.body.appendChild(root);
+    try { await document.fonts.ready; } catch (_) {}
+    await new Promise(r => setTimeout(r, 300));
+    const cv = await window.html2canvas(root.firstChild, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+    root.remove(); root = null;
+    const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    const pw = 210, ph = 297, ratio = pw / cv.width, pagePx = Math.floor(ph / ratio);
+    for (let off = 0, pg = 0; off < cv.height; off += pagePx, pg++) {
+      const h = Math.min(pagePx, cv.height - off);
+      const c2 = document.createElement('canvas'); c2.width = cv.width; c2.height = h;
+      const g = c2.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c2.width, h); g.drawImage(cv, 0, off, cv.width, h, 0, 0, cv.width, h);
+      if (pg) pdf.addPage();
+      pdf.addImage(c2.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pw, h * ratio);
+    }
+    const name = 'X8月次レポート_' + S.ym;
+    const blob = pdf.output('blob'); const file = new File([blob], name + '.pdf', { type: 'application/pdf' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: name }); } catch (_) {} }
+    else { const u = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = u; a.download = name + '.pdf'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 30000); }
+  } catch (err) { try { if (root) root.remove(); } catch (_) {} alert('PDFを作れませんでした。ネットにつながっているか確認して、もう一度押してください。'); }
+  btn.disabled = false; btn.textContent = label;
+}
 async function psOut(kind, btn){
   const name = (btn.dataset.t || '給与明細');
   let win = null; if (kind === 'printps') { try { win = window.open('', '_blank'); if (win) win.document.write('<p style="font:16px sans-serif;padding:20px">PDFを作っています…</p>'); } catch (_) { win = null; } }
@@ -1906,6 +2033,10 @@ function viewAdmin(){
   if (S.role !== 'admin') return '<div class="empty">管理者のみ使えます</div>';
   const imp = S.imp;
   return `
+  <div class="card"><h2>月次レポート（PDF）</h2>
+    <div class="note" style="margin-top:0">いま表示している${S.ym ? ymLabel(S.ym) : ''}と、その前月の数字を比べたレポートをPDFで作ります。</div>
+    <button class="btn" data-a="reportpdf" style="margin-top:10px">${S.ym ? ymLabel(S.ym) : ''}のレポートをPDFにする</button>
+  </div>
   <div class="card"><h2>Excelを取り込む</h2>
     <div class="note" style="margin-top:0">毎日の営業後に、更新したExcel(.xlsx)を選んでください。内容を確認してから確定します。</div>
     <input type="file" id="xfile" accept=".xlsx,.xls" style="display:none">
@@ -2134,6 +2265,7 @@ document.addEventListener('click', async (ev) => {
   else if (a === 'gview') { S.grpView = el.dataset.v; render(); }
   else if (a === 'person') { if (S.role === 'member') { const me = S.M && S.M.employees.find(x => hexOf(x.name) === S.hex); if (!me || me.id !== el.dataset.id) return; } S.empId = el.dataset.id; if (S.role !== 'member') lsSet('x8s_emp', S.empId); S.tab = 'pers'; render(); window.scrollTo(0, 0); }
   else if (a === 'printps' || a === 'pdfps') { psOut(a, el); }
+  else if (a === 'reportpdf') { reportPdf(el); }
   else if (a === 'persclear') { S.empId = null; S.empQuery = ''; render(); }
   else if (a === 'logintab') { S.loginRole = el.dataset.r; S.regMode = false; S.loginErr = ''; render(); }
   else if (a === 'regtoggle') { S.regMode = !S.regMode; S.loginErr = ''; render(); }

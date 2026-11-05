@@ -699,7 +699,7 @@ const FIREBASE_CONFIG = {
 const ME_MODE = true;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
 const RANK_VIEW_NAMES = ['るか'];  // 個人ページ（me.html）でランキングも見られる人
 const NEWCOMER_NAMES = ['しん'];  // 新規入店者を見られる人
-const RANK_HIDE = ['しん'];  // 個人ページ・給料明細だけ。ランキングには出さない
+const RANK_HIDE = ['しん', 'そら'];  // 個人ページ・給料明細だけ。ランキングには出さない
 const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや'];  // 店の達成率を個人ページで見られる人
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
@@ -940,7 +940,7 @@ function selectMonth(ym){
   if (unsubMonth) { unsubMonth(); unsubMonth = null; }
   if (unsubPriv) { unsubPriv(); unsubPriv = null; } S.priv = null;
   if (unsubPrivPrev) { unsubPrivPrev(); unsubPrivPrev = null; } S.privPrev = null;
-  S.ym = ym; S.M = null; S.prevM = null; S.dd = null; S.dayDetail = null; S.loading = true; render();
+  S.ym = ym; S.M = null; S.prevM = null; S.prevM2 = null; S.dd = null; S.dayDetail = null; S.loading = true; render();
   unsubMonth = backend.subMonth(ym, (M, ts) => {
     S.loading = false; S.M = M; S.updatedAt = ts; pickDefaultDay();
     loadPrev(); render();
@@ -951,9 +951,11 @@ function selectMonth(ym){
   }
 }
 async function loadPrev(){
-  const p = prevYm(S.ym);
-  if (!S.meta.months.includes(p)) { S.prevM = null; return; }
+  const cur = S.ym, p = prevYm(cur), p2 = prevYm(p);
+  if (!S.meta.months.includes(p)) { S.prevM = null; S.prevM2 = null; return; }
   try { const m = await backend.getMonthOnce(p); S.prevM = m; render(); } catch (e) { S.prevM = null; }
+  if (S.meta.months.includes(p2)) { try { const m2 = await backend.getMonthOnce(p2); if (S.ym === cur) { S.prevM2 = m2; render(); } } catch (e) { S.prevM2 = null; } }
+  else S.prevM2 = null;
 }
 function startApp(role){
   S.role = role; S.phase = 'app'; render();
@@ -1117,19 +1119,42 @@ function shokaiDaily(M){
     <div class="note">日付の行をタップすると、その日の内訳が見られます。管理者だけに出ます。</div>
   </div>`;
 }
-const STAFF_CARD_SKIP = ['しん', 'ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう']; // 運営のため増減の集計から外す
+const STAFF_CARD_SKIP = ['しん', 'ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう', 'のあ']; // 運営のため増減の集計から外す
 // 新規入店者：今月出勤があって、前月は出勤がなかった人（しんさんの個人ページにだけ出す）
 function newcomerCard(M, e){
   if (!e || !NEWCOMER_NAMES.includes(e.name)) return '';
   if (!(S.role === 'admin' || (S.role === 'member' && hexOf(e.name) === S.hex))) return '';
   if (!S.prevM) return `<div class="card"><h2>🆕 新規入店者</h2><div class="dim">前月のデータが入ると表示されます。</div></div>`;
   const keep = x => STAFF_CARD_SKIP.indexOf(x.name) < 0;
-  const pa = new Set(S.prevM.employees.filter(x => keep(x) && empMonth(S.prevM, x.id).days > 0).map(x => x.id));
-  const add = M.employees.filter(x => keep(x) && empMonth(M, x.id).days > 0 && !pa.has(x.id));
-  return `<div class="card"><h2>🆕 新規入店者（${ymLabel(M.ym)}）</h2>
-    <div class="big sm">${add.length}人</div>
-    <div class="chips" style="margin-top:8px">${add.length ? add.map(x => `<span class="chip">${esc(x.name)}　${empMonth(M, x.id).days}日</span>`).join('') : '<span class="dim">いません</span>'}</div>
-    <div class="note">今月に出勤があって、前月は出勤がなかった人です（日数は今月の出勤日数）。</div></div>`;
+  // 古い月 → 今月 の順（前々月のデータがあればそれも使う）
+  const chain = [S.prevM2, S.prevM, M].filter(Boolean);
+  const act = (X, id) => X.employees.some(x => x.id === id) && empMonth(X, id).days > 0;
+  const firstDay = (X, id) => { const ds = dayList(X).filter(dd => X.days[dd] && X.days[dd].rows && X.days[dd].rows[id]); return ds.length ? ds[0] : '01'; };
+  const lastDd = dayList(M).slice(-1)[0] || '01';
+  const [cy, cm] = M.ym.split('-').map(Number);
+  const now = new Date(cy, cm - 1, Number(lastDd));
+  const out = [];
+  M.employees.filter(keep).forEach(x => {
+    let ji = -1;
+    for (let i = 0; i < chain.length; i++) { if (act(chain[i], x.id)) { ji = i; break; } }
+    if (ji < 1) return;   // 最初のデータ月から出勤している人は、入店日が分からないので対象外
+    const JM = chain[ji], [jy, jm] = JM.ym.split('-').map(Number);
+    const jd = new Date(jy, jm - 1, Number(firstDay(JM, x.id)));
+    const lim = new Date(jd.getTime()); lim.setMonth(lim.getMonth() + 1);
+    if (now > lim) return;   // 入店から1ヶ月をこえたら外す
+    let total = 0; for (let i = ji; i < chain.length; i++) total += empMonth(chain[i], x.id).days;
+    out.push({ name: x.name, jd, total, settled: total >= 10 });
+  });
+  const fd = d => (d.getMonth() + 1) + '/' + d.getDate();
+  const nw = out.filter(o => !o.settled), st = out.filter(o => o.settled);
+  const chips = (L, mark) => L.length ? L.map(o => `<span class="chip">${mark}${esc(o.name)}　入店${fd(o.jd)}・${o.total}日</span>`).join('') : '<span class="dim">いません</span>';
+  return `<div class="card"><h2>🆕 新規入店者（入店1ヶ月以内）</h2>
+    <div class="big sm">${nw.length}人</div>
+    <div class="chips" style="margin-top:8px">${chips(nw, '')}</div>
+    <div class="hr"></div><div class="lbl">定着（10日以上出勤）</div>
+    <div class="big sm">${st.length}人</div>
+    <div class="chips" style="margin-top:8px">${chips(st, '✓ ')}</div>
+    <div class="note">入店日は、Excelで最初に出勤があった日です。入店から1ヶ月以内の人を表示し、10日出勤したら「定着」に移ります。日数は入店してからの出勤日数です。</div></div>`;
 }
 function staffChangeCard(M){
   const keep = e => STAFF_CARD_SKIP.indexOf(e.name) < 0;
