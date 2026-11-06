@@ -1319,7 +1319,7 @@ function viewStaff(){
       return `<div style="${bg};border-radius:12px;padding:10px 12px;${d === 0 ? 'opacity:.55' : ''}"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:700;font-size:${isLead ? 17 : 15}px">${isLead ? '◎ ' : ''}${esc(nm(e))}${badge(e)}</div><div style="font-family:Oswald;font-size:16px">${d === null ? '<span style="font-size:11px;font-family:inherit;opacity:.7">データなし</span>' : d + '<small style="font-family:inherit;font-size:10px;opacity:.7">日</small>'}</div></div>${d === null ? '' : `<div style="height:4px;border-radius:2px;background:rgba(0,0,0,.25);margin-top:7px"><i style="display:block;height:100%;width:${Math.min(100, d / maxD * 100)}%;border-radius:2px;background:${isLead ? '#2a1c00' : 'var(--gold)'}"></i></div>`}</div>`; };
     const stat = (v, l) => `<div style="flex:1;text-align:center"><div style="font-family:Oswald;font-size:20px">${v}</div><div style="font-size:10px;color:var(--dim)">${l}</div></div>`;
     return `<div style="border:1px solid ${t ? 'rgba(212,175,95,.5)' : 'var(--line)'};border-radius:16px;padding:14px;margin-top:14px;background:rgba(255,255,255,.02)">
-      <div style="font-size:18px;font-weight:700;color:${t ? 'var(--gold)' : 'var(--dim)'};margin-bottom:10px">${t ? esc(t) : 'チーム未設定'}</div>
+      <div style="font-size:18px;font-weight:700;color:${t ? 'var(--gold)' : 'var(--dim)'};margin-bottom:10px">${t ? esc(t) : '所属なし'}</div>
       <div style="display:flex;background:rgba(0,0,0,.25);border-radius:10px;padding:8px 4px;margin-bottom:12px">${stat(ms.length + '人', 'メンバー')}${stat(working + '人', '今月出勤あり')}${stat(rest + '人', '出勤なし')}${t ? stat(yen(gross), '総売（出勤分）') : ''}</div>
       <div style="display:grid;gap:8px">${L.map(e => card(e, true)).join('')}${R.map(e => card(e, false)).join('')}</div></div>`;
   };
@@ -1345,7 +1345,7 @@ function viewStaff(){
     ${order.length ? order.map(t => teamBox(t)).join('') : none}
     <div class="note">チーム名は、下の全員一覧で手打ちして入れます（同じ名前を入れるとまとまります）。</div></div>
   <div class="card"><h2>全員一覧（出勤なしも表示）</h2>
-    ${emps.map(e => { const d = empMonth(M, e.id).days; return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06)"><div style="flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.name)}${e.kind === 'ops' ? '<small> 運営</small>' : tag(e)}</div><div style="font-size:13px;width:34px;text-align:right;${d ? '' : 'color:var(--dim)'}">${d}日</div><input type="text" list="teamlist" data-team="${esc(hexOf(e.name))}" value="${esc(teamOf(e))}" placeholder="チーム" style="width:84px;padding:3px 6px;font-size:12px;margin:0"></div>`; }).join('')}
+    ${order.map(t => { const L = emps.filter(e => (teamOf(e) || '') === t); if (!L.length) return ''; return `<div style="margin:10px 0 2px;font-size:13px;font-weight:700;color:${t ? 'var(--gold)' : 'var(--dim)'}">${t ? esc(t) : '所属なし'}（${L.length}人）</div>` + L.map(e => { const d = empMonth(M, e.id).days; return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06)"><div style="flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.name)}${e.kind === 'ops' ? '<small> 運営</small>' : tag(e)}</div><div style="font-size:13px;width:34px;text-align:right;${d ? '' : 'color:var(--dim)'}">${d}日</div><input type="text" list="teamlist" data-team="${esc(hexOf(e.name))}" value="${esc(teamOf(e))}" placeholder="チーム" style="width:84px;padding:3px 6px;font-size:12px;margin:0"></div>`; }).join(''); }).join('')}
   </div>`;
 }
 function compareCard(M, tot, prevTo, prevTot, lastN, prevToN){
@@ -1408,7 +1408,7 @@ function viewHome(){
       ${[['本数', 'shimei'], ['新規', 'shinki'], ['飲み直し', 'nomi'], ['送り', 'okuri'], ['ヘルプ指名', 'help'], ['同伴', 'douhan']].map(([l, k]) => `<div class="kpi"><div class="v">${fmt(tot[k])}</div><div class="l">${l}</div>${prevTo ? `<div class="kd">${delta(tot[k], prevTo[k])}</div><div class="kp">前月 ${fmt(prevTo[k])}</div>` : ''}</div>`).join('')}
     </div>
     ${prevTo ? `<div class="note">▲▼は前月の同じ日まで（${lastN}日まで・営業${prevToN}日）との差です。「前月」はその合計です。</div>` : '<div class="note">前月のデータが入ると、前月比が表示されます。</div>'}
-    ${(dd && today) ? `<div class="note">${dayLabel(M.ym, dd)}: 本数 ${fmt(today.shimei)} ／ 新規 ${fmt(today.shinki)} ／ 飲み直し ${fmt(today.nomi)} ／ 送り ${fmt(today.okuri)} ／ ヘルプ ${fmt(today.help)} ／ 同伴 ${fmt(today.douhan)}</div>` : ''}
+    ${(dd && today) ? `<div class="note">${dayLabel(M.ym, dd)}: 本数 ${fmt(today.shimei)} ／ 新規 ${fmt(today.shinki)} ／ 飲み直し ${fmt(today.nomi)} ／ 送り ${fmt(today.okuri)} ／ ヘルプ指名 ${fmt(today.help)} ／ 同伴 ${fmt(today.douhan)}</div>` : ''}
     <div class="note">新規は「件数」です。人数はExcelの個人別データにないため表示しません。</div>
   </div>
   <div class="card">
@@ -1621,7 +1621,7 @@ function viewDayDetail(dd){
     <h2>${dayLabel(M.ym, dd)} の店舗合計</h2>
     ${storePair(d.store.gross)}
     ${(S.role === 'admin' && d.shokai) ? `<div class="hr"></div><div class="lbl">初回</div><div style="margin-top:4px"><b>${fmt(d.shokai.kumi)}</b>組 ／ <b>${fmt(d.shokai.nin)}</b>人</div>${`<div class="dim" style="margin-top:4px;font-size:13px;line-height:1.7">${dayBreak(d.shokai)}</div>`}` : ''}
-    <div class="kpis" style="margin-top:12px">${[['本数', 'shimei'], ['新規', 'shinki'], ['飲み直し', 'nomi'], ['送り', 'okuri'], ['ヘルプ', 'help'], ['同伴', 'douhan']].map(([l, k]) => `<div class="kpi"><div class="v">${fmt(d.store[k])}</div><div class="l">${l}</div></div>`).join('')}</div>
+    <div class="kpis" style="margin-top:12px">${[['本数', 'shimei'], ['新規', 'shinki'], ['飲み直し', 'nomi'], ['送り', 'okuri'], ['ヘルプ指名', 'help'], ['同伴', 'douhan']].map(([l, k]) => `<div class="kpi"><div class="v">${fmt(d.store[k])}</div><div class="l">${l}</div></div>`).join('')}</div>
   </div>
   ${S.role !== 'admin' ? `<div class="card"><h2>🔒 個人別</h2><div class="dim">個人の日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div><div class="note">店舗合計には、一覧に載せていない運営メンバー分（総売 ${yen(hid.gross || 0)}）${d.unas ? `と「担当なしの売上」${yen(d.unas)}` : ''}を含みます。</div></div>` : `<div class="card"><h2>個人別</h2>
     <div class="scrollx"><table class="tbl"><thead><tr><th>名前</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
