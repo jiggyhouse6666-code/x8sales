@@ -926,7 +926,7 @@ async function makeFirebaseBackend(){
     async saveExtra(name, part){
       const ref = F.doc(db, 'priv', 'extra_' + hexOf(name)); const cur = await F.getDoc(ref); let o = {};
       if (cur.exists()) { try { o = JSON.parse(cur.data().payload) || {}; } catch (e) {} }
-      const prevAch = o.ach; Object.assign(o, part, { name }); if (part.ach) o.ach = Object.assign({}, prevAch, part.ach);
+      const prevAch = o.ach, prevSg = o.sg; Object.assign(o, part, { name }); if (part.sg) o.sg = Object.assign({}, prevSg, part.sg); if (part.ach) o.ach = Object.assign({}, prevAch, part.ach);
       await F.setDoc(ref, { ym: 'extra', owner: hexOf(name), payload: JSON.stringify(o), updatedAt: F.serverTimestamp() });
     },
     async getExtra(hex){ const sn = await F.getDoc(F.doc(db, 'priv', 'extra_' + hex)); if (!sn.exists()) return null; try { return JSON.parse(sn.data().payload); } catch (e) { return null; } },
@@ -1753,11 +1753,29 @@ function attendanceCard(M, e, rec){
 function mdOf(d){ return d ? Number(d.slice(5, 7)) + '/' + Number(d.slice(8, 10)) : ''; }
 // 店売りバック（グループ売上バック）の段階表。しんさんの個人ページにだけ使う
 const GROUP_BACK = { 'しん': { rows: [['25,000,000', '0.12%', '30,000'], ['30,000,000', '0.25%', '75,000'], ['35,000,000', '0.30%', '105,000'], ['40,000,000', '0.35%', '140,000'], ['50,000,000', '0.40%', '200,000'], ['60,000,000', '0.40%', '240,000'], ['70,000,000', '0.40%', '280,000'], ['80,000,000', '0.40%', '320,000'], ['90,000,000', '0.40%', '360,000'], ['100,000,000', '0.40%', '400,000']], limit: '500,000' } };
+
+// 運営の店売りバック：写真の段階表（売上×率）をグループ売上バックと同じ形にする
+function termsTb(t){
+  if (!t || !t.tiers) return null;
+  const cap = t.cap ? Number(String(t.cap).replace(/[^0-9]/g, '')) * 10000 : 0;
+  return { rows: t.tiers.map(x => { const th = x[0] * 10000; return [String(th), x[1], String(Math.round(th * parseFloat(x[1]) / 100))]; }), limit: cap ? String(cap) : '' };
+}
+function tbFor(e){
+  if (!e) return null;
+  if (GROUP_BACK[e.name]) return { tb: GROUP_BACK[e.name], gen: 0.1 };
+  const t = (typeof OPS_TERMS !== 'undefined' && OPS_TERMS[e.name]) || (S.role === 'member' && S.extra && S.extra.terms && S.extra.terms.tiers ? S.extra.terms : null);
+  const tb = termsTb(t); return tb ? { tb, gen: (parseFloat(t.gensen) / 100) || 0.1 } : null;
+}
+function storeGrossFor(ym){
+  if (S.role === 'admin') return S.M && S.M.ym === ym ? storeGrossOf(S.M) : null;
+  const x = S.extra; if (!x) return null;
+  const a = x.ach && x.ach[ym]; if (a && a.gross != null) return a.gross;
+  return x.sg && x.sg[ym] != null ? x.sg[ym] : null;
+}
 function groupBackCard(e){
-  const tb = e && GROUP_BACK[e.name]; if (!tb) return '';
+  const tf = tbFor(e); if (!tf) return ''; const tb = tf.tb;
   if (!(S.role === 'admin' || (S.role === 'member' && hexOf(e.name) === S.hex))) return '';
-  const ach = S.extra && S.extra.ach && S.extra.ach[S.ym];
-  const g = S.role === 'admin' && S.M ? storeGrossOf(S.M) : (ach ? ach.gross : null);
+  const g = S.role === 'admin' ? (S.M ? storeGrossOf(S.M) : null) : storeGrossFor(S.ym);
   let body;
   if (g == null) body = '<div class="dim">今月の店売りは、管理者が「いまの月を反映する」を押すと出ます。</div>';
   else { const r = groupBack(tb, g);
@@ -1775,6 +1793,35 @@ function groupBack(tb, gross){
   next = tiers.find(t => t.th > gross) || null;
   const cap = n(tb.limit);
   return { tiers, cur, next, back: cur ? (cap ? Math.min(cur.back, cap) : cur.back) : 0 };
+}
+
+// 運営の報酬条件（写真の表をそのまま転記）。tiers = [売上(万円), 店売りバック率]
+const OPS_TERMS = (() => {
+  const mk = (salary, role, gensen, tiers, cap, note) => ({ salary, role, back: '有り', gensen, fee: -10000, uri: '10%', tiers, cap, note: !!note, d30: 9400, d31: 9000 });
+  const flat = (p, last) => [2500,3000,3500,4000,4500,5000,6000,7000,8000,9000].filter(v => v <= last).map((v, i) => [v, i === 0 ? '0.05%' : '0.10%']);
+  return {
+    'るか': mk(216000, 70000, '10%', [2500,3000,3500,4000,4500,5000,6000,7000,8000,9000,10000].map((v, i) => [v, i === 0 ? '0.05%' : '0.10%']), '10万円', true),
+    'りあ': mk(216000, 90000, '10%', [[2500,'0.08%'],[3000,'0.15%'],[3500,'0.20%'],[4000,'0.25%'],[5000,'0.30%'],[6000,'0.30%'],[7000,'0.30%'],[8000,'0.30%'],[9000,'0.30%'],[10000,'0.30%']], '50万円'),
+    'りお': mk(216000, 60000, '10%', flat(0, 9000), '10万円', true),
+    'まや': mk(216000, 50000, '10%', flat(0, 9000), '10万円'),
+    'そら': mk(216000, 35000, '12%', flat(0, 9000), '10万円'),
+    'ゆきお': mk(216000, 20000, '12%', [[2500,'0.04%'],[3000,'0.05%'],[3500,'0.06%'],[4000,'0.06%'],[4500,'0.07%'],[5000,'0.07%'],[6000,'0.08%'],[7000,'0.08%'],[8000,'0.08%'],[9000,'0.08%']], null),
+    'しん': { salary: null, gensen: '10%', note: false, tiers: [[2500,'0.12%'],[3000,'0.25%'],[3500,'0.30%'],[4000,'0.35%'],[5000,'0.40%'],[6000,'0.40%'],[7000,'0.40%'],[8000,'0.40%'],[9000,'0.40%'],[10000,'0.40%']], cap: '50万円' },
+    'りょーた': mk(216000, 35000, '12%', flat(0, 9000), '10万円'),
+  };
+})();
+function termsCard(t){
+  if (!t) return '';
+  const r = (k, v, red) => `<tr><td>${k}</td><td style="text-align:right;${red ? 'color:#ff6b6b' : ''}">${v}</td></tr>`;
+  return `<div class="card"><h2>報酬条件</h2>
+    <div class="scrollx"><table class="tbl"><tbody>
+      ${t.salary != null ? r('月給', yen(t.salary)) + r('役職手当', yen(t.role)) + r('各種バック', esc(t.back)) : ''}${r('源泉', esc(t.gensen), 1)}${t.fee != null ? r('データ管理費', '−' + yen(Math.abs(t.fee)), 1) + r('総売上', esc(t.uri)) : ''}
+    </tbody></table></div>
+    ${t.note ? '<div class="dim" style="font-size:12px;margin-top:6px;color:#ff6b6b">※総売り折半額から源泉を引いた額と上記金額を比べ、高い方を採用</div>' : ''}
+    ${t.d30 ? `<div class="dim" style="font-size:13px;margin-top:6px">30日の月　日給${yen(t.d30)}<br>31日の月　日給${yen(t.d31)}</div>` : ''}
+    <div class="ps-h" style="margin-top:12px">店売りバック</div>
+    <div class="scrollx"><table class="tbl"><tbody>${t.tiers.map(x => `<tr><td>${x[0]}万〜</td><td style="text-align:right">${x[1]}</td></tr>`).join('')}${t.cap ? `<tr><td><b>上限</b></td><td style="text-align:right"><b>${esc(t.cap)}</b></td></tr>` : ''}</tbody></table></div>
+  </div>`;
 }
 function extraCards(x){
   if (!x || (S.role !== 'admin' && !EXTRA_NAMES.includes(x.name))) return '';
@@ -1938,13 +1985,13 @@ async function psOut(kind, btn){
 }
 // しんさんの給料明細に、店売りバック（グループ売上バック）を入れる。シートに店売りバックが入っている月は、シートの数字をそのまま使う
 function psAdjust(rec, ym, e){
-  const tb = e && GROUP_BACK[e.name]; if (!tb || !rec || ym < '2026-08') return rec;
+  const tf = e && tbFor(e); if (!tf || !rec || ym < '2026-08') return rec;
+  const tb = tf.tb;
   if (rec.pay.some(x => /店売りバック/.test(x.k) && x.v)) return rec;
-  const ach = S.extra && S.extra.ach && S.extra.ach[ym];
-  const g = S.role === 'admin' && S.M && S.M.ym === ym ? storeGrossOf(S.M) : (ach ? ach.gross : null);
+  const g = storeGrossFor(ym);
   if (g == null) return rec;
   const r = groupBack(tb, g); if (!r.back) return rec;
-  const inc = Math.round(r.back * 0.1);   // 源泉10%
+  const inc = Math.round(r.back * tf.gen);   // 源泉
   const pay = rec.pay.filter(x => !/店売りバック/.test(x.k)).concat([{ k: '店売りバック（グループ売上バック）', v: r.back, note: '店売り ' + yen(g) + '（' + yen(r.cur.th) + ' 以上の段階）／月末の店売りで確定' }]);
   const ded = rec.ded.map(x => x.k === '源泉' ? Object.assign({}, x, { v: x.v - inc }) : x);
   const gross = rec.gross + r.back, dedTotal = rec.dedTotal - inc;
@@ -2069,7 +2116,7 @@ function viewPerson(){
     ${pt ? `<div class="note">前月（${ymLabel(S.prevM.ym)}・${pt.days}日出勤）との差です。前月は月全体の合計です。</div>` : '<div class="note">前月のデータがない（または前月に名簿にいなかった）ため、前月比は表示していません。</div>'}
     <div class="note">月間目標は店舗全体のみです（個人目標は未設定）。</div>
   </div>
-  ${detail ? (() => { const x = extraFor(e); return extraCards(x); })() : ''}
+  ${detail ? (() => { const x = extraFor(e); return termsCard((OPS_TERMS[e.name]) || (x && x.terms && x.terms.tiers ? x.terms : null)) + extraCards(x); })() : ''}
   ${detail ? (() => { const rec = S.role === 'admin' ? (M.pay && M.pay[e.id]) : (S.priv && S.priv.pay); return attendanceCard(M, e, rec) + payslipCard(rec, M.ym, extraFor(e), e); })() : ''}
   ${!detail ? '<div class="card"><h2>🔒 日別履歴</h2><div class="dim">日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div></div>' : `<div class="card"><h2>日別履歴</h2>
     <div class="scrollx"><table class="tbl"><thead><tr><th>営業日</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
@@ -2101,6 +2148,10 @@ function viewAdmin(){
     <input type="file" id="efile" accept=".xlsx,.xls,.json" multiple style="display:none">
     <button class="btn" data-a="pickextra">Excelファイルを選ぶ</button>
     ${S.ex ? exView(S.ex) : ''}
+  </div>
+  <div class="card"><h2>運営の報酬条件</h2>
+    <div class="note" style="margin-top:0">${Object.keys(OPS_TERMS).join('・')} の報酬条件（月給・役職手当・店売りバックなど）を、それぞれの個人ページに出します。管理者は個人タブで全員分見られます。</div>
+    <button class="btn" data-a="pushterms">報酬条件を${Object.keys(OPS_TERMS).length}人に反映する</button>
   </div>
   <div class="card"><h2>達成率を見せる人</h2>
     <div class="note" style="margin-top:0">${ACH_NAMES.join('・')} の個人ページに、${S.ym ? ymLabel(S.ym) : ''}の月間目標・達成率・目標までの残りと、Excelの「達成率」シートの表（総売上・新規・初回人数など）が出ます。Excelを取り込むと自動で反映されます。目標を変えた時は、そのまま反映されます。</div>
@@ -2325,6 +2376,7 @@ document.addEventListener('click', async (ev) => {
   else if (a === 'chgpw') doChangePw();
   else if (a === 'chgadm') doChangeAdminPw();
   else if (a === 'unlock') doUnlock();
+  else if (a === 'pushterms') { (async () => { try { for (const nm of Object.keys(OPS_TERMS)) await backend.saveExtra(nm, { terms: OPS_TERMS[nm] }); if (S.M && S.ym) await pushAch(S.ym, S.M); toast('反映しました'); } catch (e) { toast('反映に失敗しました'); } })(); }
   else if (a === 'pushach') { if (S.M && S.ym) { pushAch(S.ym, S.M).then(() => toast('反映しました')).catch(() => toast('反映に失敗しました')); } }
   else if (a === 'relock') { S.unlocked = false; render(); }
   else if (a === 'loadmembers') loadMembers();
@@ -2431,6 +2483,7 @@ async function pushAch(ym, M){
   const g = storeGrossOf(M), n = dayList(M).length;
   const o = { gross: g, days: n, at: Date.now() }; if (M.ach) o.tbl = M.ach;
   for (const nm of ACH_NAMES) await backend.saveExtra(nm, { ach: { [ym]: o } });
+  for (const nm of Object.keys(OPS_TERMS)) { if (!ACH_NAMES.includes(nm)) await backend.saveExtra(nm, { sg: { [ym]: g } }); }
 }
 async function doConfirmImport(){
   const imp = S.imp; if (!imp || imp.status !== 'preview') return;
