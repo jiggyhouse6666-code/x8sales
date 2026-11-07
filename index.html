@@ -1251,7 +1251,7 @@ function settleYmOf(id, jstr, chain){
 }
 function newcomerList(M){
   const keep = x => STAFF_CARD_SKIP.indexOf(x.name) < 0 && NOT_NEW.indexOf(x.name) < 0;
-  const J = joinedMap(M), out = [];
+  const J = joinedMap(M), out = [], settledAll = [];
   const chain = [S.prevM2, S.prevM, M].filter(Boolean);
   const lastDd = dayList(M).slice(-1)[0] || '01';
   const [cy, cm] = M.ym.split('-').map(Number);
@@ -1262,12 +1262,14 @@ function newcomerList(M){
     const [jy, jm, jdn] = J[x.id].split('-').map(Number);
     const jd = new Date(jy, jm - 1, jdn);
     const lim = new Date(jd.getTime()); lim.setMonth(lim.getMonth() + 1);
+    /* 定着は、入店1ヶ月の途中で10日に届いた月に数える（月末より前に1ヶ月が終わった人も入れる） */
+    if (jd <= now && settleYmOf(x.id, J[x.id], chain) === M.ym) settledAll.push({ id: x.id, name: x.name, jd });
     if (now > lim || jd > now) return;
     let total = 0;
     chain.forEach(X => { const [xy, xm] = X.ym.split('-').map(Number); dayList(X).forEach(dd => { if (new Date(xy, xm - 1, Number(dd)) >= jd && X.days[dd] && X.days[dd].rows && isWorkRow(X.days[dd].rows[x.id])) total++; }); });
     out.push({ id: x.id, name: x.name, jd, total, settled: total >= 10, settleYm: settleYmOf(x.id, J[x.id], chain) });
   });
-  return { out, ok: true, hasJoin: ids.length > 0 };
+  return { out, settledAll, ok: true, hasJoin: ids.length > 0 };
 }
 const TEAM_DEFAULT = (() => {
   const m = {};
@@ -1291,7 +1293,7 @@ function viewStaff(){
   const cnt = days.map(dd => emps.filter(e => { const r = M.days[dd] && M.days[dd].rows && M.days[dd].rows[e.id]; return r && (WORKS.includes(r[8]) || (!r[8] && r.slice(0, 8).some(n => n !== 0))); }).length);
   const avg = days.length ? (cnt.reduce((a, b) => a + b, 0) / days.length) : 0;
   const nc = newcomerList(M);
-  const nw = nc.out.filter(o => !o.settled), st = nc.out.filter(o => o.settled && o.settleYm === M.ym);
+  const nw = nc.out.filter(o => !o.settled), st = nc.settledAll.map(o => { const f = nc.out.find(z => z.id === o.id); return f || { id: o.id, name: o.name, jd: o.jd, total: 10 }; });
   const hq = M.hq || {};
   const hasHq = hq.taiken != null || hq.hon != null;
   const JM = joinedMap(M);
@@ -1815,7 +1817,7 @@ function reportHtml(){
       if (settleYmOf(e.id, j, chainP) === P.ym) pSet.push(e.name);
     });
   }
-  const curSet = nl.out.filter(o => o.settled && o.settleYm === M.ym).map(o => o.name);
+  const curSet = (nl.settledAll || []).map(o => o.name);
   const now = new Date();
   return `<div id="reportpaper" style="width:794px;box-sizing:border-box;padding:40px 44px;background:#fff;color:#1a1a1a;font-family:'Noto Sans JP',sans-serif">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #1b1824;padding-bottom:10px">
