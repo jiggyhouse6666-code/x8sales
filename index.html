@@ -627,7 +627,8 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
   function zen2n(t) { return Number(String(t).replace(/[０-９]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 65248); }).replace(/月/g, '')); }
 
   // 前入金管理シート：担当名／お客様名／出入金日／金額／備考 の表がいくつも並んでいる
-  function parseMae(XLSX, wb, names, report) {
+  function parseMae(XLSX, wb, names, report, core) {
+    var warnFor = function (nm) { return !core || core.indexOf(nm) >= 0; };
     var ws = wb.Sheets[wb.SheetNames[0]]; var rows = xRows(XLSX, ws);
     var all = []; var tot = {};
     for (var r = 0; r < rows.length; r++) {
@@ -651,7 +652,7 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
     var people = {};
     names.forEach(function (nm) {
       var mine = all.filter(function (e) { return e.who === nm; });
-      if (!mine.length) { report.warnings.push(nm + ' さんの前入金が見つかりません'); return; }
+      if (!mine.length) { if (warnFor(nm)) report.warnings.push(nm + ' さんの前入金が見つかりません'); return; }
       var by = {};
       mine.forEach(function (e) { var k = e.cust || '（お客様名なし）'; (by[k] = by[k] || []).push(e); });
       var customers = Object.keys(by).map(function (k) {
@@ -667,11 +668,15 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
   }
 
   // 報酬一覧のExcel：人ごとのシートに、月ごとの「日付／お客様名／金額」の売掛の表がある
-  function parseUri(XLSX, data, names, report) {
+  function parseUri(XLSX, data, names, report, core) {
+    var warnFor = function (nm) { return !core || core.indexOf(nm) >= 0; };
     var people = {};
+    var present = XLSX.read(data, { type: 'array', bookSheets: true }).SheetNames;
+    var want = names.filter(function (n) { return present.indexOf(n) >= 0; });
+    var wbAll = want.length ? XLSX.read(data, { type: 'array', sheets: want }) : { Sheets: {} };
     names.forEach(function (nm) {
-      var wb = XLSX.read(data, { type: 'array', sheets: [nm] });
-      var ws = wb.Sheets[nm]; if (!ws) { report.warnings.push(nm + ' さんのシートがありません'); return; }
+      var wb = wbAll;
+      var ws = wb.Sheets[nm]; if (!ws) { if (warnFor(nm)) report.warnings.push(nm + ' さんのシートがありません'); return; }
       var rows = xRows(XLSX, ws); var head = rows[1] || []; var months = [];
       for (var c = 0; c < head.length; c++) {
         if (typeof head[c] !== 'string' || !/^[0-9０-９]+月$/.test(head[c].trim())) continue;
@@ -698,7 +703,7 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
         months.push({ label: String(head[c]).trim().replace(/[０-９]/g, function (x) { return String.fromCharCode(x.charCodeAt(0) - 65248); }), n: zen2n(head[c]), total: total, sheetTotal: sheetTot, paid: paidTotal,
           byCustomer: Object.keys(by).map(function (k) { return { name: k, amt: by[k], paid: byPaid[k] || 0 }; }).sort(function (a, b) { return b.amt - a.amt || b.paid - a.paid; }), rows: lst });
       }
-      if (!months.length) report.warnings.push(nm + ' さんの売掛の表が見つかりません');
+      if (!months.length) { if (warnFor(nm)) report.warnings.push(nm + ' さんの売掛の表が見つかりません'); }
       else people[nm] = { months: months };
     });
     return people;
@@ -727,12 +732,12 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
     return out;
   }
 
-  function parseExtra(XLSX, data, fileName, names) {
+  function parseExtra(XLSX, data, fileName, names, core) {
     var report = { fileName: fileName || '', errors: [], warnings: [] };
     var b = XLSX.read(data, { type: 'array', bookSheets: true }); var sn = b.SheetNames;
-    if (sn.indexOf('報酬一覧') >= 0) return { kind: 'uri', people: parseUri(XLSX, data, names, report), hoshu: parseHoshu(XLSX, data, report), report: report };
+    if (sn.indexOf('報酬一覧') >= 0) return { kind: 'uri', people: parseUri(XLSX, data, names, report, core), hoshu: parseHoshu(XLSX, data, report), report: report };
     var wb = XLSX.read(data, { type: 'array', sheets: [sn[0]] }); var f = wb.Sheets[sn[0]];
-    if (f && f.B1 && String(f.B1.v).indexOf('前入金') >= 0) return { kind: 'mae', people: parseMae(XLSX, wb, names, report), report: report };
+    if (f && f.B1 && String(f.B1.v).indexOf('前入金') >= 0) return { kind: 'mae', people: parseMae(XLSX, wb, names, report, core), report: report };
     report.errors.push('売掛（報酬一覧）か、前入金管理シートのExcelではないようです。');
     return { kind: null, people: {}, report: report };
   }
@@ -1732,7 +1737,7 @@ function groupBack(tb, gross){
   return { tiers, cur, next, back: cur ? (cap ? Math.min(cur.back, cap) : cur.back) : 0 };
 }
 function extraCards(x){
-  if (!x || !EXTRA_NAMES.includes(x.name)) return '';
+  if (!x || (S.role !== 'admin' && !EXTRA_NAMES.includes(x.name))) return '';
   let h = '';
   if (x.mae) {
     const m = x.mae;
@@ -2414,7 +2419,7 @@ async function doParseExtra(files){
     const XLSX = await loadXLSX(); const items = [];
     for (const f of files) {
       if (/\.json$/i.test(f.name)) { const o = JSON.parse(await f.text()); const people = {}; Object.keys(o).filter(k => EXTRA_NAMES.includes(k)).forEach(k => { people[k] = o[k]; }); items.push({ fileName: f.name, kind: Object.keys(people).length ? 'terms' : null, people, report: { errors: ['対象の人（' + EXTRA_NAMES.join('・') + '）が見つかりません'], warnings: [] } }); continue; }
-      const buf = await f.arrayBuffer(); const r = window.X8Parse.parseExtra(XLSX, new Uint8Array(buf), f.name, EXTRA_NAMES); items.push({ fileName: f.name, kind: r.kind, people: r.people, hoshu: r.hoshu, report: r.report }); }
+      const buf = await f.arrayBuffer(); const allNames = Array.from(new Set(EXTRA_NAMES.concat((S.M ? S.M.employees : []).map(x => x.name)))); const r = window.X8Parse.parseExtra(XLSX, new Uint8Array(buf), f.name, allNames, EXTRA_NAMES); items.push({ fileName: f.name, kind: r.kind, people: r.people, hoshu: r.hoshu, report: r.report }); }
     S.ex = { status: 'preview', items };
   } catch (e) { S.ex = { status: 'error', msg: '読み込みに失敗しました: ' + (e && e.message || e) }; }
   render();
