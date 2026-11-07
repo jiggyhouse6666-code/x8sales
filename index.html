@@ -198,7 +198,7 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
   ];
   var ATT_HEADER = '出勤';
   // 運営メンバーのうち、一覧・ランキングに載せる人(しんさんの指定)
-  var OPS_SHOWN = ['るか', 'りお', 'かなた', 'しん', 'そら', 'ひそか'];  // しん: 個人ページ・給料明細用（ランキングには出さない）
+  var OPS_SHOWN = ['るか', 'りお', 'かなた', 'しん', 'そら', 'ひそか', 'りあ', 'りょーた', 'まや'];  // しん: 個人ページ・給料明細用（ランキングには出さない）
 
   // 名前の表記ゆれをそろえる（「（運営）」の注記を外し、全角半角をそろえる）
   function cleanName(s) { return String(s == null ? '' : s).normalize('NFKC').replace(/\(運営\)\s*$/, '').trim(); }
@@ -411,7 +411,7 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
     var out = {}; var label = mon + '月';
     want.forEach(function (e) {
       var ws = wb.Sheets[e.name]; if (!ws) return;
-      var rows = xRows(XLSX, ws);
+      var rows = xRowsA1(XLSX, ws);
       var isOps = e.kind === 'ops';
       var rec = isOps ? payOps(rows, label, e.name, report) : payCast(rows, label, e.name, report);
       if (rec.pay.length || rec.net) out[e.id] = rec;
@@ -624,6 +624,12 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
   }
   function xNum(v) { return typeof v === 'number' && isFinite(v) ? v : null; }
   function xRows(XLSX, ws) { return XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null, blankrows: true }); }
+  // 給料明細用：範囲がA1から始まらなくてもセル位置がずれない
+  function xRowsA1(XLSX, ws) {
+    var o = { header: 1, raw: true, defval: null, blankrows: true };
+    try { var rg = XLSX.utils.decode_range(ws['!ref'] || 'A1'); if (rg.s.r > 0 || rg.s.c > 0) { rg.s.r = 0; rg.s.c = 0; o.range = rg; } } catch (e) {}
+    return XLSX.utils.sheet_to_json(ws, o);
+  }
   function zen2n(t) { return Number(String(t).replace(/[０-９]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 65248); }).replace(/月/g, '')); }
 
   // 前入金管理シート：担当名／お客様名／出入金日／金額／備考 の表がいくつも並んでいる
@@ -767,7 +773,7 @@ const FIREBASE_CONFIG = {
 const ME_MODE = /*ME_MODE*/false;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
 const RANK_VIEW_NAMES = ['るか'];  // 個人ページ（me.html）でランキングも見られる人
 const NEWCOMER_NAMES = ['しん'];  // 新規入店者を見られる人
-const RANK_HIDE = ['しん', 'そら'];  // 個人ページ・給料明細だけ。ランキングには出さない
+const RANK_HIDE = ['しん', 'そら', 'りあ', 'りょーた', 'まや'];  // 個人ページ・給料明細だけ。ランキングには出さない
 const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや'];  // 店の達成率を個人ページで見られる人
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
@@ -1194,8 +1200,8 @@ function shokaiDaily(M){
     <div class="note">日付の行をタップすると、その日の内訳が見られます。管理者だけに出ます。</div>
   </div>`;
 }
-const STAFF_CARD_SKIP = ['しん', 'ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう', 'のあ']; // 運営のため増減の集計から外す
-const NOT_NEW = ['そら', 'ひそか'];  // 運営で前からいる人。10月を取り込んだ時は集計の対象外だったので、新規扱いにしない
+const STAFF_CARD_SKIP = ['しん', 'ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう', 'のあ', 'りあ', 'りょーた', 'まや']; // 運営のため増減の集計から外す
+const NOT_NEW = ['そら', 'ひそか', 'りあ', 'りょーた', 'まや'];  // 運営で前からいる人。10月を取り込んだ時は集計の対象外だったので、新規扱いにしない
 // 新規入店者：今月出勤があって、前月は出勤がなかった人（しんさんの個人ページにだけ出す）
 function newcomerCard(M, e){
   if (!e || !NEWCOMER_NAMES.includes(e.name)) return '';
@@ -1285,6 +1291,39 @@ const TEAM_DEFAULT = (() => {
   return m;
 })();
 const TEAM_LEADER = { 'るか班': 'るか', 'こうや班': 'こうや', 'るい班': 'るい' };
+/* ---------- 役職表（昇格・降格・待遇） ---------- */
+const ROLE_LINES = [
+  { title: '本店ライン', roles: [
+    { n: '幹部補佐', up: '3ヶ月連続 小計50万 or 小計150万以上', down: '3ヶ月 小計50万未達成', pay: '役職手当 2万円' },
+    { n: '幹部', up: '2ヶ月連続 小計100万 or 小計200万以上', jump: '【非役職】から：小計400万以上', down: '2ヶ月連続 小計50万未達成', pay: '役職手当 2.5万円' },
+    { n: '副主任', up: '2ヶ月連続 小計150万 or 小計250万以上', jump: '【幹部補佐】から：小計500万以上', down: '2ヶ月連続 出勤20日以下、2ヶ月連続 小計50万未達成', pay: '役職手当 3万円＋有給1日' },
+    { n: '主任', up: '2ヶ月連続 小計200万 or 小計300万以上', jump: '【幹部】から：小計600万以上', down: '2ヶ月連続 出勤20日以下、2ヶ月連続 小計50万未達成', pay: '役職手当 3.5万円＋有給1日＋22時出勤1日' },
+    { n: '支配人', up: '2ヶ月連続 小計300万 or 小計400万以上', jump: '【副主任】から：小計800万以上', down: '2ヶ月連続 出勤20日以下、2ヶ月連続 小計80万未達成', pay: '役職手当 4万円＋有給1日＋22時出勤2日' },
+    { n: '総支配人', up: '2ヶ月連続 小計400万 or 小計700万以上', jump: '【主任】から：小計1400万以上', down: '2ヶ月連続 出勤20日以下、2ヶ月連続 小計100万未達成', pay: '役職手当 4.5万円＋有給1日＋22時出勤2日＋店舗総売バック0.2%' }
+  ] },
+  { title: 'VPライン（幹部の次から）', roles: [
+    { n: 'VP', up: '2ヶ月連続 小計150万 or 小計250万以上', jump: '【幹部補佐】から：小計500万以上', down: '2ヶ月連続 小計50万未達成', pay: '役職手当（個別設定）' },
+    { n: 'SP', up: '2ヶ月連続 小計200万 or 小計300万以上', jump: '【幹部】から：小計600万以上', down: '2ヶ月連続 小計50万未達成', pay: '役職手当（個別設定）' },
+    { n: 'EP', up: '2ヶ月連続 小計300万 or 小計400万以上', jump: '【VP】から：小計800万以上', down: '2ヶ月連続 小計80万未達成', pay: '役職手当（個別設定）' },
+    { n: 'LP', up: '2ヶ月連続 小計400万 or 小計700万以上', jump: '【SP】から：小計1400万以上', down: '2ヶ月連続 小計100万未達成', pay: '役職手当（個別設定）' }
+  ] },
+  { title: '代表ライン（総支配人・LPの上）', roles: [
+    { n: '代表代理', up: '店舗運営の業務実績と、最高幹部の推薦', pay: '役職手当＋店舗総売バック＋個別設定' },
+    { n: '代表', up: '店舗運営の業務実績と、最高幹部の推薦', pay: '役職手当＋店舗総売バック＋個別設定' }
+  ] }
+];
+function rolesCard(){
+  const box = r => `<div style="border:1px solid var(--line,#3a3328);border-radius:10px;padding:10px 12px;margin:8px 0">
+      <div style="font-weight:700;color:var(--gold);font-size:15px">${esc(r.n)}</div>
+      <div style="font-size:13px;line-height:1.6;margin-top:4px"><b>昇格</b>　${esc(r.up)}</div>
+      ${r.jump ? `<div style="font-size:13px;line-height:1.6"><b>飛び級</b>　${esc(r.jump)}</div>` : ''}
+      ${r.down ? `<div style="font-size:13px;line-height:1.6"><b>降格</b>　${esc(r.down)}</div>` : ''}
+      <div style="font-size:13px;line-height:1.6"><b>待遇</b>　${esc(r.pay)}</div></div>`;
+  return `<div class="card"><h2>役職表</h2>
+    <div class="note" style="margin-top:0">昇格の条件・降格の条件・待遇です（小計＝売上の小計）。下に行くほど上の役職です。</div>
+    ${ROLE_LINES.map(l => `<details style="margin-top:10px"><summary style="font-weight:700;font-size:14px">${esc(l.title)}（${l.roles.length}役職）</summary>${l.roles.map(box).join('')}</details>`).join('')}
+  </div>`;
+}
 function viewStaff(){
   if (S.role !== 'admin') return '<div class="empty">管理者のみ使えます</div>';
   const M = S.M; if (!M) return noData();
@@ -1351,6 +1390,7 @@ function viewStaff(){
     <datalist id="teamlist">${teamNames.map(t => `<option value="${esc(t)}">`).join('')}</datalist>
     ${order.length ? order.map(t => teamBox(t)).join('') : none}
     <div class="note">チーム名は、下の全員一覧で手打ちして入れます（同じ名前を入れるとまとまります）。</div></div>
+  ${rolesCard()}
   <div class="card"><h2>全員一覧（出勤なしも表示）</h2>
     ${order.map(t => { const L = emps.filter(e => (teamOf(e) || '') === t); if (!L.length) return ''; return `<div style="margin:10px 0 2px;font-size:13px;font-weight:700;color:${t ? 'var(--gold)' : 'var(--dim)'}">${t ? esc(t) : '所属なし'}（${L.length}人）</div>` + L.map(e => { const d = empMonth(M, e.id).days; return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06)"><div style="flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.name)}${e.kind === 'ops' ? '<small> 運営</small>' : tag(e)}</div><div style="font-size:13px;width:34px;text-align:right;${d ? '' : 'color:var(--dim)'}">${d}日</div><input type="text" list="teamlist" data-team="${esc(hexOf(e.name))}" value="${esc(teamOf(e))}" placeholder="チーム" style="width:84px;padding:3px 6px;font-size:12px;margin:0"></div>`; }).join(''); }).join('')}
   </div>`;
@@ -1920,7 +1960,7 @@ function payslipCard(rec, ym, ex, e){
   const uri = hm ? hm.uri : null;
   const after = uri != null ? rec.net - uri : null;
   return `<div class="card ps"><div class="ps-title">給　与　明　細　書</div>
-    <div class="ps-sub"><span>${ymLabel(ym)}分</span><span>${esc(e ? e.name : '')} 様</span></div>
+    <div class="ps-sub"><span>${ymLabel(ym)}分${(() => { const d = new Date(Date.now() + 9*3600e3 - 5*3600e3); return ym === d.getUTCFullYear() + '-' + String(d.getUTCMonth()+1).padStart(2,'0') ? '（現状・月の途中）' : ''; })()}</span><span>${esc(e ? e.name : '')} 様</span></div>
     <div class="ps-net"><div class="lbl">差引支給額（お給料）</div><div class="big">${yen(rec.net)}</div></div>
     <div class="ps-h">支 給 項 目</div>
     ${rec.pay.map(x => row(x.k, x.v, x.note)).join('') || '<div class="dim" style="padding:8px 0">なし</div>'}

@@ -198,7 +198,7 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
   ];
   var ATT_HEADER = '出勤';
   // 運営メンバーのうち、一覧・ランキングに載せる人(しんさんの指定)
-  var OPS_SHOWN = ['るか', 'りお', 'かなた', 'しん'];  // しん: 個人ページ・給料明細用（ランキングには出さない）
+  var OPS_SHOWN = ['るか', 'りお', 'かなた', 'しん', 'そら', 'ひそか', 'りあ', 'りょーた', 'まや'];  // しん: 個人ページ・給料明細用（ランキングには出さない）
 
   // 名前の表記ゆれをそろえる（「（運営）」の注記を外し、全角半角をそろえる）
   function cleanName(s) { return String(s == null ? '' : s).normalize('NFKC').replace(/\(運営\)\s*$/, '').trim(); }
@@ -411,7 +411,7 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
     var out = {}; var label = mon + '月';
     want.forEach(function (e) {
       var ws = wb.Sheets[e.name]; if (!ws) return;
-      var rows = xRows(XLSX, ws);
+      var rows = xRowsA1(XLSX, ws);
       var isOps = e.kind === 'ops';
       var rec = isOps ? payOps(rows, label, e.name, report) : payCast(rows, label, e.name, report);
       if (rec.pay.length || rec.net) out[e.id] = rec;
@@ -561,6 +561,12 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
   }
   function xNum(v) { return typeof v === 'number' && isFinite(v) ? v : null; }
   function xRows(XLSX, ws) { return XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null, blankrows: true }); }
+  // 給料明細用：範囲がA1から始まらなくてもセル位置がずれない
+  function xRowsA1(XLSX, ws) {
+    var o = { header: 1, raw: true, defval: null, blankrows: true };
+    try { var rg = XLSX.utils.decode_range(ws['!ref'] || 'A1'); if (rg.s.r > 0 || rg.s.c > 0) { rg.s.r = 0; rg.s.c = 0; o.range = rg; } } catch (e) {}
+    return XLSX.utils.sheet_to_json(ws, o);
+  }
   function zen2n(t) { return Number(String(t).replace(/[０-９]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 65248); }).replace(/月/g, '')); }
 
   // 前入金管理シート：担当名／お客様名／出入金日／金額／備考 の表がいくつも並んでいる
@@ -699,7 +705,7 @@ const FIREBASE_CONFIG = {
 const ME_MODE = true;  // true: 個人専用ページ（me.html）。false: 全体用（index.html）
 const RANK_VIEW_NAMES = ['るか'];  // 個人ページ（me.html）でランキングも見られる人
 const NEWCOMER_NAMES = ['しん'];  // 新規入店者を見られる人
-const RANK_HIDE = ['しん', 'そら'];  // 個人ページ・給料明細だけ。ランキングには出さない
+const RANK_HIDE = ['しん', 'そら', 'りあ', 'りょーた', 'まや'];  // 個人ページ・給料明細だけ。ランキングには出さない
 const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや'];  // 店の達成率を個人ページで見られる人
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
@@ -1119,7 +1125,7 @@ function shokaiDaily(M){
     <div class="note">日付の行をタップすると、その日の内訳が見られます。管理者だけに出ます。</div>
   </div>`;
 }
-const STAFF_CARD_SKIP = ['しん', 'ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう', 'のあ']; // 運営のため増減の集計から外す
+const STAFF_CARD_SKIP = ['しん', 'ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう', 'のあ', 'りあ', 'りょーた', 'まや']; // 運営のため増減の集計から外す
 // 新規入店者：今月出勤があって、前月は出勤がなかった人（しんさんの個人ページにだけ出す）
 function newcomerCard(M, e){
   if (!e || !NEWCOMER_NAMES.includes(e.name)) return '';
@@ -1595,7 +1601,7 @@ function payslipCard(rec, ym, ex, e){
   const uri = hm ? hm.uri : null;
   const after = uri != null ? rec.net - uri : null;
   return `<div class="card ps"><div class="ps-title">給　与　明　細　書</div>
-    <div class="ps-sub"><span>${ymLabel(ym)}分</span><span>${esc(e ? e.name : '')} 様</span></div>
+    <div class="ps-sub"><span>${ymLabel(ym)}分${(() => { const d = new Date(Date.now() + 9*3600e3 - 5*3600e3); return ym === d.getUTCFullYear() + '-' + String(d.getUTCMonth()+1).padStart(2,'0') ? '（現状・月の途中）' : ''; })()}</span><span>${esc(e ? e.name : '')} 様</span></div>
     <div class="ps-net"><div class="lbl">差引支給額（お給料）</div><div class="big">${yen(rec.net)}</div></div>
     <div class="ps-h">支 給 項 目</div>
     ${rec.pay.map(x => row(x.k, x.v, x.note)).join('') || '<div class="dim" style="padding:8px 0">なし</div>'}
