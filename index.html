@@ -2046,8 +2046,8 @@ function viewAdmin(){
     <button class="btn" data-a="reportpdf" style="margin-top:10px">${S.ym ? ymLabel(S.ym) : ''}のレポートをPDFにする</button>
   </div>
   <div class="card"><h2>Excelを取り込む</h2>
-    <div class="note" style="margin-top:0">毎日の営業後に、更新したExcel(.xlsx)を選んでください。内容を確認してから確定します。</div>
-    <input type="file" id="xfile" accept=".xlsx,.xls" style="display:none">
+    <div class="note" style="margin-top:0">毎日の営業後に、更新したExcel(.xlsx)を選んでください。内容を確認してから確定します。10月と11月など、複数のExcelをまとめて選べます（1つずつ確認して確定します）。</div>
+    <input type="file" id="xfile" accept=".xlsx,.xls" multiple style="display:none">
     <button class="btn" data-a="pickfile">Excelファイルを選ぶ</button>
     ${imp ? impView(imp) : ''}
   </div>
@@ -2291,7 +2291,7 @@ document.addEventListener('click', async (ev) => {
   else if (a === 'pickextra') $('#efile').click();
   else if (a === 'saveextra') doSaveExtra();
   else if (a === 'cancelextra') { S.ex = null; render(); }
-  else if (a === 'cancelimp') { S.imp = null; render(); }
+  else if (a === 'cancelimp') { S.imp = null; S.impQueue = []; render(); }
   else if (a === 'confirmimp') doConfirmImport();
   else if (a === 'settarget') doSetTarget();
   else if (a === 'loadimports') { try { S.importsList = await backend.listImports(); } catch (e) { toast('履歴を読み込めませんでした'); } render(); }
@@ -2303,7 +2303,7 @@ document.addEventListener('input', (ev) => {
 });
 document.addEventListener('change', (ev) => {
   if (ev.target.id === 'efile' && ev.target.files && ev.target.files.length) { const fs = Array.from(ev.target.files); ev.target.value = ''; doParseExtra(fs); }
-  if (ev.target.id === 'xfile' && ev.target.files && ev.target.files[0]) { const f = ev.target.files[0]; ev.target.value = ''; doParse(f); }
+  if (ev.target.id === 'xfile' && ev.target.files && ev.target.files[0]) { const fs = Array.from(ev.target.files).sort((a, b) => a.name.localeCompare(b.name)); ev.target.value = ''; S.impQueue = fs.slice(1); doParse(fs[0]); }
   if (ev.target.id === 'allowrm' && S.imp) S.imp.allowRemove = ev.target.checked;
 });
 document.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && ['pw', 'pw2', 'nm', 'code'].includes(ev.target.id)) doLogin(); });
@@ -2404,7 +2404,8 @@ async function doConfirmImport(){
     S.imp = { status: 'done', summary: ymLabel(ym) + '：' + dayList(merged).length + '日分、総売 ' + yen(tot.gross) };
     S.importsList = null; toast('取り込みました');
     if (S.ym !== ym) selectMonth(ym);
-  } catch (e) { S.imp = { status: 'error', msg: '保存に失敗しました。既存のデータは変更されていません。(' + (e && e.code || e && e.message || '') + ')' }; }
+    if (S.impQueue && S.impQueue.length) { const nx = S.impQueue.shift(); render(); toast('次のファイルを読み込みます（残り' + S.impQueue.length + '）'); await doParse(nx); return; }
+  } catch (e) { S.impQueue = []; S.imp = { status: 'error', msg: '保存に失敗しました。既存のデータは変更されていません。(' + (e && e.code || e && e.message || '') + ')' }; }
   render();
 }
 async function doParseExtra(files){
