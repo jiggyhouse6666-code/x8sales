@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>X8 営業管理</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a090e">
+<meta name="robots" content="noindex,nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="X8営業管理">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAR8klEQVR4Xu2deVxTVxbHXxYSAoRNZHEDK0sFqYL7WgWliKB2Wi1qdaotirZVZ7Qdd6U62nas21jEWrHLWKkdp1rFXcEqblAUN0QUwQ1BGgXZIcl8mMyHYVjuue/lJXnB8/378XJz7i+/c5dzLyIrhS2DIM0hxrAgLYHiQFAcCHvQORB0DoQ9UvZ/wpHbR2dx/EukCZ4hsUaIisigU1kUhBEwnFAMIg7UhEngXSV8igM1IRD4Uglv4gCVwVeLEYYxUrR5EAdBFigII2C4+OsrjmZbhpowCbz3BXdx8N4UhBd47BeO4mjaAnQLQcFLB3FZPuflgxGD0vS3Cs4YmsJaHKgMc0F/fbBLK42UganELODcayycg/NnIKal0W+YPr/QigOVYdZw0wetOBqC2cQc4dBrVOKgNyLEXKDpU1gcmFBaDWyTCywOTCitCVbJBRBHQ9tg9V5EsDTsR3JyIYmD/JdI64DQy7RpBW2jNUHZm7TiQF5AWhQHjjZaNzQjD3QOpEVQHAhLcWBOeREAMws6B8LSORCEYdA5EFbOgQOOFwfysAPHHAiOORD2oHMg6BwIe9A5EHQOhD3oHAg6B8IedA4EnQNhDzoHgs6BsAedA0HnQNiDzoGgcyDsMd5/TXjRkFlI/L2dX/Fx7tLJwb2dXVsHK0d7S4VcKrOQqDXaktKqkrLq52XVd+8/vXrrydVbhddvP6mqVgsqSoITx47V4YN7dSLH6ImqfOiU73kJZUc3239tetPBzpL8iRcyHr6zcH9NrQbsPIVcGvaqZ+jgLgMCOshlkmafl0gYJwcrJwcrhmG6+ziPHe7DMExpefWB5Nu7D924klUIfopxEJw4Nn6fCoqjraPVm6913bn/mp4xUlrLvl45ClRGdp5qZsxhUBn2SnnU+MCJ4X5KaxmHhtlYySLDfCPDfFOv5S/ZkHzn3lMOL+EXwQ1IL2cWnE67B37JqHE9JBK9Gi+RiDcvDe3SyYH8WYW/l01bdKCktIrwmEjERIb5Jn03ecZbAdyU0ZDe3dwOxL01e3JviVgExsGg6BVfA7Hx+1TwzR1cbcOHeoKPEYj5cMjAwA7kN5SWV7+7ODH/SSnhMRsr2daYsFVzh+ovi3ospOLZk3tvWTGypcRkHIQoDkrziI4MFHH9ab03rkdkmC85xLW1mvc/OZyZU0R4zN7WMmHd60H9PAzRW0H9PNYvHMH5O+qPEMXBMFTm4eXuyK1Xhg/o/PF7/cHYLViXlJL+gPCYzEIS/9fwl19qA76KMyEDX4oaF8D5z/VEoOKgNI+ZkT3Zfn8/z7brFwwXQ7/HL3Zc2Hs8i/zyRTMGvuLjzLYBbJkzpY+rkw3bv+IFwc1W6qGZtvTo6tKve/vzGQ8pY+HiZL1tZZjC0oL8/K7E61t2/UZ+xtfTaWKEH83nVteoE5Nvn/nt/q1claqkQioRt7FX+Hs7hw/17O3fDnyDXCZ5b1yPVVvOgE/yjnDFoTMPcFobPSGQUhwKS4ttn4xybmNNDuLJC7kr/v4rGOgPJvUC7YdhmFOp9xavT35c9H9D2ocFz69kFe7cfy24v8cXfxluYwVMfccO91mzNUWt0YKt4heBphUdNNOWQYEd/b1hbxeLRBsWjvD1dCKH70pW4ZxVR8FuaGOvCO7fGeyJn49lRS1JbKSMhpw4l/unNcfA99gr5d0oviPvCFoclCOP6MhAMC4Lpg8I7g/MKe49Ko5amlhRVQu+bXCvTuAiRHaeasnGZI0W+LknXcg7e4k07NXh2wWQtSEQtDgozSNk4EtdOpLWsiLDfKe90Z0cvqfFldMWH/j9WQVNlAO6uoCPbf5HGuUC/8FTt8G3tXdRgs/wjtDFQWMeIhEz/a0W53sDAzvEfDiEHLjKqtqoZYm5D4sp4+vR3p78ZEVlzeEzOZRvu5b9BHzSWgEMog2B0MXBMMyG7+AF0zFB3u2cm5nvdenksHlpKHmhXaPVzl1z7HJmAX187W3l5IcvZRao1fAunY6nJZXgR5dXwsmOd8xAHBk3C35NBXZbpFLxe282Ng9HO8X2VaPAVe2YzaePn73LKrIyi+a3W+t5WPic/oU0m0SqYqp8xy9mIA7Kkcf4kV0d7RT10ZFZSOJiRnZwtSXHa+uPlzjs7pZX1JBfW/KctFHXCDsbwIcYpm7/j/yJhsA8xEFjHpZy6dQ/vFIfo8/mBwX6upJD9svJ7LXx58jPNMszqO8t5SwWkLzcgZ1hhmHSruVzaKeemIc4KM3j7dH+ugWlOVP6RAzzIofmfMbDv6w9Ac00m+d2nor8chdoqa0h4Dpp7sNi8s6wgTAbcdCYh9JaNinCb3SQ14dv9yLH61auauaKQ2D9TkuA84tAP1do9+a/KK1lYa8CtQc/HwN2eQyE2YiD0jyixgd+Oi+IHKzHRaXTFh14XlbNOaa/pt6rJZYMOtopKHeMoyN7kqepz8uqv9t3hXNT9cGcxEFjHvZKOXkq8bysrn6HsKRNQ3FpVfLFPPKTC6IGgIsTQf08osb3IL9n8840fXSsD+YkDkrzIFBTq5kVcyjr7u/6hExHLLRt27mDffzqcF0VcVMkYtGUsf5bloeSd++SL+bF77msf2u5wWJQLQR05jGkN1Ce3ixaLbNg7clzl2n398lcySr8+VjW6yPqCsdboqef2/EdE384cD3pfG72vafPy6qVVhZuzsoBAR3Gh3YFy1cz7xTN/+w4tyEzL5iZOHTmwU0cX+w4v+/kLV6ipiPmy9MBvq4e7e0I77Sxkk0fHzB9POtqrgsZD2csP1Razn1gpD9mllYYhmrk0ZSd+6/FJaTrH6+GlJZXT/543/38En5fW1lVu/6bi+8s3G9aZZjr3ec0dR4NOXEu95MvT/PbhTryn5S+MXsPuLpPSVlFTcLBG6FRCV/+kMZ5ms0j5pdW6s2DMrlk3CyYuxqu3+GMqrji3SUHxgT7zJ3SG1ytb4parcm6q8rIKki7mn80JYemmsRomF9a0RH/rwyaGD14XBK19KChI97Rzc7KUppz/xlNkxrxtKTy+Lm7WxPS9528Zeh2ssUsncNSLp0zuTfNV5VKxYbL3HY28jdee3nCKL/OHYDyDgJODlazJ/d+f1Kv3YdubPj2ImW1kXEwP+cQi0TrF44IgDbVdLg62Ywf2ZX3UCqtZctmDU7Z9cdFMwbqo4x6JGLRhFF+R7ZP7N+jPe+t5Yz5iWPZ+4NHDICLe+uJjgwEyy9YET7U6+j2iVPG+rPaeqXBXin/Zk0EuGVoNMwsrcx4K+Dt0d1YRUdnHv/4Rd8j+XVTO5FoUfTAd17/X2FAs6jVmvTMusW63IfPVMWVGrXGwU7h5+U0tI+7n2dbcuMlEvHnHwU/LipLvfqI1dc0BOYkjohhXvOnwccYmxIdGbj7UGZ1jV5Xo0il4vULRowc0oXcDYdP3/nb9vN5jxqXox5NyVn/zcVBPTuu+fMwt7akE2wWUvG6BcND3t1VUQmUFBkas0krfbu3//yjYMp98EbwMvJYPGMgWRlaLbMy9swHK480VUY9Z367P2bWT+DdG25tbWZNgM9bGBrzEIe3h2PcipEWUu6t1XPkETHMa/IYf3JnfLrt7Ld74b11VXFFNEUpycSIbqa9f8E8VkhdnKzjV4eDdcJkXJ1sxoVynLZYKyyWfwAcbjh76QH99undB8/2HL1JbrCdjTxk4EuG9gYy3H+LxsHGSrZ9VTj5mLlWy6yNPw+eYZw5IZCb90we42+vBGqA18afZ7V9+gvFFmC/7iae1gpaHFKpOHZ5KHgBxsbvLsYlpIPnxv4z8gAubGmKRCwCT8tl3Cxge8tbxk34YEv3l+FzdQZFuOIQiZjP5gUNCABuZtp7PGvzzjSGYeIS0sHfLgfz8PdxbnjioVnAqrCmVFWrwbNMrsRJjREQrjjmTe03JtibHILUa/kL1yXpnsm6+3vSxVxw5MHWPAYFdgS7If3GY/CZpoDFf7Y2Mm6zM74QqDgmhvuBZ+fzHhU3qiCP2wVXbLA1D/DWBoZh8qgP2TYErDAVi0QihuutZ3wgRHEE9fMAZwfFpVVRSxKf/f8p0/Qbj8GFRbYjDzCnMExdYzj0hZ0SuBm3sqoWvMHBoAhOHN19nDcuDiHfflFbVyd8OOdBM1vksXybRxv7/x2xbAkOp5xdnWzAZQxwUGJohCUO93Z221aNUkBnCZdsTL7Qwj1gp9PuXb8N3GjAyjwsoDPTDFO3Scu2n3p1cwP/hLDSahwEJA5HO0X86nDQxuMS0v95hLSCRFMrGh1Ju+ZBs8FB3itplmF93cEOvpnDwxEKfRCKOBRy6baVYe7tSJXcDFO3rfXFjvPkL3zkdM7d5jJOQ9za0k5bCiiOt9PYQEOcHa3AI5AMw1y8YuKNWUGIQyIWbVgUAq75ZGQVzv8cPvqs0Wq/+vES+IuhNA+amchYaMrdiD9N7Quu1VZU1aak3we/hUERhDiWvT8YvM3tUWFp9PKDlRS3uTEM8/OJLPDAI6V5XKK48af7yy5BfWlvuA4d3GXca/Auz9GUnDLoFhBDY3pxREcGTooA6nfKKmqiliY+UZVThqO2VrP9n3AFMo15pKTfp5lPfv5xME29YOjgLusWDAe/hVbLfP2TyU5B1mNicYwJ8p43tR85WGqNdvaqI2wPuCYcvPG0GLhri8Y8nqjKzxJvQNdhr5Tv2fRG2KueLa1p2tnIl8wctGlJCE3NYuKp7Mw7pAv5jYMpK8H692j/6fwgcIV4ZezpU9CdYE2pqKz5du+VuX/sQ47jf4rEbpBPEH21+9KgnvAiuq2NfNPikOy3ex0+nZN+43GRqryyutbB1rKjq+2QPp2C+npQznifFleujDXBZdZNMZk4fDq3iV0O1+98u/cK5/LP7/ddjRofQF6ldmtbV+fxw4HrBA2dvfTgVOq9V+lOb3u5O3q5OxLeBtrknz87LpADCqZJK65ONvF/het3ki7krY5L4Rzo4tKqXcRe1xEd2ROcOyxenwwmKf3Rapllm07R/KMq42ACcSitZfGrw12cgAvqM3OK5uh9jDF+z2WwrridM1wk9riodGbMIcq5EjfUas3Ha0/8ePAGtz83BMYWh4VUvGXFSG8PwHgLVeVRSw6CNzqCFKrKwYI8SvNIu5Y/Vb/LoggUFJVN+mifqe7+agmjiqOufmd+MFj9VlFVO32pvjcz1fPV7ktgBSGNeTAMk3r10ehZu9kWfZHRaLW7Eq+PmpFgksskyRhVHB+92390EHADpEarnffpcfC6Pnru55eAFYSU5sEwdW97c/aeZZtO6X9rrFqj3Z+UHRG9e+nGU+DFpibBeLOVSRHdaC64+dvX54+m0F4pT8nWH9PDh3qR58w68yBPW3RotNofDlz/6XDmqKFeY4O9+/doT3M/dT1qteZKVuHBX+8kJmcXUi/rmQSRlaLxBdC3j86qb4pnSKxJmmVGWCssevu3e8XH2dvDsb2L0tnRWmktk8skIrGoulpdVaN+VlJZqCp/VPA8O0+Veaco7Vq+ydfFG0LobuM5R2ulrKIm+WIehxpj4WPUMQdiXqA4kBZBcSAoDoQ96BwIOgfCHnQOBJ0DYQ86B4LOgbAHnQNB50DYg86BoHMg7BHEln3SRuA/JL6YDJtj4kNvmFYQTCsIewSRVkzun0izYFpBMK0g7EHnQNA5EPagcyDoHAh70DkQdA6EPegcCDoHwh50DgSdA2EPOgeCzoGwB50DYeMcDa96angnENL6IF/xhc6BsHEOBNGBzoGwdA4cdrwIkAcc6BwICUwrCMu0wjCYWVo5YE7BtILwkVZwNaw1QdmbpDEH3or/IkDoZWBAinPa1gfNaEMHu9kKpR0hgoVVD8LiaGQ7rN6OCIpGfQcOG2BxNJrWIq0DUBms04oONA9zhEOvUTlHU/Pg8EmICWGbUFgPSHHwYaZwUwbDNPcPAMk09Qya7IWYBD07izat1NNUCphihImeyuA4IEV9CB/9lcElrdTTrGFgijE5PPZLM/90mBU8NgXRE977Ql9xkJc90EiMAGHMp2f8eRCHDnBYqmdDkYYYJ9q8iYNGH4hx4Ot3yKc4yGNVxNDwpYl6DCIOVIkx4V0TRhIHqzSJ0GM4QTTEsM6BmDWsl8+RFwcUB9IiKA4ExYGw59+21XDn+QcOdgAAAABJRU5ErkJggg==">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a090e;--card:#14121a;--card2:#1b1822;--line:rgba(230,195,120,.22);--gold:#e6c378;--gold2:#c99a3e;--text:#f3eee2;--dim:#9b94a6;--pos:#38caa0;--neg:#e5535a;--warn:#f0a84a;--silver:#c9ccd4;--bronze:#d08a52}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Noto Sans JP',-apple-system,'Hiragino Sans',sans-serif;font-size:15px;line-height:1.55}
+body{min-height:100vh;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+button,input,select,textarea{font-family:inherit;color:inherit;font-size:16px}
+.wrap{max-width:720px;margin:0 auto;padding:0 14px}
+header.top{position:sticky;top:0;z-index:20;background:rgba(10,9,14,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top)) 0 10px}
+.top-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:2px;color:var(--gold);font-size:19px}
+.brand small{font-family:'Noto Sans JP';font-weight:500;letter-spacing:0;color:var(--dim);font-size:12px;margin-left:8px}
+.who{font-size:12px;color:var(--dim);text-align:right}
+.who b{color:var(--gold);font-weight:500}
+main{padding-top:14px}
+h1.pt{font-size:20px;margin:2px 0 12px;font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 10px;font-size:13px;font-weight:500;color:var(--dim);letter-spacing:1px}
+.card.warn{border-color:rgba(229,83,90,.55);background:#1c1216}
+.big{font-family:'Oswald','Noto Sans JP';font-weight:700;font-size:32px;line-height:1.15;color:var(--gold);white-space:nowrap}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(min-width:520px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.kpi{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px 8px;text-align:center}
+.kpi .l{font-size:11px;color:var(--dim)}
+.kpi .v{font-family:'Oswald','Noto Sans JP';font-weight:700;font-size:30px;color:var(--text);line-height:1.2}
+.kpi .v small{font-size:13px;color:var(--dim);font-weight:500;margin-left:2px}
+.kpi .d{font-size:11px;color:var(--dim)}
+.kpi.alert .v{color:var(--neg)}
+.up{color:var(--pos)}.down{color:var(--neg)}.dim{color:var(--dim)}.gold{color:var(--gold)}
+.bar{height:10px;background:#27232f;border-radius:6px;overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--gold2),var(--gold));border-radius:6px}
+.bar.ok>i{background:linear-gradient(90deg,#2a9d7c,var(--pos))}
+.prow{margin-bottom:12px}.prow .t{display:flex;justify-content:space-between;font-size:13px}
+.btn{background:linear-gradient(180deg,var(--gold),var(--gold2));color:#1a1408;border:0;border-radius:12px;padding:13px 16px;font-weight:700;font-size:16px;width:100%}
+.btn.ghost{background:transparent;color:var(--gold);border:1px solid var(--line)}
+.btn.sm{padding:8px 12px;font-size:13px;width:auto;border-radius:10px}
+.btn.red{background:#5a2229;color:#ffd6da}
+.btn:disabled{opacity:.4}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}.btnrow .btn{flex:1}
+.seg{display:flex;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px;margin-bottom:12px}
+.seg button{flex:1;background:none;border:0;border-radius:9px;padding:9px 4px;color:var(--dim);font-size:14px}
+.seg button.on{background:var(--gold);color:#1a1408;font-weight:700}
+.nav{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px}
+.nav b{min-width:150px;text-align:center;font-family:'Oswald','Noto Sans JP';font-size:17px}
+.nav button{background:var(--card);border:1px solid var(--line);border-radius:10px;width:40px;height:36px;color:var(--gold)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--dim)}
+.chip.on{background:var(--gold);color:#1a1408;border-color:var(--gold);font-weight:700}
+.badge{display:inline-block;border-radius:6px;padding:1px 8px;font-size:11px;font-weight:700;vertical-align:middle}
+.b-red{background:#5a2229;color:#ffd6da}.b-gold{background:#3b3014;color:var(--gold)}.b-grn{background:#123a2e;color:#8ff0cf}.b-gry{background:#2a2733;color:var(--dim)}.b-blu{background:#1a2c44;color:#9cc7ff}
+.list>.it{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid rgba(255,255,255,.07)}
+.list>.it:first-child{border-top:0}
+.it .grow{flex:1;min-width:0}.it .nm{font-weight:700}.it .sub{font-size:12px;color:var(--dim)}
+.av{width:44px;height:44px;border-radius:50%;background:#2a2430;display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700;overflow:hidden;flex:none;border:1px solid var(--line)}
+.av img{width:100%;height:100%;object-fit:cover}.av.lg{width:72px;height:72px;font-size:26px}
+table.tb{width:100%;border-collapse:collapse;font-size:13px}
+table.tb th{font-weight:500;color:var(--dim);text-align:right;padding:6px 4px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.tb td{padding:8px 4px;text-align:right;border-bottom:1px solid rgba(255,255,255,.06);font-variant-numeric:tabular-nums}
+table.tb th:first-child,table.tb td:first-child{text-align:left}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+label.f{display:block;font-size:12px;color:var(--dim);margin:12px 0 4px}
+input[type=text],input[type=password],input[type=number],input[type=date],select,textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;outline:0}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+textarea{min-height:76px;resize:vertical}
+.err{color:#ffb4ba;font-size:13px;margin-top:6px;min-height:1px}
+.note{font-size:12px;color:var(--dim)}
+.step{display:flex;align-items:center;gap:8px}
+.step button{width:52px;height:48px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--gold);font-size:24px;flex:none}
+.step input{text-align:center;font-family:'Oswald';font-size:24px;font-weight:700;height:48px;padding:0}
+.frow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,.06)}
+.frow:first-of-type{border-top:0}.frow .fl{font-size:14px;flex:1}.frow .step{width:178px;flex:none}
+.sv{position:sticky;bottom:calc(57px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--line);padding:8px 0;z-index:5}
+nav.bot{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(10,9,14,.97);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom)}
+nav.bot .in{display:flex;width:100%;max-width:720px}
+nav.bot button{flex:1;background:none;border:0;padding:9px 2px 8px;color:var(--dim);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav.bot button .ic{font-size:21px;line-height:1}
+nav.bot button.on{color:var(--gold)}
+#sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;display:none}
+#sheet{position:fixed;left:0;right:0;bottom:0;z-index:51;background:var(--card);border-top:1px solid var(--line);border-radius:18px 18px 0 0;max-height:92vh;overflow-y:auto;padding:16px 14px calc(18px + env(safe-area-inset-bottom));display:none}
+#sheet .in{max-width:720px;margin:0 auto}
+#toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%) translateY(-90px);background:#22201a;border:1px solid var(--gold);color:var(--text);padding:10px 18px;border-radius:12px;z-index:99;transition:.25s;max-width:90vw;font-size:14px}
+#toast.show{transform:translateX(-50%) translateY(0)}
+.login{max-width:380px;margin:0 auto;padding:calc(50px + env(safe-area-inset-top)) 20px 30px;text-align:center}
+.login .logo{font-family:'Oswald';font-weight:700;font-size:54px;letter-spacing:6px;color:var(--gold);line-height:1}
+.login .sub{letter-spacing:4px;font-size:11px;color:var(--dim);margin:6px 0 26px}
+.login .box{text-align:left}
+.empty{text-align:center;color:var(--dim);padding:26px 10px}
+.empty b{display:block;color:var(--text);margin-bottom:6px}
+.spin{text-align:center;color:var(--dim);padding:40px}
+.menu .it{display:flex;align-items:center;gap:12px;padding:15px 4px;border-top:1px solid rgba(255,255,255,.07);cursor:pointer}
+.menu .it:first-child{border-top:0}.menu .it .ic{font-size:20px;width:28px;text-align:center}.menu .it .ar{margin-left:auto;color:var(--dim)}
+.spark{display:flex;align-items:flex-end;gap:2px;height:46px}.spark i{flex:1;background:var(--gold2);border-radius:2px 2px 0 0;min-height:2px}.spark i.z{background:#2a2630}
+.rk{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(255,255,255,.07)}
+.rk:first-child{border-top:0}.rk .no{width:30px;font-family:'Oswald';font-size:20px;color:var(--dim);text-align:center}
+.rk.r1 .no{color:var(--gold)}.rk.r2 .no{color:var(--silver)}.rk.r3 .no{color:var(--bronze)}
+.rk .v{font-family:'Oswald','Noto Sans JP';font-weight:700;font-size:20px}
+.cg{border-left:3px solid var(--gold2);padding-left:10px;margin:6px 0}
+.cg.od{border-color:var(--neg)}
+.tri{display:flex;gap:4px}.tri button{border:1px solid var(--line);background:var(--card2);border-radius:8px;padding:6px 10px;color:var(--dim);font-size:13px}
+.tri button.on{background:var(--gold);color:#1a1408;font-weight:700}.tri button.ac{border-color:var(--pos);color:var(--pos)}
+.demo{background:#3a2d12;color:#ffe3a3;text-align:center;font-size:12px;padding:5px}
+</style>
+</head>
+<body>
+<div id="root"><div class="spin">読み込み中…</div></div>
+<div id="sheetbg"></div><div id="sheet"><div class="in" id="sheetin"></div></div>
+<div id="toast"></div>
+<script type="module">
+/* =====================================================================
+   X8 営業管理 (X8 SALES MANAGEMENT)
+   データ: Firebase (プロジェクト x8open) の Firestore。 mg_* コレクション。
+   ログイン: 売上アプリ(me.html)と同じ個人アカウント / 管理者 admin@x8sales.app
+   権限は Firestore ルール(サーバー側)で制限。 画面側の表示切替は見やすさのため。
+   長期運用: 期限付きの仕組みなし。バージョン固定のSDK。月別ドキュメントで肥大化しない。
+   ===================================================================== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBMkuBSZ75otzTCNT2fdFsxcHaTGk86Lz4",
+  authDomain: "x8open.firebaseapp.com",
+  projectId: "x8open",
+  storageBucket: "x8open.firebasestorage.app",
+  messagingSenderId: "222731309583",
+  appId: "1:222731309583:web:3df818ef2166159d77097a"
+};
+const ADMIN_EMAIL = 'admin@x8sales.app';
+const FB_VER = '12.19.0';
+const BUILD = 'mg-1 - 2026-11-09';
+const MG_COLS = ['mg_cast','mg_reports','mg_goals','mg_coach','mg_rot','mg_meta'];
+
+const FIELDS = [
+  {k:'line',l:'LINE交換人数',g:'act'},{k:'lineRej',l:'LINE交換を断られた件数',g:'act'},
+  {k:'sns',l:'SNS投稿回数',g:'act'},{k:'tel',l:'電話営業件数',g:'act'},{k:'offsite',l:'店外営業件数',g:'act'},
+  {k:'okuri',l:'送りのお客様への連絡件数',g:'act'},{k:'nomi',l:'飲み直しのお客様への連絡件数',g:'act'},
+  {k:'newVisit',l:'新規来店獲得数',g:'res'},{k:'shimei',l:'指名卓獲得数',g:'res'},{k:'planned',l:'来店予定人数',g:'res'},
+  {k:'prospect',l:'来店見込み人数',g:'res'},{k:'visitActual',l:'営業による来店実績',g:'res'}
+];
+const FL = Object.fromEntries(FIELDS.map(f => [f.k, f.l]));
+const GOAL_KEYS = [['newVisit','新規'],['shimei','指名卓'],['line','LINE交換'],['tel','電話'],['offsite','店外'],['sns','SNS']];
+const REJ = ['タイミングが悪い','担当の店・キャストがいる','まだ早い','交換する気がない','その他'];
+const ST = ['未対応','対応中','改善完了'];
+const ROT_ITEMS = [['sns','SNSを積極的に活用している'],['new','新規集客に向けて行動している'],['line','LINE営業を実施している'],['tel','電話・店外営業を実施している'],['shimei','指名卓を呼ぶ意識がある']];
+const DEF_CFG = { alertLine: 10, poolSize: 9, roleMin: 5, nonMin: 3, nurtureDays: 90, nurtureMin: 1, th: { sns: 7, new: 1, line: 5, tel: 3, shimei: 1 } };
+
+/* ---------- utils ---------- */
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = (n) => Math.round(n || 0).toLocaleString('ja-JP');
+const yen = (n) => '¥' + fmt(n);
+const hexOf = (name) => { const s = String(name == null ? '' : name).normalize('NFKC').trim(); let h = 'u'; for (let i = 0; i < s.length; i++) h += s.charCodeAt(i).toString(16).padStart(4, '0'); return h; };
+const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+const lsDel = (k) => { try { localStorage.removeItem(k); } catch (e) {} };
+let toastT; function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
+const ymd2d = (s) => new Date(s + 'T00:00:00Z');
+const d2ymd = (d) => d.toISOString().slice(0, 10);
+const addDays = (s, n) => { const d = ymd2d(s); d.setUTCDate(d.getUTCDate() + n); return d2ymd(d); };
+const ymOf = (s) => s.slice(0, 7);
+const addMonths = (ym, n) => { let [y, m] = ym.split('-').map(Number); m += n; while (m < 1) { m += 12; y--; } while (m > 12) { m -= 12; y++; } return y + '-' + String(m).padStart(2, '0'); };
+const lastDay = (ym) => { const [y, m] = ym.split('-').map(Number); return new Date(Date.UTC(y, m, 0)).getUTCDate(); };
+const dow = (s) => '日月火水木金土'[ymd2d(s).getUTCDay()];
+const dlab = (s) => Number(s.slice(5, 7)) + '/' + Number(s.slice(8)) + '(' + dow(s) + ')';
+const ymlab = (ym) => ym.slice(0, 4) + '年' + Number(ym.slice(5)) + '月';
+// 営業日: 朝6時までは前日扱い（日本時間）
+const bizDate = () => d2ymd(new Date(Date.now() + 9 * 3600e3 - 6 * 3600e3));
+const pct = (a, b) => b > 0 ? Math.round(a / b * 100) : null;
+const initial = (n) => esc(String(n || '?').trim().slice(0, 1));
+const avatar = (c, cls) => '<div class="av ' + (cls || '') + '">' + (c && c.photo ? '<img src="' + esc(c.photo) + '" alt="">' : initial(c && c.name)) + '</div>';
+const arrow = (cur, prev) => { const d = cur - prev; if (!prev && !cur) return '<span class="dim">-</span>'; return d > 0 ? '<span class="up">▲' + fmt(d) + '</span>' : d < 0 ? '<span class="down">▼' + fmt(-d) + '</span>' : '<span class="dim">±0</span>'; };
+function csvCell(v){ const s = String(v == null ? '' : v); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+function downloadFile(name, text, mime){ const b = new Blob(['﻿' + text], { type: (mime || 'text/csv') + ';charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
+const toCsv = (rows) => rows.map(r => r.map(csvCell).join(',')).join('\r\n');
+const num = (v, mx) => { const n = Math.floor(Number(v)); return isFinite(n) && n > 0 ? Math.min(n, mx || 999999) : 0; };
+
+/* ---------- backends ---------- */
+const TEST = window.__X8_MG_TEST || null;
+let B = null;
+
+async function makeFirebaseBackend(){
+  const base = 'https://www.gstatic.com/firebasejs/' + FB_VER + '/';
+  const [A, Au, F] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-firestore.js')]);
+  const app = A.initializeApp(FIREBASE_CONFIG);
+  const auth = Au.getAuth(app);
+  let db; const EMU = window.__X8_MG_EMU || null;   // テスト用(本番では使われません)
+  if (EMU) { db = F.getFirestore(app); F.connectFirestoreEmulator(db, EMU.host, EMU.port); Au.connectAuthEmulator(auth, EMU.auth, { disableWarnings: true }); }
+  else { try { db = F.initializeFirestore(app, { localCache: F.persistentLocalCache({ tabManager: F.persistentMultipleTabManager() }) }); } catch (e) { db = F.getFirestore(app); } }
+  const infoOf = (u) => {
+    if (!u || !u.email) return null;
+    if (u.email === ADMIN_EMAIL) return { role: 'admin' };
+    const m = /^(u[0-9a-f]+)@x8sales\.app$/.exec(u.email); return m ? { role: 'member', hex: m[1] } : null;
+  };
+  let suppress = false, theCb = null;
+  const memEmail = (name) => hexOf(name) + '@x8sales.app';
+  const fix = (d) => { const o = d.data(); o.id = d.id; return o; };
+  return {
+    onAuth(cb){ theCb = cb; return Au.onAuthStateChanged(auth, (u) => { if (suppress) return; cb(infoOf(u)); }); },
+    async login(admin, name, pw){ await Au.signInWithEmailAndPassword(auth, admin ? ADMIN_EMAIL : memEmail(name), pw); },
+    async register(name, code, pw){
+      suppress = true; let cred;
+      try { cred = await Au.createUserWithEmailAndPassword(auth, memEmail(name), pw); } catch (e) { suppress = false; throw e; }
+      try { await F.setDoc(F.doc(db, 'members', hexOf(name)), { uid: cred.user.uid, code: String(code).trim().toUpperCase(), name: String(name).trim(), at: F.serverTimestamp() }); }
+      catch (e) { try { await cred.user.delete(); } catch (_) {} try { await Au.signOut(auth); } catch (_) {} suppress = false; const er = new Error('bad-code'); er.code = 'bad-code'; throw er; }
+      suppress = false; if (theCb) theCb(infoOf(auth.currentUser));
+    },
+    async logout(){ await Au.signOut(auth); },
+    async setPw(pw){ await Au.updatePassword(auth.currentUser, pw); },
+    async setAdminPw(cur, pw){ const u = auth.currentUser; await Au.reauthenticateWithCredential(u, Au.EmailAuthProvider.credential(ADMIN_EMAIL, cur)); await Au.updatePassword(u, pw); },
+    async linkUid(hex){ await F.setDoc(F.doc(db, 'mg_uid', auth.currentUser.uid), { hex, at: Date.now() }); },
+    async get(col, id){ const s = await F.getDoc(F.doc(db, col, id)); return s.exists() ? fix(s) : null; },
+    async set(col, id, obj, merge){ await F.setDoc(F.doc(db, col, id), obj, { merge: merge !== false }); },
+    async del(col, id){ await F.deleteDoc(F.doc(db, col, id)); },
+    async delDay(col, id, dd){ await F.updateDoc(F.doc(db, col, id), { ['days.' + dd]: F.deleteField() }); },
+    async list(col, w){
+      const ref = F.collection(db, col);
+      const q = w ? F.query(ref, F.where(w[0], w[1], w[2])) : ref;
+      return (await F.getDocs(q)).docs.map(fix);
+    },
+    async setMany(items){
+      for (let i = 0; i < items.length; i += 400) {
+        const b = F.writeBatch(db); items.slice(i, i + 400).forEach(x => b.set(F.doc(db, x.col, x.id), x.data));
+        await b.commit();
+      }
+    },
+    async issueInvite(name){
+      const al = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; const a = new Uint8Array(8); crypto.getRandomValues(a);
+      const code = Array.from(a).map(x => al[x % al.length]).join('');
+      await F.setDoc(F.doc(db, 'invites', hexOf(name)), { code, name, at: F.serverTimestamp() });
+      return code;
+    },
+    async members(){ return (await F.getDocs(F.collection(db, 'members'))).docs.map(d => d.id); }
+  };
+}
+
+function makeMemBackend(T){
+  T.docs = T.docs || {}; T.users = T.users || {}; let cb = null, cur = null;
+  const col = (c) => (T.docs[c] = T.docs[c] || {});
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+  const deep = (a, b) => { for (const k in b) { if (b[k] && typeof b[k] === 'object' && !Array.isArray(b[k]) && a[k] && typeof a[k] === 'object') deep(a[k], b[k]); else a[k] = b[k]; } return a; };
+  const info = () => cur ? (cur.admin ? { role: 'admin' } : { role: 'member', hex: cur.hex }) : null;
+  const delay = () => new Promise(r => setTimeout(r, T.latency || 0));
+  const failCheck = () => { if (T.offline) { const e = new Error('offline'); e.code = 'unavailable'; throw e; } };
+  return {
+    onAuth(f){ cb = f; setTimeout(() => f(info()), 0); return () => {}; },
+    async login(admin, name, pw){ await delay(); if (admin) { if (pw !== T.adminPw) { const e = new Error('x'); e.code = 'auth/invalid-credential'; throw e; } cur = { admin: true }; } else { const u = T.users[hexOf(name)]; if (!u || u.pw !== pw) { const e = new Error('x'); e.code = 'auth/invalid-credential'; throw e; } cur = { hex: hexOf(name) }; } cb(info()); },
+    async register(name, code, pw){ const inv = col('invites')[hexOf(name)]; if (!inv || inv.code !== String(code).trim().toUpperCase()) { const e = new Error('bad-code'); e.code = 'bad-code'; throw e; } T.users[hexOf(name)] = { pw }; col('members')[hexOf(name)] = { name }; cur = { hex: hexOf(name) }; cb(info()); },
+    async logout(){ cur = null; cb(null); },
+    async setPw(pw){ if (cur && cur.hex) T.users[cur.hex].pw = pw; },
+    async setAdminPw(c, pw){ if (c !== T.adminPw) { const e = new Error('x'); e.code = 'auth/wrong-password'; throw e; } T.adminPw = pw; },
+    async linkUid(hex){ col('mg_uid')[hex] = { hex }; },
+    async get(c, id){ await delay(); failCheck(); const d = col(c)[id]; return d ? Object.assign(clone(d), { id }) : null; },
+    async set(c, id, obj, merge){ await delay(); failCheck(); const o = clone(obj); if (merge !== false && col(c)[id]) deep(col(c)[id], o); else col(c)[id] = o; },
+    async del(c, id){ failCheck(); delete col(c)[id]; },
+    async delDay(c, id, dd){ failCheck(); if (col(c)[id] && col(c)[id].days) delete col(c)[id].days[dd]; },
+    async list(c, w){ await delay(); failCheck(); return Object.keys(col(c)).map(id => Object.assign(clone(col(c)[id]), { id })).filter(d => { if (!w) return true; const v = d[w[0]]; if (w[1] === '==') return v === w[2]; if (w[1] === 'in') return w[2].includes(v); return true; }); },
+    async setMany(items){ items.forEach(x => { col(x.col)[x.id] = clone(x.data); }); },
+    async issueInvite(name){ const code = 'TESTCODE'; col('invites')[hexOf(name)] = { code, name }; return code; },
+    async members(){ return Object.keys(col('members')); }
+  };
+}
+
+/* ---------- state ---------- */
+const S = {
+  me: null,            // { role:'admin'|'operator'|'cast', hex, name, cast }
+  casts: {},           // hex -> mg_cast
+  R: {},               // hex -> { 'YYYY-MM-DD': report }
+  loadedR: {},         // ym -> ms
+  goals: {},           // ym -> { hex: goal }
+  coach: [], coachAt: 0,
+  rot: {},             // ym -> { hex: rot }
+  cfg: JSON.parse(JSON.stringify(DEF_CFG)),
+  tab: 'home', period: 'day', ref: bizDate(), ym: ymOf(bizDate()),
+  scopeAll: false, members: null, salesMonths: null, rk: 'newVisit', rkPeriod: 'month',
+  coachF: { st: 'open', cast: '', op: '' }, rep: null, back: null, menuPage: null, castHex: null
+};
+const isStaff = () => S.me && (S.me.role === 'admin' || S.me.role === 'operator');
+const isAdmin = () => S.me && S.me.role === 'admin';
+
+/* ---------- data loading ---------- */
+async function loadCasts(){
+  if (isStaff()) { const l = await B.list('mg_cast'); S.casts = {}; l.forEach(c => { S.casts[c.id] = c; }); }
+  else { const c = await B.get('mg_cast', S.me.hex); S.casts = c ? { [c.id]: c } : {}; }
+}
+async function loadMeta(){
+  const m = isStaff() ? await B.get('mg_meta', 'app') : null;
+  S.cfg = JSON.parse(JSON.stringify(DEF_CFG));
+  if (m && m.cfg) { Object.assign(S.cfg, m.cfg); S.cfg.th = Object.assign({}, DEF_CFG.th, m.cfg.th || {}); }
+}
+const monthsBetween = (a, b) => { const o = []; let m = ymOf(a); const e = ymOf(b); while (m <= e && o.length < 40) { o.push(m); m = addMonths(m, 1); } return o; };
+async function loadReports(yms, force){
+  for (const ym of yms) {
+    if (!force && S.loadedR[ym] && Date.now() - S.loadedR[ym] < 30000) continue;
+    let docs = [];
+    if (isStaff()) docs = await B.list('mg_reports', ['ym', '==', ym]);
+    else { const d = await B.get('mg_reports', ym + '_' + S.me.hex); if (d) docs = [d]; }
+    Object.keys(S.R).forEach(h => { Object.keys(S.R[h]).forEach(k => { if (k.startsWith(ym)) delete S.R[h][k]; }); });
+    docs.forEach(d => { const h = d.owner; S.R[h] = S.R[h] || {}; Object.keys(d.days || {}).forEach(dd => { S.R[h][ym + '-' + dd] = d.days[dd]; }); });
+    S.loadedR[ym] = Date.now();
+  }
+}
+async function loadGoals(ym, force){
+  if (!force && S.goals[ym] && S.goals[ym]._t && Date.now() - S.goals[ym]._t < 30000) return;
+  const g = { _t: Date.now() };
+  if (isStaff()) (await B.list('mg_goals', ['ym', '==', ym])).forEach(d => { g[d.owner] = d; });
+  else { const d = await B.get('mg_goals', ym + '_' + S.me.hex); if (d) g[d.owner] = d; }
+  S.goals[ym] = g;
+}
+async function loadCoach(force, yms){
+  const key = (yms && yms.length ? yms : [S.coachF.ym || ymOf(bizDate())]).join(',');
+  if (!force && key === S.coachKey && Date.now() - S.coachAt < 20000) return;
+  let l = [];
+  if (isStaff()) {
+    const a = await B.list('mg_coach', ['status', 'in', [0, 1]]);
+    const seen = {}; a.forEach(d => { seen[d.id] = d; });
+    for (const ym of key.split(',')) (await B.list('mg_coach', ['ym', '==', ym])).forEach(d => { seen[d.id] = d; });
+    l = Object.values(seen);
+  } else l = await B.list('mg_coach', ['castHex', '==', S.me.hex]);
+  S.coach = l.sort((x, y) => (y.date || '').localeCompare(x.date || '')); S.coachAt = Date.now(); S.coachKey = key;
+}
+async function loadRot(ym){ const m = {}; (await B.list('mg_rot', ['ym', '==', ym])).forEach(d => { m[d.owner] = d; }); S.rot[ym] = m; }
+
+/* ---------- casts / scope ---------- */
+const castList = () => Object.values(S.casts).sort((a, b) => (a.role === b.role ? 0 : a.role === 'operator' ? 1 : -1) || String(a.name).localeCompare(String(b.name), 'ja'));
+const isTracked = (c) => c.active !== false && (c.track != null ? c.track : c.role !== 'operator');
+const operators = () => castList().filter(c => c.role === 'operator' && c.active !== false);
+function scopeCasts(){
+  const all = castList().filter(isTracked);
+  if (isAdmin() || S.scopeAll) return all;
+  return all.filter(c => c.operator === S.me.hex);
+}
+const castName = (h) => (S.casts[h] && S.casts[h].name) || '(不明)';
+
+/* ---------- aggregation ---------- */
+function rangeOf(period, ref){
+  if (period === 'day') return { from: ref, to: ref, label: dlab(ref) };
+  if (period === 'week') { const d = ymd2d(ref); const k = (d.getUTCDay() + 6) % 7; const from = addDays(ref, -k); const to = addDays(from, 6); return { from, to, label: dlab(from) + ' 〜 ' + dlab(to) }; }
+  const ym = ymOf(ref); return { from: ym + '-01', to: ym + '-' + String(lastDay(ym)).padStart(2, '0'), label: ymlab(ym) };
+}
+function prevRange(period, ref){
+  if (period === 'day') return rangeOf('day', addDays(ref, -1));
+  if (period === 'week') return rangeOf('week', addDays(ref, -7));
+  return rangeOf('month', addMonths(ymOf(ref), -1) + '-01');
+}
+function stepRef(period, ref, dir){ return period === 'day' ? addDays(ref, dir) : period === 'week' ? addDays(ref, 7 * dir) : addMonths(ymOf(ref), dir) + '-01'; }
+function agg(hex, r){
+  const t = {}; FIELDS.forEach(f => { t[f.k] = 0; }); t.n = 0; t.snsDays = 0;
+  const rep = S.R[hex] || {};
+  for (const k in rep) if (k >= r.from && k <= r.to) { const d = rep[k]; FIELDS.forEach(f => { t[f.k] += Number(d[f.k]) || 0; }); if (d.submitted) t.n++; if ((Number(d.sns) || 0) > 0) t.snsDays++; }
+  t.act = t.line + t.tel + t.offsite + t.sns + t.okuri + t.nomi;
+  return t;
+}
+function aggMany(hexes, r){
+  const t = {}; FIELDS.forEach(f => { t[f.k] = 0; }); t.n = 0; t.act = 0;
+  hexes.forEach(h => { const a = agg(h, r); FIELDS.forEach(f => { t[f.k] += a[f.k]; }); t.n += a.n; t.act += a.act; });
+  return t;
+}
+const daysIn = (r, until) => { const to = r.to < until ? r.to : until; if (to < r.from) return 0; return Math.round((ymd2d(to) - ymd2d(r.from)) / 864e5) + 1; };
+function goalOf(ym, hex){ const g = S.goals[ym] && S.goals[ym][hex]; return (g && g.targets) || {}; }
+function achieve(hex, ym){
+  const g = goalOf(ym, hex); const a = agg(hex, rangeOf('month', ym + '-01')); const items = [];
+  GOAL_KEYS.forEach(([k, l]) => { const tg = Number(g[k]) || 0; if (tg > 0) items.push({ k, l, tg, v: a[k], p: Math.round(a[k] / tg * 100) }); });
+  const rate = items.length ? Math.round(items.reduce((s, x) => s + Math.min(x.p, 150), 0) / items.length) : null;
+  return { items, rate, a };
+}
+
+/* ---------- shared view helpers ---------- */
+const empty = (t, s) => `<div class="empty"><b>${t}</b>${s || ''}</div>`;
+function periodBar(){
+  const r = rangeOf(S.period, S.ref);
+  return `<div class="seg">${[['day','日別'],['week','週別'],['month','月別']].map(([k, l]) => `<button class="${S.period === k ? 'on' : ''}" data-a="per" data-v="${k}">${l}</button>`).join('')}</div>
+  <div class="nav"><button data-a="step" data-v="-1">‹</button><b>${r.label}</b><button data-a="step" data-v="1">›</button></div>`;
+}
+const monthBar = (ym, act) => `<div class="nav"><button data-a="${act || 'mstep'}" data-v="-1">‹</button><b>${ymlab(ym)}</b><button data-a="${act || 'mstep'}" data-v="1">›</button></div>`;
+const tile = (l, v, unit, d, alert) => `<div class="kpi ${alert ? 'alert' : ''}"><div class="l">${l}</div><div class="v">${v}<small>${unit || ''}</small></div><div class="d">${d == null ? '&nbsp;' : d}</div></div>`;
+const progress = (l, v, tg) => { const p = tg > 0 ? Math.round(v / tg * 100) : 0; return `<div class="prow"><div class="t"><span>${l}</span><span><b class="gold">${fmt(v)}</b> / ${fmt(tg)} <span class="${p >= 100 ? 'up' : 'dim'}">${p}%</span></span></div><div class="bar ${p >= 100 ? 'ok' : ''}"><i style="width:${Math.min(p, 100)}%"></i></div></div>`; };
+function scopeToggle(){
+  if (S.me.role !== 'operator') return '';
+  return `<div class="seg"><button class="${!S.scopeAll ? 'on' : ''}" data-a="scope" data-v="0">担当キャスト</button><button class="${S.scopeAll ? 'on' : ''}" data-a="scope" data-v="1">全キャスト</button></div>`;
+}
+const stBadge = (s) => `<span class="badge ${s === 2 ? 'b-grn' : s === 1 ? 'b-gold' : 'b-red'}">${ST[s] || ST[0]}</span>`;
+const isOver = (x, today) => x.status !== 2 && x.due && x.due < (today || bizDate());
+const uniqMonths = (...lists) => [...new Set([].concat(...lists))];
+
+/* ---------- HOME (staff) ---------- */
+async function vHomeStaff(){
+  const today = bizDate(), r = rangeOf(S.period, S.ref), pr = prevRange(S.period, S.ref), ym = ymOf(S.ref);
+  const last7 = { from: addDays(today, -6), to: today };
+  await loadReports(uniqMonths(monthsBetween(pr.from, r.to), monthsBetween(last7.from, last7.to), [ym]));
+  await Promise.all([loadGoals(ym), loadCoach()]);
+  const cs = scopeCasts(), hs = cs.map(c => c.id);
+  if (!castList().length) return `<h1 class="pt">管理ダッシュボード</h1>${empty('キャストがまだ登録されていません', isAdmin() ? '<div style="margin-top:14px"><button class="btn" data-a="tab" data-v="casts">キャストを登録する</button></div>' : '管理者がキャストを登録すると表示されます。')}`;
+  const tot = aggMany(hs, r), ptot = aggMany(hs, pr);
+  const den = hs.length * daysIn(r, today), rate = pct(tot.n, den), prate = pct(ptot.n, hs.length * daysIn(pr, today));
+  const openCo = S.coach.filter(x => x.status !== 2 && hs.includes(x.castHex));
+  const openPeople = new Set(openCo.map(x => x.castHex)).size;
+  const dl = (a, b) => `前: ${fmt(b)} ${arrow(a, b)}`;
+  const mr = rangeOf('month', S.ref), ma = aggMany(hs, mr);
+  let goalHtml = '';
+  GOAL_KEYS.forEach(([k, l]) => { const tg = hs.reduce((s, h) => s + (Number(goalOf(ym, h)[k]) || 0), 0); if (tg > 0) goalHtml += progress(l, ma[k], tg); });
+  const noRes = cs.filter(c => { const a = agg(c.id, last7); return a.line >= S.cfg.alertLine && a.visitActual === 0 && a.newVisit === 0; });
+  const notSub = cs.filter(c => !((S.R[c.id] || {})[today] || {}).submitted);
+  const stale = cs.filter(c => [0, 1, 2].every(i => !((S.R[c.id] || {})[addDays(today, -i)] || {}).submitted) && (c.joinDate || '0') <= addDays(today, -3));
+  const over = S.coach.filter(x => isOver(x, today) && hs.includes(x.castHex));
+  const row = (c, extra, btn) => `<div class="it"><div class="grow"><div class="nm">${esc(c.name)}</div><div class="sub">${extra}</div></div>${btn || ''}</div>`;
+  const alerts =
+    (over.length ? `<div class="card warn"><h2>指導の期限超過 ${over.length}件</h2><div class="list">${over.map(x => row({ name: x.castName }, `期限 ${dlab(x.due)}・${esc(x.issue || '')}`, `<button class="btn sm ghost" data-a="coachEdit" data-v="${x.id}">開く</button>`)).join('')}</div></div>` : '') +
+    (noRes.length ? `<div class="card warn"><h2>活動が成果につながっていません(直近7日)</h2><div class="list">${noRes.map(c => { const a = agg(c.id, last7); return row(c, `LINE交換 ${a.line}件 → 来店 0件`, `<button class="btn sm" data-a="coachFrom" data-h="${c.id}" data-t="nores">指導にする</button>`); }).join('')}</div></div>` : '') +
+    (stale.length ? `<div class="card"><h2>3日以上 営業報告なし ${stale.length}名</h2><div class="chips">${stale.map(c => `<span class="chip" data-a="cast" data-v="${c.id}">${esc(c.name)}</span>`).join('')}</div></div>` : '') +
+    (S.period === 'day' && S.ref === today && notSub.length ? `<div class="card"><h2>本日の営業報告 未提出 ${notSub.length}名</h2><div class="chips">${notSub.map(c => `<span class="chip" data-a="cast" data-v="${c.id}">${esc(c.name)}</span>`).join('')}</div></div>` : '');
+  return `<h1 class="pt">管理ダッシュボード</h1>${scopeToggle()}${periodBar()}
+  ${cs.length ? '' : '<div class="card">' + empty('担当キャストが未設定です', '「全キャスト」に切り替えるか、キャスト詳細で担当運営者を設定してください。') + '</div>'}
+  <div class="kpis">
+    ${tile('新規獲得', fmt(tot.newVisit), '件', dl(tot.newVisit, ptot.newVisit))}
+    ${tile('指名卓獲得', fmt(tot.shimei), '卓', dl(tot.shimei, ptot.shimei))}
+    ${tile('LINE交換', fmt(tot.line), '人', dl(tot.line, ptot.line))}
+    ${tile('電話営業', fmt(tot.tel), '件', dl(tot.tel, ptot.tel))}
+    ${tile('店外営業', fmt(tot.offsite), '件', dl(tot.offsite, ptot.offsite))}
+    ${tile('来店見込み', fmt(tot.prospect), '人', dl(tot.prospect, ptot.prospect))}
+    ${tile('報告提出率', rate == null ? '-' : rate, '%', prate == null ? '' : `前: ${prate}%`)}
+    ${tile('指導未完了', openPeople, '名', openPeople ? '対応が必要' : '', openPeople > 0)}
+  </div>
+  <div style="height:12px"></div>
+  ${alerts}
+  <div class="card"><h2>${ymlab(ym)} 目標に対する達成率</h2>${goalHtml || '<div class="note">この月の個人目標が未設定です。メニュー → 目標設定 から入力できます。</div>'}</div>
+  ${!hs.length ? '' : `<div class="card"><h2>${esc(r.label)} キャスト別</h2><div class="scroll"><table class="tb"><tr><th>名前</th><th>新規</th><th>指名</th><th>LINE</th><th>電話</th><th>店外</th><th>提出</th></tr>${cs.map(c => { const a = agg(c.id, r); return `<tr data-a="cast" data-v="${c.id}" style="cursor:pointer"><td>${esc(c.name)}</td><td>${a.newVisit}</td><td>${a.shimei}</td><td>${a.line}</td><td>${a.tel}</td><td>${a.offsite}</td><td>${a.n}</td></tr>`; }).join('')}</table></div></div>`}`;
+}
+
+/* ---------- HOME (cast) ---------- */
+async function vHomeCast(){
+  const today = bizDate(), ym = ymOf(today), h = S.me.hex, c = S.casts[h];
+  await Promise.all([loadReports([ym]), loadGoals(ym), loadCoach()]);
+  const rep = (S.R[h] || {})[today], a = agg(h, rangeOf('month', today)), ac = achieve(h, ym);
+  const open = S.coach.filter(x => x.status !== 2);
+  return `<h1 class="pt">${esc(c.name)}さん</h1>
+  <div class="card">${rep && rep.submitted
+    ? `<h2>本日の営業報告</h2><div class="big" style="color:var(--pos)">提出済み ✓</div><div class="note" style="margin:6px 0 12px">内容は後から修正できます。</div><button class="btn ghost" data-a="rep" data-h="${h}" data-d="${today}">内容を見る・修正する</button>`
+    : `<h2>本日の営業報告</h2><div class="big" style="color:var(--warn)">まだ未提出</div><div class="note" style="margin:6px 0 12px">営業が終わったら入力してください。</div><button class="btn" data-a="rep" data-h="${h}" data-d="${today}">営業報告を入力する</button>`}</div>
+  <div class="card"><h2>${ymlab(ym)} 累計</h2><div class="kpis">${tile('新規獲得', a.newVisit, '件')}${tile('指名卓', a.shimei, '卓')}${tile('LINE交換', a.line, '人')}${tile('電話・店外', a.tel + a.offsite, '件')}</div></div>
+  <div class="card"><h2>今月の目標</h2>${ac.items.length ? ac.items.map(x => progress(x.l, x.v, x.tg)).join('') + (goalOf(ym, h).note ? `<div class="note">${esc(goalOf(ym, h).note)}</div>` : '') : '<div class="note">今月の目標はまだ設定されていません。運営者が設定すると表示されます。</div>'}</div>
+  ${open.length ? `<div class="card ${open.some(x => isOver(x, today)) ? 'warn' : ''}"><h2>運営者からの指導 ${open.length}件</h2>${open.slice(0, 3).map(x => `<div class="cg ${isOver(x, today) ? 'od' : ''}"><div>${stBadge(x.status)} <b>${esc(x.issue || '')}</b></div><div class="note">${x.due ? '期限 ' + dlab(x.due) : ''}</div></div>`).join('')}<button class="btn ghost" style="margin-top:8px" data-a="tab" data-v="coach">指導の内容を見る</button></div>` : ''}`;
+}
+
+/* ---------- REPORT form ---------- */
+const draftKey = (h, d) => 'x8mg_draft_' + h + '_' + d;
+function stepper(k, v){ return `<div class="step"><button type="button" data-a="st" data-k="${k}" data-d="-1">−</button><input type="number" inputmode="numeric" min="0" max="999" id="f_${k}" value="${v || 0}"><button type="button" data-a="st" data-k="${k}" data-d="1">＋</button></div>`; }
+async function vReport(){
+  const today = bizDate();
+  const R = S.rep = S.rep || { hex: S.me.hex || '', ymd: today };
+  if (!R.hex) return empty('入力するキャストを選んでください', '日別管理 または キャスト詳細から開きます。');
+  await loadReports([ymOf(R.ymd)], true);
+  const base = (S.R[R.hex] || {})[R.ymd] || null;
+  let v = base || {}; const dr = lsGet(draftKey(R.hex, R.ymd));
+  if (dr) { try { const d = JSON.parse(dr); if (!base || (d.t || 0) > (base.at || 0)) v = d; } catch (e) {} }
+  const self = R.hex === S.me.hex, admin = isAdmin();
+  const c = S.casts[R.hex] || { name: S.me.name };
+  const chips = v.rejChips || [];
+  const minD = admin ? '' : `min="${addDays(today, -7)}"`;
+  return `<h1 class="pt">営業報告${self ? '' : '：' + esc(c.name)}</h1>
+  ${S.back ? `<button class="btn ghost sm" data-a="repback" style="margin-bottom:10px">‹ 戻る</button>` : ''}
+  <div id="repform">
+  <label class="f" style="margin-top:0">対象日(営業日)</label>
+  <input type="date" id="f_date" data-a="repdate" value="${R.ymd}" ${minD} max="${admin ? '' : today}">
+  <div class="card" style="margin-top:12px"><h2>営業活動</h2>${FIELDS.filter(f => f.g === 'act').map(f => `<div class="frow"><div class="fl">${f.l}</div>${stepper(f.k, v[f.k])}</div>`).join('')}
+    <label class="f">断られた理由(複数選べます)</label>
+    <div class="chips">${REJ.map(x => `<button type="button" class="chip ${chips.includes(x) ? 'on' : ''}" data-a="rej" data-r="${x}">${x}</button>`).join('')}</div>
+    <input type="text" id="f_rejNote" placeholder="理由のメモ(任意)" value="${esc(v.rejNote || '')}" style="margin-top:8px"></div>
+  <div class="card"><h2>営業成果</h2>${FIELDS.filter(f => f.g === 'res').map(f => `<div class="frow"><div class="fl">${f.l}</div>${stepper(f.k, v[f.k])}</div>`).join('')}</div>
+  <div class="card"><h2>振り返り</h2>
+    <label class="f" style="margin-top:0">今日できたこと</label><textarea id="f_did">${esc(v.did || '')}</textarea>
+    <label class="f">今日の課題</label><textarea id="f_issue">${esc(v.issue || '')}</textarea>
+    <label class="f">明日の営業目標</label><textarea id="f_tomorrow">${esc(v.tomorrow || '')}</textarea></div>
+  <div class="err" id="repErr"></div>
+  <div class="sv"><div class="note" id="repst" style="text-align:center;margin-bottom:6px">${base ? (base.submitted ? '提出済み' : '下書き保存済み') : '入力すると自動で保存されます'}</div>
+  <div class="btnrow"><button class="btn" data-a="repsave">${base && base.submitted ? '修正を保存する' : '提出する'}</button>${admin && base ? `<button class="btn red" style="flex:0 0 90px" data-a="repdel">削除</button>` : ''}</div></div>
+  </div>`;
+}
+function collectRep(){
+  const d = {}; FIELDS.forEach(f => { d[f.k] = num(($('#f_' + f.k) || {}).value, 999); });
+  d.rejChips = [...document.querySelectorAll('#repform .chip.on')].map(e => e.dataset.r);
+  d.rejNote = ($('#f_rejNote').value || '').trim().slice(0, 200);
+  d.rejReason = d.rejChips.concat(d.rejNote ? [d.rejNote] : []).join('、');
+  ['did', 'issue', 'tomorrow'].forEach(k => { d[k] = ($('#f_' + k).value || '').trim().slice(0, 600); });
+  return d;
+}
+let autoT = null, saving = false, pendingSave = null;
+function scheduleAuto(){ clearTimeout(autoT); const st = $('#repst'); if (st) st.textContent = '入力中…'; autoT = setTimeout(() => saveRep(false), 1200); const R = S.rep; if (R) { const d = collectRep(); d.t = Date.now(); lsSet(draftKey(R.hex, R.ymd), JSON.stringify(d)); } }
+async function saveRep(final){
+  if (!document.getElementById('repform')) return;
+  if (saving) { pendingSave = final || pendingSave; return; }
+  const R = S.rep, st = $('#repst'), er = $('#repErr'); er.textContent = '';
+  const d = collectRep();
+  if (final && d.lineRej > 0 && !d.rejReason) { er.textContent = 'LINE交換を断られた件があります。断られた理由を選ぶか、メモを書いてください。'; return; }
+  const prev = (S.R[R.hex] || {})[R.ymd] || {};
+  d.submitted = final ? true : !!prev.submitted; d.at = Date.now(); d.by = isAdmin() ? 'admin' : S.me.hex;
+  const ym = ymOf(R.ymd), dd = R.ymd.slice(8);
+  saving = true; clearTimeout(autoT);
+  lsSet(draftKey(R.hex, R.ymd), JSON.stringify(Object.assign({ t: d.at }, d)));
+  try {
+    await B.set('mg_reports', ym + '_' + R.hex, { ym, owner: R.hex, days: { [dd]: d } }, true);
+    S.R[R.hex] = S.R[R.hex] || {}; S.R[R.hex][R.ymd] = d; S.loadedR[ym] = Date.now();
+    lsDel(draftKey(R.hex, R.ymd));
+    const t = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    if (final) { toast(prev.submitted ? '修正を保存しました' : '提出しました'); } else if (st) st.textContent = '自動保存しました ' + t;
+    if (final) { saving = false; S.noFlush = true; const b = S.back; S.back = null; go(b || 'home'); return; }
+  } catch (e) {
+    if (st) st.textContent = '⚠ 保存できませんでした(通信を確認)。入力は端末に残っています。';
+    if (final) er.textContent = '保存できませんでした。通信を確認してもう一度押してください。入力内容は消えません。';
+  }
+  saving = false;
+  if (pendingSave) { const f = pendingSave; pendingSave = null; saveRep(f === true); }
+}
+
+/* ---------- SALES (既存の売上アプリのデータを読む) ---------- */
+async function salesMonths(){
+  if (S.salesMonths) return S.salesMonths;
+  let m = null; try { m = await B.get('meta', 'app'); } catch (e) {}
+  S.salesMonths = ((m && m.months) || []).slice().sort();
+  return S.salesMonths;
+}
+const SK = ['sub', 'gross', 'shimei', 'douhan', 'shinki', 'nomi', 'help', 'okuri'];
+function sumRows(rowsList){ const t = new Array(8).fill(0); let n = 0; rowsList.forEach(r => { for (let i = 0; i < 8; i++) t[i] += Number(r[i]) || 0; n++; }); return { sub: t[0], gross: t[1], shimei: t[2], douhan: t[3], shinki: t[4], nomi: t[5], help: t[6], okuri: t[7], days: n }; }
+const salesCache = {};
+async function getPrivSales(ym, hex){
+  const k = 'p' + ym + hex; if (salesCache[k]) return salesCache[k];
+  const d = await B.get('priv', ym + '_' + hex); let out = null;
+  if (d && d.payload) { try { const p = JSON.parse(d.payload); out = Object.assign(sumRows(Object.values(p.days || {})), { daily: p.days || {} }); } catch (e) {} }
+  return (salesCache[k] = out);
+}
+async function getFullSales(ym){
+  const k = 'f' + ym; if (salesCache[k]) return salesCache[k];
+  const d = await B.get('full', ym); let out = null;
+  if (d && d.payload) { try {
+    const M = JSON.parse(d.payload); const per = {};
+    (M.employees || []).forEach(e => { const rows = []; Object.keys(M.days || {}).forEach(dd => { const r = M.days[dd].rows && M.days[dd].rows[e.id]; if (r) rows.push(r); }); per[hexOf(e.name)] = Object.assign(sumRows(rows), { name: e.name }); });
+    out = per;
+  } catch (e) {} }
+  return (salesCache[k] = out);
+}
+async function salesFor(ym, hex){ return isAdmin() ? ((await getFullSales(ym)) || {})[hex] || null : await getPrivSales(ym, hex); }
+function salesCard(s, ym, extra){
+  if (!s) return `<div class="empty"><b>${ymlab(ym)}の売上データがありません</b>売上アプリに取り込まれると表示されます。</div>`;
+  return `<div class="kpis" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="kpi"><div class="l">小計</div><div class="v gold" style="font-size:28px">${yen(s.sub)}</div></div><div class="kpi"><div class="l">総売</div><div class="v" style="font-size:28px">${yen(s.gross)}</div></div></div>
+  <div class="kpis" style="margin-top:10px;grid-template-columns:repeat(4,minmax(0,1fr))">${tile('本数', fmt(s.shimei), '本')}${tile('新規', fmt(s.shinki), '')}${tile('同伴', fmt(s.douhan), '')}${tile('出勤', fmt(s.days), '日')}</div>${extra || ''}`;
+}
+async function vSales(){
+  const ms = await salesMonths();
+  if (!ms.length) return `<h1 class="pt">売上</h1>${empty('売上データがまだありません', '売上アプリにExcelが取り込まれると、ここに表示されます。')}`;
+  if (!S.sm || !ms.includes(S.sm)) S.sm = ms[ms.length - 1];
+  const i = ms.indexOf(S.sm);
+  const bar = `<div class="nav"><button data-a="smstep" data-v="-1" ${i <= 0 ? 'disabled' : ''}>‹</button><b>${ymlab(S.sm)}</b><button data-a="smstep" data-v="1" ${i >= ms.length - 1 ? 'disabled' : ''}>›</button></div>`;
+  if (isAdmin()) {
+    const per = (await getFullSales(S.sm)) || null;
+    if (!per) return `<h1 class="pt">全員の売上</h1>${bar}${empty('この月のデータがありません')}`;
+    const rows = Object.keys(per).map(h => Object.assign({ hex: h }, per[h])).sort((a, b) => b.sub - a.sub);
+    const T = sumRows(rows.map(r => [r.sub, r.gross, r.shimei, r.douhan, r.shinki, r.nomi, r.help, r.okuri]));
+    return `<h1 class="pt">全員の売上</h1>${bar}
+    <div class="card"><h2>全員の合計</h2>${salesCard(Object.assign(T, { days: rows.filter(r => r.days).length }), S.sm).replace('出勤', '出勤者').replace('日</small>', '名</small>')}</div>
+    <div class="card"><h2>個人別(小計の多い順)</h2><div class="scroll"><table class="tb"><tr><th>名前</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>出勤</th></tr>${rows.map(r => `<tr><td>${esc(r.name)}</td><td><b class="gold">${yen(r.sub)}</b></td><td>${yen(r.gross)}</td><td>${r.shimei}</td><td>${r.shinki}</td><td>${r.days}</td></tr>`).join('')}</table></div></div>
+    <div class="note">売上アプリの取り込みデータをそのまま集計しています(管理者のみ表示)。</div>`;
+  }
+  const s = await getPrivSales(S.sm, S.me.hex);
+  const prev = i > 0 ? await getPrivSales(ms[i - 1], S.me.hex) : null;
+  const daily = s ? Object.keys(s.daily).sort() : [];
+  return `<h1 class="pt">自分の売上</h1>${bar}
+  <div class="card">${salesCard(s, S.sm)}</div>
+  ${s && prev ? `<div class="card"><h2>前月との比較</h2><table class="tb"><tr><th></th><th>今月</th><th>前月</th><th>差</th></tr>${[['小計', s.sub, prev.sub, 1], ['総売', s.gross, prev.gross, 1], ['本数', s.shimei, prev.shimei], ['新規', s.shinki, prev.shinki]].map(([l, a, b, y]) => `<tr><td>${l}</td><td>${y ? yen(a) : a}</td><td>${y ? yen(b) : b}</td><td>${arrow(a, b)}</td></tr>`).join('')}</table></div>` : ''}
+  ${daily.length ? `<div class="card"><h2>日別</h2><div class="scroll"><table class="tb"><tr><th>日</th><th>小計</th><th>総売</th><th>本数</th></tr>${daily.map(dd => { const r = s.daily[dd]; return `<tr><td>${dlab(S.sm + '-' + dd)}</td><td>${yen(r[0])}</td><td>${yen(r[1])}</td><td>${r[2] || 0}</td></tr>`; }).join('')}</table></div></div>` : ''}
+  <div class="note">給料明細・掛けなどは、これまでの個人ページ(me.html)で確認できます。</div>`;
+}
+
+/* ---------- CAST detail / 実績 ---------- */
+async function vCast(){
+  const hex = S.castHex || S.me.hex, c = S.casts[hex];
+  if (!c) return empty('キャスト情報が見つかりません');
+  const today = bizDate(), self = hex === S.me.hex, ym = ymOf(S.ref);
+  const r = rangeOf(S.period, S.ref), pr = prevRange(S.period, S.ref);
+  await loadReports(uniqMonths(monthsBetween(pr.from, r.to), [ym, ymOf(today)]));
+  await Promise.all([loadGoals(ym), loadCoach()]);
+  const a = agg(hex, r), p = agg(hex, pr), ac = achieve(hex, ym), canEdit = isStaff();
+  let mine = S.coach.filter(x => x.castHex === hex);
+  if (canEdit) { try { mine = (await B.list('mg_coach', ['castHex', '==', hex])).sort((x, y) => (y.date || '').localeCompare(x.date || '')); } catch (e) {} }
+  const days = Object.keys(S.R[hex] || {}).sort().reverse().slice(0, 14);
+  const conv = a.line > 0 ? Math.round(a.visitActual / a.line * 100) : null;
+  const flagNoRes = a.line >= S.cfg.alertLine && a.visitActual === 0 && a.newVisit === 0;
+  // 日別の推移(月)
+  const mdays = lastDay(ym); const spark = []; let mx = 1;
+  for (let d = 1; d <= mdays; d++) { const k = ym + '-' + String(d).padStart(2, '0'); const rp = (S.R[hex] || {})[k]; const v = rp ? (Number(rp.newVisit) || 0) + (Number(rp.shimei) || 0) : 0; spark.push(v); if (v > mx) mx = v; }
+  let salesHtml = '';
+  if (isAdmin() || self) {
+    const sms = await salesMonths();
+    if (sms.length) { const sm = sms.includes(ym) ? ym : sms[sms.length - 1]; let s = null; try { s = await salesFor(sm, hex); } catch (e) {} salesHtml = `<div class="card"><h2>${ymlab(sm)} 売上</h2>${salesCard(s, sm)}</div>`; }
+  }
+  const opName = c.operator && S.casts[c.operator] ? S.casts[c.operator].name : (c.opName || '');
+  return `${!self || S.castHex ? `<button class="btn ghost sm" data-a="back" style="margin-bottom:10px">‹ 戻る</button>` : ''}
+  <div class="card" style="display:flex;gap:14px;align-items:center">${avatar(c, 'lg')}<div class="grow" style="flex:1;min-width:0"><div style="font-size:20px;font-weight:700">${esc(c.name)} ${c.role === 'operator' ? '<span class="badge b-blu">運営者</span>' : ''}${c.active === false ? '<span class="badge b-gry">退店</span>' : ''}</div>
+  <div class="note">${esc(c.title || '役職なし')}${c.joinDate ? ' ・ 入店 ' + c.joinDate : ''}${opName ? ' ・ 担当 ' + esc(opName) : ''}</div></div></div>
+  ${isAdmin() ? `<div class="btnrow" style="margin-bottom:12px"><button class="btn ghost sm" data-a="castEdit" data-v="${hex}">プロフィール編集</button><button class="btn ghost sm" data-a="invite" data-v="${hex}">登録コード発行</button><button class="btn ghost sm" data-a="rep" data-h="${hex}" data-d="${today}" data-b="cast">報告を入力・修正</button></div>` : ''}
+  <div class="card ${flagNoRes ? 'warn' : ''}"><h2>現在の課題</h2><div>${c.issue ? esc(c.issue).replace(/\n/g, '<br>') : '<span class="dim">未入力</span>'}</div>${flagNoRes ? '<div style="margin-top:8px" class="down">直近の活動が来店につながっていません。</div>' : ''}${canEdit ? `<div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" data-a="issueEdit" data-v="${hex}">課題を編集</button><button class="btn sm" data-a="coachFrom" data-h="${hex}" data-t="manual">指導を記録する</button></div>` : ''}</div>
+  <div class="card"><h2>${ymlab(ym)} 個人目標</h2>${ac.items.length ? ac.items.map(x => progress(x.l, x.v, x.tg)).join('') : '<div class="note">目標が未設定です。</div>'}${goalOf(ym, hex).note ? `<div class="note" style="margin-top:6px">${esc(goalOf(ym, hex).note)}</div>` : ''}${canEdit ? `<button class="btn ghost sm" style="margin-top:8px" data-a="goalEdit" data-v="${hex}">目標を設定・変更</button>` : ''}</div>
+  ${periodBar()}
+  <div class="card"><h2>営業実績の比較</h2><div class="scroll"><table class="tb"><tr><th>項目</th><th>今回</th><th>前回</th><th>差</th></tr>
+  ${[['LINE交換', 'line'], ['電話営業', 'tel'], ['店外営業', 'offsite'], ['SNS投稿', 'sns'], ['新規来店', 'newVisit'], ['指名卓', 'shimei'], ['来店見込み', 'prospect'], ['来店実績', 'visitActual']].map(([l, k]) => `<tr><td>${l}</td><td><b>${a[k]}</b></td><td>${p[k]}</td><td>${arrow(a[k], p[k])}</td></tr>`).join('')}
+  <tr><td>営業活動量(計)</td><td><b>${a.act}</b></td><td>${p.act}</td><td>${arrow(a.act, p.act)}</td></tr></table></div>
+  <div class="kpis" style="margin-top:10px;grid-template-columns:repeat(3,minmax(0,1fr))">${tile('LINE→来店', conv == null ? '-' : conv, '%', 'LINE交換あたりの来店実績')}${tile('SNS活動日', a.snsDays, '日', '投稿した日数')}${tile('報告提出', a.n, '日')}</div></div>
+  <div class="card"><h2>${ymlab(ym)} 新規＋指名の推移</h2><div class="spark">${spark.map(v => `<i class="${v ? '' : 'z'}" style="height:${Math.max(4, Math.round(v / mx * 100))}%" title="${v}"></i>`).join('')}</div><div class="note" style="display:flex;justify-content:space-between"><span>1日</span><span>${mdays}日</span></div></div>
+  ${salesHtml}
+  <div class="card"><h2>直近の営業報告</h2>${days.length ? days.map(k => { const d = S.R[hex][k]; return `<div class="cg"><div><b>${dlab(k)}</b> ${d.submitted ? '' : '<span class="badge b-gry">下書き</span>'} <span class="note">LINE${d.line || 0} 電話${d.tel || 0} 店外${d.offsite || 0} / 新規${d.newVisit || 0} 指名${d.shimei || 0}</span></div>${d.did ? `<div class="note">できた: ${esc(d.did)}</div>` : ''}${d.issue ? `<div class="note">課題: ${esc(d.issue)}</div>` : ''}${d.tomorrow ? `<div class="note">明日: ${esc(d.tomorrow)}</div>` : ''}${isAdmin() ? `<button class="btn ghost sm" style="margin-top:4px" data-a="rep" data-h="${hex}" data-d="${k}" data-b="cast">修正</button>` : ''}</div>`; }).join('') : empty('営業報告がまだありません', self ? '「報告」から入力してください。' : '')}</div>
+  <div class="card"><h2>指導履歴</h2>${mine.length ? mine.map(x => `<div class="cg ${isOver(x, today) ? 'od' : ''}"><div>${stBadge(x.status)} <b>${esc(x.issue || '')}</b> ${isOver(x, today) ? '<span class="badge b-red">期限超過</span>' : ''}</div><div class="note">${dlab(x.date)}・${esc(x.operatorName || '')}${x.due ? '・期限 ' + dlab(x.due) : ''}</div>${x.content ? `<div class="note">指導: ${esc(x.content)}</div>` : ''}${x.goal ? `<div class="note">目標: ${esc(x.goal)}</div>` : ''}${x.result ? `<div class="note">結果: ${esc(x.result)}</div>` : ''}${canEdit ? `<button class="btn ghost sm" style="margin-top:4px" data-a="coachEdit" data-v="${x.id}">編集</button>` : ''}</div>`).join('') : '<div class="note">指導の記録はありません。</div>'}</div>`;
+}
+
+/* ---------- sheet (modal) ---------- */
+function openSheet(html){ $('#sheetin').innerHTML = html; $('#sheetbg').style.display = 'block'; $('#sheet').style.display = 'block'; $('#sheet').scrollTop = 0; }
+function closeSheet(){ $('#sheetbg').style.display = 'none'; $('#sheet').style.display = 'none'; $('#sheetin').innerHTML = ''; }
+const val = (id) => { const e = document.getElementById(id); return e ? e.value : ''; };
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const sopt = (list, cur) => list.map(([v, l]) => `<option value="${esc(v)}" ${String(v) === String(cur) ? 'selected' : ''}>${esc(l)}</option>`).join('');
+
+/* ---------- COACHING ---------- */
+async function vCoach(){
+  const today = bizDate(); S.coachF.ym = S.coachF.ym || ymOf(today);
+  await loadCoach(true, [S.coachF.ym]);
+  if (!isStaff()) {
+    const l = S.coach;
+    return `<h1 class="pt">運営者からの指導</h1>${l.length ? l.map(x => `<div class="card ${isOver(x, today) ? 'warn' : ''}"><div>${stBadge(x.status)} ${isOver(x, today) ? '<span class="badge b-red">期限超過</span>' : ''}</div><div style="font-weight:700;margin:6px 0">${esc(x.issue || '')}</div><div class="note">${dlab(x.date)}・${esc(x.operatorName || '運営者')}</div>${x.content ? `<h2 style="margin-top:10px">指導内容</h2><div>${esc(x.content).replace(/\n/g, '<br>')}</div>` : ''}${x.goal ? `<h2 style="margin-top:10px">改善目標</h2><div>${esc(x.goal)}</div>` : ''}${x.due ? `<div class="note" style="margin-top:6px">改善期限: ${dlab(x.due)}</div>` : ''}${x.result ? `<h2 style="margin-top:10px">改善結果</h2><div>${esc(x.result)}</div>` : ''}</div>`).join('') : empty('指導の記録はまだありません', '運営者が記録すると、ここで確認できます。')}`;
+  }
+  const f = S.coachF;
+  let l = S.coach.slice();
+  if (f.st === 'open') l = l.filter(x => x.status !== 2); else if (f.st !== 'all') l = l.filter(x => x.status === Number(f.st));
+  if (f.st !== 'open') l = l.filter(x => x.status !== 2 || x.ym === f.ym);
+  if (f.cast) l = l.filter(x => x.castHex === f.cast);
+  if (f.op) l = l.filter(x => x.operatorHex === f.op);
+  l.sort((a, b) => (isOver(b, today) ? 1 : 0) - (isOver(a, today) ? 1 : 0) || (b.date || '').localeCompare(a.date || ''));
+  // 運営者ごとの集計
+  const ops = {}; const getOp = (h, n) => (ops[h || '-'] = ops[h || '-'] || { name: n || '管理者', total: 0, done: 0, open: 0, over: 0, days: [] });
+  S.coach.forEach(x => {
+    const o = getOp(x.operatorHex, x.operatorName);
+    if (x.status !== 2) { o.open++; if (isOver(x, today)) o.over++; }
+    if (x.ym === f.ym) { o.total++; if (x.status === 2) { o.done++; if (x.doneAt && x.date) o.days.push(Math.max(0, Math.round((ymd2d(x.doneAt) - ymd2d(x.date)) / 864e5))); } }
+  });
+  const opRows = Object.keys(ops).filter(h => isAdmin() || h === S.me.hex).map(h => ops[h]);
+  const castOpts = [['', 'キャスト全員']].concat(castList().map(c => [c.id, c.name]));
+  const opOpts = [['', '運営者全員']].concat(operators().map(c => [c.id, c.name]));
+  return `<h1 class="pt">指導管理</h1>
+  <button class="btn" data-a="coachNew" style="margin-bottom:12px">＋ 指導を記録する</button>
+  <div class="chips" style="margin-bottom:10px">${[['open', '未完了'], ['0', '未対応'], ['1', '対応中'], ['2', '改善完了'], ['all', 'すべて']].map(([k, n]) => `<span class="chip ${f.st === k ? 'on' : ''}" data-a="cf" data-k="st" data-v="${k}">${n}</span>`).join('')}</div>
+  <div class="btnrow" style="margin-bottom:12px"><select data-a="cfsel" data-k="cast">${sopt(castOpts, f.cast)}</select>${isAdmin() ? `<select data-a="cfsel" data-k="op">${sopt(opOpts, f.op)}</select>` : ''}</div>
+  ${l.length ? l.map(x => `<div class="card ${isOver(x, today) ? 'warn' : ''}" ><div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(x.castName || castName(x.castHex))}</b><span>${stBadge(x.status)} ${isOver(x, today) ? '<span class="badge b-red">期限超過</span>' : ''}</span></div>
+    <div style="margin:4px 0">${esc(x.issue || '')}</div>
+    <div class="note">${dlab(x.date)}・担当 ${esc(x.operatorName || '-')}${x.due ? '・期限 ' + dlab(x.due) : ''}</div>
+    ${x.content ? `<div class="note">指導: ${esc(x.content)}</div>` : ''}${x.goal ? `<div class="note">目標: ${esc(x.goal)}</div>` : ''}${x.result ? `<div class="note">結果: ${esc(x.result)}</div>` : ''}
+    <div class="btnrow" style="margin-top:8px"><button class="btn ghost sm" data-a="coachEdit" data-v="${x.id}">編集・進捗を更新</button>${x.status < 2 ? `<button class="btn sm" data-a="coachNext" data-v="${x.id}">${x.status === 0 ? '対応中にする' : '改善完了にする'}</button>` : ''}</div></div>`).join('') : empty('該当する指導記録はありません', '「指導を記録する」から追加できます。')}
+  ${monthBar(f.ym, 'cmstep')}
+  <div class="card"><h2>${ymlab(f.ym)} 運営者ごとの指導実績</h2>${opRows.length ? `<div class="scroll"><table class="tb"><tr><th>運営者</th><th>指導</th><th>完了</th><th>完了率</th><th>平均日数</th><th>未完了</th><th>超過</th></tr>${opRows.map(o => `<tr><td>${esc(o.name)}</td><td>${o.total}</td><td>${o.done}</td><td>${pct(o.done, o.total) == null ? '-' : pct(o.done, o.total) + '%'}</td><td>${o.days.length ? Math.round(o.days.reduce((s, v) => s + v, 0) / o.days.length) + '日' : '-'}</td><td>${o.open}</td><td class="${o.over ? 'down' : ''}">${o.over}</td></tr>`).join('')}</table></div>` : '<div class="note">この月の指導記録がありません。</div>'}</div>`;
+}
+function coachSheet(x, preset){
+  const today = bizDate(); x = x || preset || {};
+  const cs = castList().filter(c => c.active !== false);
+  const ops = operators();
+  const defOp = x.operatorHex != null ? x.operatorHex : (S.me.role === 'operator' ? S.me.hex : ((S.casts[x.castHex] || {}).operator || ''));
+  openSheet(`<h1 class="pt">${x.id ? '指導記録を編集' : '指導を記録する'}</h1>
+  <input type="hidden" id="c_id" value="${esc(x.id || '')}">
+  <label class="f" style="margin-top:0">対象キャスト</label><select id="c_cast" ${x.id ? 'disabled' : ''}>${sopt([['', '選んでください']].concat(cs.map(c => [c.id, c.name])), x.castHex || '')}</select>
+  ${isAdmin() ? `<label class="f">担当運営者</label><select id="c_op">${sopt([['', '管理者']].concat(ops.map(c => [c.id, c.name])), defOp)}</select>` : ''}
+  <label class="f">指導日</label><input type="date" id="c_date" value="${x.date || today}">
+  <label class="f">課題</label><input type="text" id="c_issue" value="${esc(x.issue || '')}" placeholder="例：LINE交換は多いが来店につながっていない">
+  <label class="f">指導内容</label><textarea id="c_content">${esc(x.content || '')}</textarea>
+  <label class="f">改善目標</label><input type="text" id="c_goal" value="${esc(x.goal || '')}">
+  <label class="f">改善期限</label><input type="date" id="c_due" value="${x.due || ''}">
+  <label class="f">進捗状況</label><select id="c_st">${sopt(ST.map((n, i) => [i, n]), x.status || 0)}</select>
+  <label class="f">改善結果</label><textarea id="c_result">${esc(x.result || '')}</textarea>
+  <div class="err" id="c_err"></div>
+  <div class="btnrow" style="margin-top:12px"><button class="btn ghost" data-a="sheetClose">閉じる</button><button class="btn" data-a="coachSave">保存</button></div>
+  ${x.id && isAdmin() ? `<button class="btn red sm" style="margin-top:12px" data-a="coachDel" data-v="${x.id}">この記録を削除</button>` : ''}`);
+}
+async function coachSave(){
+  const id = val('c_id') || newId(), isNew = !val('c_id'), old = S.coach.find(x => x.id === id) || {};
+  const castHex = isNew ? val('c_cast') : old.castHex, issue = val('c_issue').trim(), date = val('c_date');
+  const er = $('#c_err'); er.textContent = '';
+  if (!castHex) { er.textContent = '対象キャストを選んでください'; return; }
+  if (!issue) { er.textContent = '課題を入力してください'; return; }
+  if (!date) { er.textContent = '指導日を入れてください'; return; }
+  const st = Number(val('c_st')) || 0;
+  const opHex = isAdmin() ? val('c_op') : S.me.hex;
+  const op = S.casts[opHex];
+  const o = { ym: ymOf(date), castHex, castName: castName(castHex), operatorHex: opHex || '', operatorName: op ? op.name : '管理者', date, issue, content: val('c_content').trim(), goal: val('c_goal').trim(), due: val('c_due'), status: st, result: val('c_result').trim(), updatedAt: Date.now() };
+  if (isNew) o.createdAt = Date.now();
+  if (st === 2) o.doneAt = old.status === 2 && old.doneAt ? old.doneAt : bizDate(); else o.doneAt = '';
+  try { await B.set('mg_coach', id, o, true); S.coachAt = 0; closeSheet(); toast('保存しました'); refresh(); }
+  catch (e) { er.textContent = '保存できませんでした。通信を確認してもう一度押してください。'; }
+}
+
+/* ---------- ROTATION (付け回し評価) ---------- */
+function rotAuto(hex, end){
+  const a = agg(hex, { from: addDays(end, -13), to: end }), th = S.cfg.th;
+  return { sns: a.sns >= th.sns, new: a.newVisit + a.planned + a.prospect >= th.new, line: a.line >= th.line, tel: a.tel + a.offsite >= th.tel, shimei: a.shimei + a.planned >= th.shimei, a };
+}
+function pickRot(items){
+  const cfg = S.cfg, ok = items.filter(x => x.pin !== -1);
+  const by = (a, b) => b.score - a.score || b.auto.a.act - a.auto.a.act || String(a.c.name).localeCompare(String(b.c.name), 'ja');
+  const roles = ok.filter(x => x.isRole).sort(by), non = ok.filter(x => !x.isRole).sort(by);
+  const pick = new Set(items.filter(x => x.pin === 1));
+  const nR = () => [...pick].filter(x => x.isRole).length, nN = () => [...pick].filter(x => !x.isRole).length, nU = () => [...pick].filter(x => !x.isRole && x.nurture).length;
+  for (const x of roles) { if (nR() >= cfg.roleMin) break; pick.add(x); }
+  for (const x of non.filter(x => x.nurture)) { if (nU() >= cfg.nurtureMin || nN() >= cfg.nonMin) break; pick.add(x); }
+  for (const x of non) { if (nN() >= cfg.nonMin) break; pick.add(x); }
+  for (const x of ok.slice().sort(by)) { if (pick.size >= cfg.poolSize) break; pick.add(x); }
+  return { list: [...pick].sort((a, b) => (b.isRole ? 1 : 0) - (a.isRole ? 1 : 0) || by(a, b)), shortRole: roles.length < cfg.roleMin, shortNon: non.length < cfg.nonMin };
+}
+async function vRot(){
+  const today = bizDate(), ym = S.ym, end = ym === ymOf(today) ? today : ym + '-' + String(lastDay(ym)).padStart(2, '0');
+  await loadReports(monthsBetween(addDays(end, -13), end)); await loadRot(ym);
+  const pool = castList().filter(c => c.active !== false && (c.role === 'cast' ? c.rot !== false : c.rot === true));
+  if (!pool.length) return `<h1 class="pt">付け回し評価</h1>${monthBar(ym)}${empty('評価するキャストがいません', 'キャスト登録後に表示されます。')}`;
+  const items = pool.map(c => {
+    const rt = (S.rot[ym] || {})[c.id] || {}, checks = rt.checks || {}, auto = rotAuto(c.id, end), fin = {};
+    ROT_ITEMS.forEach(([k]) => { fin[k] = checks[k] !== undefined ? checks[k] : auto[k]; });
+    const isRole = !!(c.title || '').trim();
+    return { c, rt, checks, auto, fin, score: ROT_ITEMS.filter(([k]) => fin[k]).length, isRole, nurture: c.nurture === true || (!!c.joinDate && c.joinDate >= addDays(end, -S.cfg.nurtureDays)), pin: rt.pin || 0 };
+  });
+  const P = pickRot(items), cfg = S.cfg;
+  const tag = (x) => `${x.isRole ? '<span class="badge b-blu">役職</span>' : '<span class="badge b-gry">非役職</span>'} ${x.nurture ? '<span class="badge b-grn">育成枠</span>' : ''} ${x.pin === 1 ? '<span class="badge b-gold">固定</span>' : x.pin === -1 ? '<span class="badge b-red">除外</span>' : ''}`;
+  const itemRow = (x) => `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>${esc(x.c.name)}</b> ${tag(x)}<div class="note">${esc(x.c.title || '')}　直近14日: LINE${x.auto.a.line} 電話${x.auto.a.tel} 店外${x.auto.a.offsite} SNS${x.auto.a.sns} 新規${x.auto.a.newVisit} 指名${x.auto.a.shimei}</div></div><div class="big" style="font-size:26px">${x.isRole ? '' : x.score + '<small class="dim" style="font-size:13px">/5</small>'}</div></div>
+    ${x.isRole ? '' : ROT_ITEMS.map(([k, l]) => { const m = x.checks[k]; return `<div class="frow"><div class="fl">${l}<div class="note">自動判定: ${x.auto[k] ? '○' : '×'}${m !== undefined ? '(手動で変更済み)' : ''}</div></div><div class="tri"><button class="${x.fin[k] ? 'on' : ''}" data-a="rotck" data-h="${x.c.id}" data-k="${k}" data-v="1">○</button><button class="${!x.fin[k] ? 'on' : ''}" data-a="rotck" data-h="${x.c.id}" data-k="${k}" data-v="0">×</button></div></div>`; }).join('')}
+    <div class="btnrow" style="margin-top:8px"><button class="btn ghost sm" data-a="rotpin" data-h="${x.c.id}">${x.pin === 1 ? '固定中 → 除外にする' : x.pin === -1 ? '除外中 → 通常に戻す' : '固定にする'}</button></div></div>`;
+  return `<h1 class="pt">付け回し評価</h1>${monthBar(ym)}
+  <div class="card"><h2>付け回し候補(初回1人あたり 目安${cfg.poolSize}名)</h2>
+  <div class="note" style="margin-bottom:8px">役職${cfg.roleMin}名以上＋非役職${cfg.nonMin}名以上を基本に、活動評価が高い順。入店${cfg.nurtureDays}日以内・育成枠の人を${cfg.nurtureMin}名以上入れています。</div>
+  ${P.shortRole ? `<div class="down note">役職のキャストが${cfg.roleMin}名に足りません。</div>` : ''}${P.shortNon ? `<div class="down note">非役職のキャストが${cfg.nonMin}名に足りません。</div>` : ''}
+  ${P.list.map((x, i) => `<div class="rk"><div class="no">${i + 1}</div><div class="grow" style="flex:1"><b>${esc(x.c.name)}</b> ${tag(x)}</div><div class="v">${x.isRole ? '-' : x.score + '/5'}</div></div>`).join('')}</div>
+  <div class="note" style="margin:0 0 10px">自動判定は直近14日の営業報告から出しています。○×は運営者が自由に変更でき、同じ側をもう一度押すと自動判定に戻ります。</div>
+  ${items.slice().sort((a, b) => (b.isRole ? 1 : 0) - (a.isRole ? 1 : 0) || b.score - a.score).map(itemRow).join('')}`;
+}
+async function rotSet(hex, patch){
+  const ym = S.ym, cur = (S.rot[ym] || {})[hex] || { ym, owner: hex, checks: {} };
+  const o = Object.assign({}, cur, patch, { ym, owner: hex, by: S.me.hex || 'admin', at: Date.now() }); delete o.id;
+  await B.set('mg_rot', ym + '_' + hex, o, false);
+  S.rot[ym] = S.rot[ym] || {}; S.rot[ym][hex] = o;
+}
+
+/* ---------- RANKING ---------- */
+const RK = [['newVisit', '新規集客'], ['shimei', '指名卓獲得'], ['line', 'LINE交換'], ['act', '営業活動'], ['rate', '目標達成率'], ['coach', '運営者指導実績']];
+async function vRank(){
+  if (S.rkPeriod === 'day') S.rkPeriod = 'week';
+  const r = rangeOf(S.rkPeriod, S.ref), ym = ymOf(r.to), today = bizDate();
+  await loadReports(monthsBetween(r.from, r.to)); await loadGoals(ym);
+  if (S.rk === 'coach') await loadCoach(true, monthsBetween(r.from, r.to));
+  const cs = castList().filter(isTracked);
+  let rows = [];
+  if (S.rk === 'coach') {
+    const ops = {}; S.coach.forEach(x => { const h = x.operatorHex || '-'; const o = (ops[h] = ops[h] || { name: x.operatorName || '管理者', v: 0, sub: 0 }); if (x.date >= r.from && x.date <= r.to) o.sub++; if (x.status === 2 && x.doneAt >= r.from && x.doneAt <= r.to) o.v++; });
+    rows = Object.values(ops).map(o => ({ name: o.name, v: o.v, txt: o.v + '件完了', sub: `指導 ${o.sub}件` }));
+  } else {
+    rows = cs.map(c => {
+      const a = agg(c.id, r);
+      if (S.rk === 'rate') { const ac = achieve(c.id, ym); return { name: c.name, c, v: ac.rate == null ? -1 : ac.rate, txt: ac.rate == null ? '目標なし' : ac.rate + '%', sub: ac.items.map(x => x.l + x.p + '%').join(' ') }; }
+      return { name: c.name, c, v: a[S.rk], txt: fmt(a[S.rk]) + (S.rk === 'shimei' ? '卓' : S.rk === 'act' ? '' : S.rk === 'line' ? '人' : '件'), sub: S.rk === 'act' ? `LINE${a.line} 電話${a.tel} 店外${a.offsite} SNS${a.sns} 送り${a.okuri} 飲直${a.nomi}` : '' };
+    });
+  }
+  rows.sort((x, y) => y.v - x.v || String(x.name).localeCompare(String(y.name), 'ja'));
+  let rank = 0, prev = null; rows.forEach((x, i) => { if (x.v !== prev) { rank = i + 1; prev = x.v; } x.rank = rank; });
+  const has = rows.some(x => x.v > 0);
+  return `<h1 class="pt">ランキング</h1>
+  <div class="chips" style="margin-bottom:12px">${RK.map(([k, l]) => `<span class="chip ${S.rk === k ? 'on' : ''}" data-a="rk" data-v="${k}">${l}</span>`).join('')}</div>
+  <div class="seg">${[['week', '週間'], ['month', '月間']].map(([k, l]) => `<button class="${S.rkPeriod === k ? 'on' : ''}" data-a="rkp" data-v="${k}">${l}</button>`).join('')}</div>
+  <div class="nav"><button data-a="rkstep" data-v="-1">‹</button><b>${r.label}</b><button data-a="rkstep" data-v="1">›</button></div>
+  <div class="card">${rows.length && has ? rows.map(x => `<div class="rk r${x.rank}"><div class="no">${x.rank}</div>${x.c ? avatar(x.c) : ''}<div class="grow" style="flex:1;min-width:0"><div class="nm">${esc(x.name)}</div>${x.sub ? `<div class="note">${esc(x.sub)}</div>` : ''}</div><div class="v ${x.rank === 1 ? 'gold' : ''}">${x.txt}</div></div>`).join('') : empty('この期間のデータがまだありません', S.rk === 'rate' ? '個人目標を設定すると達成率が出ます。' : '営業報告が提出されると集計されます。')}</div>`;
+}
+
+/* ---------- DAILY (日別管理) ---------- */
+async function vDaily(){
+  const d = S.ref, today = bizDate();
+  await loadReports([ymOf(d)], true);
+  const cs = (isAdmin() || S.scopeAll ? castList().filter(isTracked) : scopeCasts());
+  const nsub = cs.filter(c => !(((S.R[c.id] || {})[d]) || {}).submitted);
+  return `<h1 class="pt">日別管理</h1>${scopeToggle()}
+  <div class="nav"><button data-a="dstep" data-v="-1">‹</button><b>${dlab(d)}${d === today ? ' 本日' : ''}</b><button data-a="dstep" data-v="1">›</button></div>
+  <div class="card"><h2>提出 ${cs.length - nsub.length} / ${cs.length}名</h2>${cs.length ? `<div class="scroll"><table class="tb"><tr><th>名前</th><th>状態</th><th>LINE</th><th>電話</th><th>店外</th><th>新規</th><th>指名</th>${isAdmin() ? '<th></th>' : ''}</tr>${cs.map(c => { const v = (S.R[c.id] || {})[d]; return `<tr><td data-a="cast" data-v="${c.id}" style="cursor:pointer">${esc(c.name)}</td><td>${v && v.submitted ? '<span class="badge b-grn">提出</span>' : v ? '<span class="badge b-gry">下書き</span>' : '<span class="badge b-red">未</span>'}</td><td>${v ? v.line || 0 : '-'}</td><td>${v ? v.tel || 0 : '-'}</td><td>${v ? v.offsite || 0 : '-'}</td><td>${v ? v.newVisit || 0 : '-'}</td><td>${v ? v.shimei || 0 : '-'}</td>${isAdmin() ? `<td><button class="btn ghost sm" data-a="rep" data-h="${c.id}" data-d="${d}" data-b="daily">${v ? '修正' : '入力'}</button></td>` : ''}</tr>`; }).join('')}</table></div>` : empty('対象のキャストがいません')}</div>`;
+}
+
+/* ---------- GOALS ---------- */
+async function vGoals(){
+  const ym = S.ym; await loadGoals(ym, true);
+  const cs = isAdmin() || S.scopeAll ? castList().filter(isTracked) : scopeCasts();
+  return `<h1 class="pt">目標設定</h1>${scopeToggle()}${monthBar(ym)}
+  <div class="note" style="margin-bottom:10px">空欄は「目標なし」です。数字は月間の目標です。</div>
+  ${cs.length ? cs.map(c => { const g = goalOf(ym, c.id); return `<div class="card" data-gh="${c.id}"><b>${esc(c.name)}</b><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px">${GOAL_KEYS.map(([k, l]) => `<div><div class="note">${l}</div><input type="number" inputmode="numeric" min="0" data-gk="${k}" value="${g[k] || ''}"></div>`).join('')}</div></div>`; }).join('') + `<div class="sv"><div class="btnrow"><button class="btn ghost" data-a="goalCopy">前月の目標をコピー</button><button class="btn" data-a="goalSaveAll">まとめて保存</button></div></div>` : empty('対象のキャストがいません')}`;
+}
+function goalSheet(hex){
+  const ym = S.ym === ymOf(S.ref) ? S.ym : ymOf(S.ref), g = goalOf(ymOf(S.ref), hex);
+  openSheet(`<h1 class="pt">${esc(castName(hex))}の個人目標(${ymlab(ymOf(S.ref))})</h1><div id="gs" data-h="${hex}" data-ym="${ymOf(S.ref)}">
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">${GOAL_KEYS.map(([k, l]) => `<div><div class="note">${l}</div><input type="number" inputmode="numeric" min="0" id="g_${k}" value="${g[k] || ''}"></div>`).join('')}</div>
+  <label class="f">一言メモ(本人にも表示されます)</label><textarea id="g_note">${esc(g.note || '')}</textarea>
+  <div class="err" id="g_err"></div><div class="btnrow" style="margin-top:12px"><button class="btn ghost" data-a="sheetClose">閉じる</button><button class="btn" data-a="goalSave">保存</button></div></div>`);
+}
+async function goalWrite(ym, hex, targets, note){
+  const o = { ym, owner: hex, targets, by: S.me.hex || 'admin', at: Date.now() }; if (note != null) o.note = note;
+  await B.set('mg_goals', ym + '_' + hex, o, true);
+  S.goals[ym] = S.goals[ym] || { _t: Date.now() }; S.goals[ym][hex] = Object.assign({}, S.goals[ym][hex] || {}, o);
+}
+
+/* ---------- CASTS (キャスト一覧・管理) ---------- */
+async function vCasts(){
+  await loadCasts();
+  if (isAdmin() && !S.members) { try { S.members = await B.members(); } catch (e) { S.members = []; } }
+  const today = bizDate(); await loadReports([ymOf(today)]);
+  const all = castList(), shown = all.filter(c => S.showQuit || c.active !== false);
+  const opName = (c) => c.operator && S.casts[c.operator] ? S.casts[c.operator].name : '';
+  return `<h1 class="pt">キャスト管理</h1>
+  ${isAdmin() ? `<div class="btnrow" style="margin-bottom:12px"><button class="btn" data-a="castNew">＋ キャスト追加</button><button class="btn ghost" data-a="importSales">売上アプリから取り込む</button></div>` : ''}
+  ${all.length ? '' : empty('キャストがまだ登録されていません', isAdmin() ? '「売上アプリから取り込む」で、売上アプリの従業員をまとめて登録できます。' : '管理者が登録すると表示されます。')}
+  ${shown.length ? `<div class="card"><div class="list">${shown.map(c => { const rep = ((S.R[c.id] || {})[today]) || {}; const m = agg(c.id, rangeOf('month', today)); const reg = !isAdmin() || !S.members ? '' : S.members.includes(c.id) ? '' : '<span class="badge b-gry">未登録</span>'; return `<div class="it" data-a="cast" data-v="${c.id}" style="cursor:pointer">${avatar(c)}<div class="grow"><div class="nm">${esc(c.name)} ${c.role === 'operator' ? '<span class="badge b-blu">運営者</span>' : ''} ${c.active === false ? '<span class="badge b-gry">退店</span>' : ''} ${reg}</div><div class="sub">${esc(c.title || '役職なし')}${opName(c) ? '・担当 ' + esc(opName(c)) : ''}</div></div><div style="text-align:right"><div class="note">今月 新規${m.newVisit} 指名${m.shimei}</div>${isTracked(c) ? (rep.submitted ? '<span class="badge b-grn">本日提出</span>' : '<span class="badge b-red">本日未提出</span>') : ''}</div></div>`; }).join('')}</div></div>` : ''}
+  ${all.some(c => c.active === false) ? `<button class="btn ghost sm" data-a="toggleQuit">${S.showQuit ? '退店した人を隠す' : '退店した人も表示'}</button>` : ''}`;
+}
+let pendingPhoto = null;
+function castSheet(hex){
+  const c = hex ? S.casts[hex] : {}; pendingPhoto = c.photo || null;
+  openSheet(`<h1 class="pt">${hex ? 'プロフィール編集' : 'キャスト追加'}</h1><div id="cs" data-h="${hex || ''}">
+  <label class="f" style="margin-top:0">名前${hex ? '(変更不可)' : ''}</label><input type="text" id="k_name" value="${esc(c.name || '')}" ${hex ? 'disabled' : ''} placeholder="売上アプリと同じ表記">
+  <label class="f">写真</label><div style="display:flex;gap:12px;align-items:center"><div id="k_av">${avatar(c, 'lg')}</div><input type="file" accept="image/*" id="k_photo"></div>
+  <label class="f">区分</label><select id="k_role">${sopt([['cast', 'キャスト'], ['operator', '運営者']], c.role || 'cast')}</select>
+  <label class="f">役職(なければ空欄)</label><input type="text" id="k_title" value="${esc(c.title || '')}">
+  <label class="f">入店日</label><input type="date" id="k_join" value="${c.joinDate || ''}">
+  <label class="f">担当運営者</label><select id="k_op">${sopt([['', '未設定']].concat(operators().filter(o => o.id !== hex).map(o => [o.id, o.name])), c.operator || '')}</select>
+  <div style="margin-top:12px">
+  <label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="k_track" ${(c.track != null ? c.track : (c.role || 'cast') !== 'operator') ? 'checked' : ''}> 営業報告の集計対象にする</label>
+  <label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="k_rot" ${(c.rot != null ? c.rot : (c.role || 'cast') !== 'operator') ? 'checked' : ''}> 付け回し評価の対象にする</label>
+  <label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="k_nur" ${c.nurture ? 'checked' : ''}> 育成枠として扱う(入店が浅い人など)</label>
+  <label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="k_act" ${c.active === false ? '' : 'checked'}> 在籍中</label></div>
+  <div class="err" id="k_err"></div><div class="btnrow" style="margin-top:12px"><button class="btn ghost" data-a="sheetClose">閉じる</button><button class="btn" data-a="castSave">保存</button></div></div>`);
+}
+function resizePhoto(file){
+  return new Promise((res, rej) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => { const s = 160, cv = document.createElement('canvas'); cv.width = cv.height = s; const m = Math.min(img.width, img.height), ctx = cv.getContext('2d'); ctx.drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, s, s); URL.revokeObjectURL(url); res(cv.toDataURL('image/jpeg', 0.72)); };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('img')); }; img.src = url;
+  });
+}
+async function castSave(){
+  const er = $('#k_err'); er.textContent = '';
+  const cur = $('#cs').dataset.h, name = cur ? S.casts[cur].name : val('k_name').trim();
+  if (!name) { er.textContent = '名前を入力してください'; return; }
+  const hex = cur || hexOf(name);
+  if (!cur && S.casts[hex]) { er.textContent = 'この名前はすでに登録されています'; return; }
+  const op = val('k_op'), role = val('k_role');
+  const o = { name, role, title: val('k_title').trim(), joinDate: val('k_join'), operator: op, opName: op && S.casts[op] ? S.casts[op].name : '', track: $('#k_track').checked, rot: $('#k_rot').checked, nurture: $('#k_nur').checked, active: $('#k_act').checked, updatedAt: Date.now() };
+  if (pendingPhoto) o.photo = pendingPhoto;
+  if (!cur) o.createdAt = Date.now();
+  try { await B.set('mg_cast', hex, o, true); S.casts[hex] = Object.assign({}, S.casts[hex] || {}, o, { id: hex }); closeSheet(); toast('保存しました'); refresh(); }
+  catch (e) { er.textContent = '保存できませんでした。通信を確認してください。'; }
+}
+async function importSales(){
+  const ms = await salesMonths(); if (!ms.length) { toast('売上アプリのデータがまだありません'); return; }
+  const per = await getFullSales(ms[ms.length - 1]); if (!per) { toast('売上データを読めませんでした'); return; }
+  const add = Object.keys(per).filter(h => !S.casts[h]); if (!add.length) { toast('取り込める新しい人はいません'); return; }
+  if (!confirm(`売上アプリ(${ymlab(ms[ms.length - 1])})の従業員のうち、まだ登録されていない${add.length}名を追加します。運営者の人は後で「プロフィール編集」で区分を変えてください。`)) return;
+  const items = add.map(h => ({ col: 'mg_cast', id: h, data: { name: per[h].name, role: 'cast', title: '', joinDate: '', operator: '', opName: '', track: true, rot: true, nurture: false, active: true, createdAt: Date.now(), updatedAt: Date.now() } }));
+  try { await B.setMany(items); await loadCasts(); toast(add.length + '名を追加しました'); refresh(); } catch (e) { toast('取り込めませんでした。通信を確認してください'); }
+}
+
+/* ---------- EXPORT / BACKUP / SETTINGS / CFG / MENU ---------- */
+async function vExport(){
+  const ym = S.ym;
+  return `<h1 class="pt">データ出力(CSV)</h1>${monthBar(ym)}
+  <div class="card"><div class="menu">
+  <div class="it" data-a="exp" data-v="reports"><span class="ic">▤</span>営業報告(日別) ${ymlab(ym)}<span class="ar">›</span></div>
+  <div class="it" data-a="exp" data-v="kpi"><span class="ic">◈</span>個人別 月間KPI ${ymlab(ym)}<span class="ar">›</span></div>
+  <div class="it" data-a="exp" data-v="coach"><span class="ic">✎</span>指導記録(全期間)<span class="ar">›</span></div>
+  <div class="it" data-a="exp" data-v="rot"><span class="ic">⇄</span>付け回し評価 ${ymlab(ym)}<span class="ar">›</span></div>
+  ${isAdmin() ? `<div class="it" data-a="exp" data-v="sales"><span class="ic">¥</span>個人別売上 ${ymlab(ym)}<span class="ar">›</span></div>` : ''}</div></div>
+  <div class="note">Excelでそのまま開けます(UTF-8)。</div>`;
+}
+async function doExport(kind){
+  const ym = S.ym, cs = castList(); let rows = [], name = '';
+  if (kind === 'reports') {
+    await loadReports([ym], true); name = `営業報告_${ym}`;
+    rows.push(['日付', 'キャスト', '提出', ...FIELDS.map(f => f.l), '断られた理由', '今日できたこと', '今日の課題', '明日の営業目標']);
+    cs.forEach(c => Object.keys(S.R[c.id] || {}).filter(k => k.startsWith(ym)).sort().forEach(k => { const d = S.R[c.id][k]; rows.push([k, c.name, d.submitted ? '提出' : '下書き', ...FIELDS.map(f => d[f.k] || 0), d.rejReason || '', d.did || '', d.issue || '', d.tomorrow || '']); }));
+  } else if (kind === 'kpi') {
+    await loadReports([ym], true); await loadGoals(ym, true); name = `月間KPI_${ym}`;
+    rows.push(['キャスト', '提出日数', ...FIELDS.map(f => f.l), 'LINE→来店率(%)', ...GOAL_KEYS.map(([, l]) => '目標:' + l), '目標達成率(%)']);
+    cs.filter(isTracked).forEach(c => { const a = agg(c.id, rangeOf('month', ym + '-01')), ac = achieve(c.id, ym), g = goalOf(ym, c.id); rows.push([c.name, a.n, ...FIELDS.map(f => a[f.k]), a.line ? Math.round(a.visitActual / a.line * 100) : '', ...GOAL_KEYS.map(([k]) => g[k] || ''), ac.rate == null ? '' : ac.rate]); });
+  } else if (kind === 'coach') {
+    const all = await B.list('mg_coach'); name = '指導記録';
+    rows.push(['指導日', 'キャスト', '担当運営者', '課題', '指導内容', '改善目標', '改善期限', '進捗', '改善結果', '完了日']);
+    all.sort((a, b) => (a.date || '').localeCompare(b.date || '')).forEach(x => rows.push([x.date, x.castName, x.operatorName, x.issue, x.content, x.goal, x.due, ST[x.status] || '', x.result, x.doneAt || '']));
+  } else if (kind === 'rot') {
+    await loadRot(ym); name = `付け回し評価_${ym}`;
+    rows.push(['キャスト', ...ROT_ITEMS.map(([, l]) => l), '固定/除外']);
+    cs.forEach(c => { const rt = (S.rot[ym] || {})[c.id]; if (rt) rows.push([c.name, ...ROT_ITEMS.map(([k]) => rt.checks && rt.checks[k] !== undefined ? (rt.checks[k] ? '○' : '×') : '自動'), rt.pin === 1 ? '固定' : rt.pin === -1 ? '除外' : '']); });
+  } else if (kind === 'sales') {
+    const per = await getFullSales(ym); name = `個人別売上_${ym}`;
+    rows.push(['名前', '小計', '総売', '本数', '同伴', '新規', '飲み直し', 'ヘルプ指名', '送り', '出勤日数']);
+    Object.values(per || {}).sort((a, b) => b.sub - a.sub).forEach(r => rows.push([r.name, r.sub, r.gross, r.shimei, r.douhan, r.shinki, r.nomi, r.help, r.okuri, r.days]));
+  }
+  if (rows.length <= 1) { toast('出力するデータがありません'); return; }
+  downloadFile(name + '.csv', toCsv(rows)); toast('CSVを保存しました');
+}
+async function vBackup(){
+  const last = lsGet('x8mg_lastbackup');
+  const old = !last || (Date.now() - Number(last)) > 35 * 864e5;
+  return `<h1 class="pt">バックアップ</h1>
+  <div class="card ${old ? 'warn' : ''}"><h2>全データの保存</h2><div class="note" style="margin-bottom:10px">営業報告・指導・目標・付け回し・キャスト情報をまとめて1つのファイルに保存します。月に1回の保存をおすすめします。</div>
+  <div class="note" style="margin-bottom:10px">最後の保存: ${last ? new Date(Number(last)).toLocaleDateString('ja-JP') : 'まだ保存していません'}</div><button class="btn" data-a="bkExport">バックアップを保存する</button></div>
+  <div class="card"><h2>復元</h2><div class="note" style="margin-bottom:10px">保存したファイルを選ぶと、その内容を書き戻します(同じ場所のデータは上書きされます)。</div><input type="file" accept=".json,application/json" id="bkFile"><button class="btn ghost" style="margin-top:10px" data-a="bkImport">このファイルで復元する</button></div>`;
+}
+async function bkExport(){
+  const cols = {}; let n = 0;
+  for (const c of MG_COLS) { cols[c] = await B.list(c); n += cols[c].length; }
+  const j = JSON.stringify({ app: 'x8mg', version: 1, at: new Date().toISOString(), cols });
+  const b = new Blob([j], { type: 'application/json' }); const a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = 'x8-eigyo-backup-' + bizDate() + '.json'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  lsSet('x8mg_lastbackup', String(Date.now())); toast(n + '件を保存しました'); refresh();
+}
+async function bkImport(){
+  const f = ($('#bkFile') || {}).files && $('#bkFile').files[0]; if (!f) { toast('ファイルを選んでください'); return; }
+  let j; try { j = JSON.parse(await f.text()); } catch (e) { toast('ファイルを読めませんでした'); return; }
+  if (!j || j.app !== 'x8mg' || !j.cols) { toast('このアプリのバックアップではありません'); return; }
+  const items = []; MG_COLS.forEach(c => (j.cols[c] || []).forEach(d => { const id = d.id; const data = Object.assign({}, d); delete data.id; items.push({ col: c, id, data }); }));
+  if (!confirm(items.length + '件のデータを書き戻します。よろしいですか?')) return;
+  try { await B.setMany(items); S.loadedR = {}; S.goals = {}; S.coachAt = 0; await loadCasts(); toast('復元しました'); refresh(); } catch (e) { toast('復元できませんでした'); }
+}
+async function vSettings(){
+  const adm = isAdmin();
+  return `<h1 class="pt">設定</h1>
+  <div class="card"><h2>${adm ? '管理者パスワードの変更' : 'パスワードの変更'}</h2>
+  ${adm ? '<label class="f" style="margin-top:0">今のパスワード</label><input type="password" id="pw0" autocomplete="current-password">' : ''}
+  <label class="f" ${adm ? '' : 'style="margin-top:0"'}>新しいパスワード(6文字以上)</label><input type="password" id="pw1" autocomplete="new-password"><div class="err" id="pwErr"></div>
+  <button class="btn" style="margin-top:10px" data-a="pwSave">変更する</button></div>
+  <div class="card"><button class="btn ghost" data-a="logout">ログアウト</button></div>
+  <div class="note" style="text-align:center">X8 営業管理 ${BUILD}</div>`;
+}
+async function vCfg(){
+  const c = S.cfg, th = c.th;
+  return `<h1 class="pt">警告・付け回しの設定</h1><div class="card" id="cfgf">
+  <label class="f" style="margin-top:0">「成果につながっていない」警告: 直近7日のLINE交換が何件以上で来店0なら表示</label><input type="number" id="cf_alert" value="${c.alertLine}">
+  <h2 style="margin-top:18px">付け回しの人数</h2>
+  <label class="f" style="margin-top:0">初回1人あたりの目安人数</label><input type="number" id="cf_pool" value="${c.poolSize}">
+  <label class="f">役職の最低人数</label><input type="number" id="cf_role" value="${c.roleMin}">
+  <label class="f">非役職の最低人数</label><input type="number" id="cf_non" value="${c.nonMin}">
+  <label class="f">育成枠とみなす入店からの日数</label><input type="number" id="cf_nd" value="${c.nurtureDays}">
+  <label class="f">育成枠の最低人数</label><input type="number" id="cf_nm" value="${c.nurtureMin}">
+  <h2 style="margin-top:18px">自動判定の目安(直近14日)</h2>
+  <label class="f" style="margin-top:0">SNS投稿の合計回数</label><input type="number" id="cf_sns" value="${th.sns}">
+  <label class="f">新規への行動(新規来店＋来店予定＋見込み)</label><input type="number" id="cf_new" value="${th.new}">
+  <label class="f">LINE交換人数</label><input type="number" id="cf_line" value="${th.line}">
+  <label class="f">電話＋店外営業の件数</label><input type="number" id="cf_tel" value="${th.tel}">
+  <label class="f">指名卓＋来店予定</label><input type="number" id="cf_shi" value="${th.shimei}">
+  <div class="err" id="cfErr"></div><button class="btn" style="margin-top:12px" data-a="cfgSave">保存</button></div>`;
+}
+async function vMenu(){
+  const adm = isAdmin();
+  const it = (k, ic, l) => `<div class="it" data-a="tab" data-v="${k}"><span class="ic">${ic}</span>${l}<span class="ar">›</span></div>`;
+  return `<h1 class="pt">メニュー</h1><div class="card"><div class="menu">
+  ${it('daily', '▤', '日別管理(提出状況)')}${it('rank', '♛', 'ランキング')}${it('goals', '◎', '目標設定')}
+  ${S.me.role === 'operator' && S.casts[S.me.hex] && isTracked(S.casts[S.me.hex]) ? it('report', '✎', '自分の営業報告を入力') : ''}
+  ${it('sales', '¥', adm ? '全員の売上' : '自分の売上')}
+  ${it('export', '⇩', 'データ出力(CSV)')}${adm ? it('backup', '⛁', 'バックアップ・復元') + it('cfg', '⚙', '警告・付け回しの設定') : ''}
+  ${it('settings', '☰', '設定・ログアウト')}</div></div>`;
+}
+
+/* ---------- shell / router ---------- */
+const VIEWS = {
+  home: () => isStaff() ? vHomeStaff() : vHomeCast(), casts: vCasts, cast: vCast, me: () => { S.castHex = null; return vCast(); },
+  report: vReport, sales: vSales, coach: vCoach, rot: vRot, menu: vMenu, daily: vDaily, rank: vRank, goals: vGoals,
+  export: vExport, backup: vBackup, settings: vSettings, cfg: vCfg
+};
+const tabsFor = () => S.me.role === 'cast'
+  ? [['home', 'ホーム', '◈'], ['report', '報告', '✎'], ['me', '実績', '▤'], ['sales', '売上', '¥'], ['coach', '指導', '☆']]
+  : [['home', 'ホーム', '◈'], ['casts', 'キャスト', '♟'], ['coach', '指導', '✎'], ['rot', '付け回し', '⇄'], ['menu', 'その他', '☰']];
+function navKey(){
+  if (S.me.role === 'cast') return S.tab;
+  return ['home', 'casts', 'coach', 'rot', 'menu'].includes(S.tab) ? S.tab : S.tab === 'cast' ? 'casts' : 'menu';
+}
+const roleLabel = () => S.me.role === 'admin' ? '管理者' : S.me.role === 'operator' ? '運営者' : 'キャスト';
+function shellHtml(){
+  const k = navKey();
+  return `<header class="top"><div class="wrap"><div class="top-row"><div class="brand">X8<small>営業管理</small></div>
+  <div style="display:flex;align-items:center;gap:8px"><div class="who"><b>${esc(S.me.name)}</b><br>${roleLabel()}</div>
+  <button class="btn ghost sm" data-a="reload" aria-label="更新">↻</button><button class="btn ghost sm" data-a="tab" data-v="settings" aria-label="設定">⚙</button></div></div></div></header>
+  <main class="wrap" id="main"><div class="spin">読み込み中…</div></main>
+  <nav class="bot"><div class="in">${tabsFor().map(([t, l, i]) => `<button class="${k === t ? 'on' : ''}" data-a="tab" data-v="${t}"><span class="ic">${i}</span>${l}</button>`).join('')}</div></nav>`;
+}
+function errView(e){
+  const c = e && e.code || '';
+  if (c === 'permission-denied') return empty('権限がありません', isAdmin() ? 'Firestoreのルールにこのアプリ用の追記がまだの可能性があります(firestore-rules-add.txt を貼り付けてください)。' : '管理者に確認してください。');
+  if (c === 'unavailable' || /offline|network/i.test(String(e && e.message))) return empty('通信できません', '電波の良い所で ↻ を押してください。入力途中のデータは端末に残ります。');
+  return empty('読み込めませんでした', esc(String(e && e.message || e)) + '<div style="margin-top:12px"><button class="btn ghost sm" data-a="reload">もう一度読み込む</button></div>');
+}
+let rSeq = 0;
+async function refresh(){
+  const m = $('#main'); if (!m) return; const seq = ++rSeq, y = window.scrollY; let html;
+  try { html = await VIEWS[S.tab](); } catch (e) { html = errView(e); }
+  if (seq !== rSeq) return; m.innerHTML = html; window.scrollTo(0, y);
+}
+function go(tab, keepScroll){ if (!S.noFlush && S.tab === 'report' && tab !== 'report' && document.getElementById('repform') && !saving) saveRep(false); S.noFlush = false; S.tab = tab; $('#root').innerHTML = shellHtml(); if (!keepScroll) window.scrollTo(0, 0); refresh(); }
+
+/* ---------- login ---------- */
+const L = { mode: 'member' };
+function renderLogin(msg){
+  S.me = null;
+  const m = L.mode, nm = lsGet('x8mg_name') || '';
+  $('#root').innerHTML = `<div class="login"><div class="logo">X8</div><div class="sub">SALES MANAGEMENT</div>
+  <div class="seg">${[['member', 'ログイン'], ['reg', '初めての登録'], ['admin', '管理者']].map(([k, l]) => `<button class="${m === k ? 'on' : ''}" data-a="lgmode" data-v="${k}">${l}</button>`).join('')}</div>
+  <div class="box">
+  ${m !== 'admin' ? `<label class="f" style="margin-top:0">お名前(売上アプリと同じ名前)</label><input type="text" id="lg_name" autocomplete="username" value="${esc(nm)}">` : ''}
+  ${m === 'reg' ? `<label class="f">登録コード(運営者からもらったもの)</label><input type="text" id="lg_code" autocapitalize="characters" autocomplete="off">` : ''}
+  <label class="f" ${m === 'admin' ? 'style="margin-top:0"' : ''}>${m === 'reg' ? '自分で決めるパスワード(6文字以上)' : 'パスワード'}</label><input type="password" id="lg_pw" autocomplete="${m === 'reg' ? 'new-password' : 'current-password'}">
+  <div class="err" id="lgErr">${msg || ''}</div>
+  <button class="btn" style="margin-top:8px" data-a="doLogin">${m === 'reg' ? '登録して始める' : 'ログイン'}</button>
+  ${m === 'member' ? '<div class="note" style="margin-top:14px;text-align:center">売上アプリの個人ページ(me.html)と同じ名前・パスワードで入れます。</div>' : ''}</div></div>`;
+}
+function authMsg(e){
+  const c = e && e.code || '';
+  if (c === 'bad-code') return '登録コードが違います。運営者に確認してください。';
+  if (/invalid-credential|wrong-password|user-not-found|invalid-email/.test(c)) return 'お名前またはパスワードが違います。初めての人は「初めての登録」から入ってください。';
+  if (c === 'auth/email-already-in-use') return 'この名前はすでに登録されています。「ログイン」から入ってください。';
+  if (c === 'auth/weak-password') return 'パスワードは6文字以上にしてください。';
+  if (/too-many/.test(c)) return '何度も間違えたため、少し待ってからやり直してください。';
+  if (/network/.test(c)) return '通信できません。電波を確認してください。';
+  return 'うまくいきませんでした。(' + c + ')';
+}
+async function doLogin(){
+  const m = L.mode, er = $('#lgErr'); er.textContent = '';
+  const name = m === 'admin' ? '' : val('lg_name').trim(), pw = val('lg_pw'), code = val('lg_code');
+  if (m !== 'admin' && !name) { er.textContent = 'お名前を入れてください'; return; }
+  if (!pw) { er.textContent = 'パスワードを入れてください'; return; }
+  if (m === 'reg' && !code.trim()) { er.textContent = '登録コードを入れてください'; return; }
+  if (m === 'reg' && pw.length < 6) { er.textContent = 'パスワードは6文字以上にしてください'; return; }
+  const b = document.querySelector('[data-a=doLogin]'); b.disabled = true;
+  try { if (m === 'reg') await B.register(name, code, pw); else await B.login(m === 'admin', name, pw); if (name) lsSet('x8mg_name', name); }
+  catch (e) { er.textContent = authMsg(e); b.disabled = false; }
+}
+async function setupUser(info){
+  $('#root').innerHTML = '<div class="spin">読み込み中…</div>';
+  try {
+    if (info.role === 'admin') S.me = { role: 'admin', name: '管理者' };
+    else {
+      try { await B.linkUid(info.hex); } catch (e) { if (e && e.code === 'permission-denied') { $('#root').innerHTML = `<div class="login"><div class="logo">X8</div><div class="note" style="margin:24px 0;text-align:left">初期設定がまだ終わっていません。管理者に「Firestoreのルール追記」を依頼してください。</div><button class="btn ghost" data-a="logout">ログアウト</button></div>`; return; } throw e; }
+      const c = await B.get('mg_cast', info.hex);
+      if (!c) { $('#root').innerHTML = `<div class="login"><div class="logo">X8</div><div class="note" style="margin:24px 0;text-align:left">ログインできました。<br>管理者があなたをキャストとして登録すると、使えるようになります。</div><button class="btn ghost" data-a="logout">ログアウト</button></div>`; return; }
+      S.me = { role: c.role === 'operator' ? 'operator' : 'cast', hex: info.hex, name: c.name };
+    }
+    await loadCasts(); await loadMeta();
+    S.ref = bizDate(); S.ym = ymOf(S.ref); S.castHex = null; S.rep = null;
+    go('home');
+  } catch (e) { $('#root').innerHTML = `<div class="login"><div class="logo">X8</div><div style="margin:20px 0">${errView(e)}</div><button class="btn ghost" data-a="logout">ログアウト</button></div>`; }
+}
+function resetState(){ S.casts = {}; S.R = {}; S.loadedR = {}; S.goals = {}; S.coach = []; S.coachAt = 0; S.rot = {}; S.members = null; S.salesMonths = null; S.me = null; S.sm = null; Object.keys(salesCache).forEach(k => delete salesCache[k]); }
+
+/* ---------- actions ---------- */
+async function afterWrite(){ S.coachAt = 0; }
+const A = {
+  tab(el){ const v = el.dataset.v; S.ref = bizDate(); if (v === 'report') { S.rep = null; S.back = null; } if (v === 'home') S.period = S.period || 'day'; go(v); },
+  reload(){ S.loadedR = {}; S.goals = {}; S.coachAt = 0; S.members = null; S.salesMonths = null; Object.keys(salesCache).forEach(k => delete salesCache[k]); loadCasts().then(refresh).catch(refresh); },
+  per(el){ S.period = el.dataset.v; refresh(); },
+  step(el){ S.ref = stepRef(S.period, S.ref, Number(el.dataset.v)); refresh(); },
+  mstep(el){ S.ym = addMonths(S.ym, Number(el.dataset.v)); refresh(); },
+  cmstep(el){ S.coachF.ym = addMonths(S.coachF.ym || ymOf(bizDate()), Number(el.dataset.v)); refresh(); },
+  smstep(el){ const ms = S.salesMonths || []; const i = ms.indexOf(S.sm) + Number(el.dataset.v); if (ms[i]) { S.sm = ms[i]; refresh(); } },
+  dstep(el){ S.ref = addDays(S.ref, Number(el.dataset.v)); refresh(); },
+  scope(el){ S.scopeAll = el.dataset.v === '1'; refresh(); },
+  cast(el){ S.backTab = S.tab === 'cast' ? S.backTab : S.tab; S.castHex = el.dataset.v; go('cast'); },
+  repback(){ const b = S.back || 'home'; S.back = null; go(b); },
+  back(){ go(S.backTab && S.backTab !== 'cast' ? S.backTab : 'casts'); },
+  rep(el){ S.rep = { hex: el.dataset.h, ymd: el.dataset.d }; S.back = el.dataset.b === 'cast' ? 'cast' : el.dataset.b === 'daily' ? 'daily' : S.tab; go('report'); },
+  async repdate(el){ if (!/^\d{4}-\d{2}-\d{2}$/.test(el.value)) return; await saveRep(false); S.rep.ymd = el.value; refresh(); },
+  repsave(){ saveRep(true); },
+  async repdel(){ const R = S.rep; if (!confirm(dlab(R.ymd) + ' の ' + castName(R.hex) + ' の報告を削除します。よろしいですか?')) return; try { await B.delDay('mg_reports', ymOf(R.ymd) + '_' + R.hex, R.ymd.slice(8)); if (S.R[R.hex]) delete S.R[R.hex][R.ymd]; lsDel(draftKey(R.hex, R.ymd)); clearTimeout(autoT); S.noFlush = true; const b = S.back; S.back = null; toast('削除しました'); go(b || 'daily'); } catch (e) { toast('削除できませんでした'); } },
+  st(el){ const i = $('#f_' + el.dataset.k); i.value = Math.max(0, Math.min(999, (Number(i.value) || 0) + Number(el.dataset.d))); scheduleAuto(); },
+  rej(el){ el.classList.toggle('on'); scheduleAuto(); },
+  lgmode(el){ L.mode = el.dataset.v; renderLogin(); },
+  doLogin(){ doLogin(); },
+  async logout(){ try { await B.logout(); } catch (e) {} resetState(); renderLogin(); },
+  sheetClose(){ closeSheet(); },
+  coachNew(){ coachSheet(null, { date: bizDate() }); },
+  coachFrom(el){ const h = el.dataset.h, t = bizDate(); const p = { castHex: h, date: t }; if (el.dataset.t === 'nores') { const a = agg(h, { from: addDays(t, -6), to: t }); p.issue = `LINE交換${a.line}件に対し来店0件(直近7日)`; p.goal = 'LINE交換から来店につながる営業に見直す'; } coachSheet(null, p); },
+  async coachEdit(el){ let x = S.coach.find(v => v.id === el.dataset.v); if (!x) x = await B.get('mg_coach', el.dataset.v); if (x) coachSheet(x); },
+  coachSave(){ coachSave(); },
+  async coachNext(el){ const x = S.coach.find(v => v.id === el.dataset.v); if (!x) return; const st = Math.min(2, (x.status || 0) + 1); try { await B.set('mg_coach', x.id, { status: st, updatedAt: Date.now(), doneAt: st === 2 ? bizDate() : '' }, true); S.coachAt = 0; toast(ST[st] + 'にしました'); refresh(); } catch (e) { toast('更新できませんでした'); } },
+  async coachDel(el){ if (!confirm('この指導記録を削除します。よろしいですか?')) return; try { await B.del('mg_coach', el.dataset.v); S.coachAt = 0; closeSheet(); toast('削除しました'); refresh(); } catch (e) { toast('削除できませんでした'); } },
+  cf(el){ S.coachF[el.dataset.k] = el.dataset.v; refresh(); },
+  async rotck(el){ const h = el.dataset.h, k = el.dataset.k, v = el.dataset.v === '1'; const cur = ((S.rot[S.ym] || {})[h] || {}).checks || {}; const checks = Object.assign({}, cur); if (checks[k] === v) delete checks[k]; else checks[k] = v; try { await rotSet(h, { checks }); refresh(); } catch (e) { toast('保存できませんでした'); } },
+  async rotpin(el){ const h = el.dataset.h, cur = ((S.rot[S.ym] || {})[h] || {}).pin || 0; const next = cur === 0 ? 1 : cur === 1 ? -1 : 0; try { await rotSet(h, { pin: next }); refresh(); } catch (e) { toast('保存できませんでした'); } },
+  rk(el){ S.rk = el.dataset.v; refresh(); },
+  rkp(el){ S.rkPeriod = el.dataset.v; refresh(); },
+  rkstep(el){ S.ref = stepRef(S.rkPeriod, S.ref, Number(el.dataset.v)); refresh(); },
+  goalEdit(el){ goalSheet(el.dataset.v); },
+  async goalSave(){ const d = $('#gs'); const t = {}; GOAL_KEYS.forEach(([k]) => { const n = num(val('g_' + k), 99999); if (n) t[k] = n; }); try { await goalWrite(d.dataset.ym, d.dataset.h, t, val('g_note').trim().slice(0, 200)); closeSheet(); toast('保存しました'); refresh(); } catch (e) { $('#g_err').textContent = '保存できませんでした。通信を確認してください。'; } },
+  async goalSaveAll(){ const ym = S.ym; let n = 0; try { for (const card of document.querySelectorAll('[data-gh]')) { const t = {}; card.querySelectorAll('[data-gk]').forEach(i => { const v = num(i.value, 99999); if (v) t[i.dataset.gk] = v; }); const old = goalOf(ym, card.dataset.gh); const same = GOAL_KEYS.every(([k]) => (Number(old[k]) || 0) === (t[k] || 0)); if (!same) { await goalWrite(ym, card.dataset.gh, t, null); n++; } } toast(n ? n + '名分を保存しました' : '変更はありません'); } catch (e) { toast('保存できませんでした。通信を確認してください'); } },
+  async goalCopy(){ const pm = addMonths(S.ym, -1); await loadGoals(pm, true); let n = 0; document.querySelectorAll('[data-gh]').forEach(card => { const g = goalOf(pm, card.dataset.gh); card.querySelectorAll('[data-gk]').forEach(i => { if (!i.value && g[i.dataset.gk]) { i.value = g[i.dataset.gk]; n++; } }); }); toast(n ? '前月の目標を入れました。「まとめて保存」を押してください' : 'コピーできる目標がありません'); },
+  issueEdit(el){ const c = S.casts[el.dataset.v]; openSheet(`<h1 class="pt">${esc(c.name)}の現在の課題</h1><textarea id="is_t" style="min-height:120px">${esc(c.issue || '')}</textarea><div class="err" id="is_e"></div><div class="btnrow" style="margin-top:12px"><button class="btn ghost" data-a="sheetClose">閉じる</button><button class="btn" data-a="issueSave" data-v="${c.id}">保存</button></div>`); },
+  async issueSave(el){ const h = el.dataset.v, t = val('is_t').trim().slice(0, 400); try { await B.set('mg_cast', h, { issue: t, updatedAt: Date.now() }, true); S.casts[h].issue = t; closeSheet(); toast('保存しました'); refresh(); } catch (e) { $('#is_e').textContent = '保存できませんでした。'; } },
+  castNew(){ castSheet(null); },
+  castEdit(el){ castSheet(el.dataset.v); },
+  castSave(){ castSave(); },
+  importSales(){ importSales(); },
+  toggleQuit(){ S.showQuit = !S.showQuit; refresh(); },
+  async invite(el){ const c = S.casts[el.dataset.v]; try { const code = await B.issueInvite(c.name); const url = location.href.split('#')[0].split('?')[0]; openSheet(`<h1 class="pt">${esc(c.name)}さんの登録コード</h1><div class="card"><div class="big" style="text-align:center;letter-spacing:4px">${esc(code)}</div></div><div class="note">本人に伝えてください。本人はこのアプリ(<b>${esc(url)}</b>)の「初めての登録」で、名前・コード・自分のパスワードを入れます。すでに売上アプリの個人ページに登録済みの人は、同じ名前・パスワードでそのまま入れます。</div><button class="btn ghost" style="margin-top:12px" data-a="sheetClose">閉じる</button>`); } catch (e) { toast('発行できませんでした'); } },
+  exp(el){ doExport(el.dataset.v); },
+  bkExport(){ bkExport(); }, bkImport(){ bkImport(); },
+  async pwSave(){ const er = $('#pwErr'); er.textContent = ''; const n = val('pw1'); if (n.length < 6) { er.textContent = '6文字以上にしてください'; return; } try { if (isAdmin()) await B.setAdminPw(val('pw0'), n); else await B.setPw(n); toast('パスワードを変更しました'); $('#pw1').value = ''; if ($('#pw0')) $('#pw0').value = ''; } catch (e) { er.textContent = /requires-recent/.test(e.code || '') ? '一度ログアウトして入り直してから、もう一度お試しください。' : /wrong|invalid-cred/.test(e.code || '') ? '今のパスワードが違います。' : '変更できませんでした。'; } },
+  async cfgSave(){
+    const g = (id, lo, hi) => Math.max(lo, Math.min(hi, Math.floor(Number(val(id))) || 0));
+    const cfg = { alertLine: g('cf_alert', 1, 999), poolSize: g('cf_pool', 3, 30), roleMin: g('cf_role', 0, 30), nonMin: g('cf_non', 0, 30), nurtureDays: g('cf_nd', 1, 730), nurtureMin: g('cf_nm', 0, 10), th: { sns: g('cf_sns', 0, 999), new: g('cf_new', 0, 999), line: g('cf_line', 0, 999), tel: g('cf_tel', 0, 999), shimei: g('cf_shi', 0, 999) } };
+    try { await B.set('mg_meta', 'app', { cfg, updatedAt: Date.now() }, true); S.cfg = cfg; toast('保存しました'); refresh(); } catch (e) { $('#cfErr').textContent = '保存できませんでした。'; }
+  }
+};
+document.addEventListener('click', (e) => {
+  if (e.target.id === 'sheetbg') { closeSheet(); return; }
+  const el = e.target.closest('[data-a]'); if (!el || el.tagName === 'SELECT' || (el.tagName === 'INPUT' && el.type === 'date')) return;
+  const f = A[el.dataset.a]; if (f) f(el);
+});
+document.addEventListener('change', async (e) => {
+  const t = e.target;
+  if (t.dataset && t.dataset.a === 'cfsel') { S.coachF[t.dataset.k] = t.value; refresh(); }
+  else if (t.dataset && t.dataset.a === 'repdate') A.repdate(t);
+  else if (t.id === 'k_photo' && t.files[0]) { try { pendingPhoto = await resizePhoto(t.files[0]); $('#k_av').innerHTML = avatar({ photo: pendingPhoto, name: '' }, 'lg'); } catch (x) { toast('画像を読み込めませんでした'); } }
+});
+document.addEventListener('input', (e) => { const t = e.target; if (t.closest && t.closest('#repform') && t.id !== 'f_date') scheduleAuto(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.closest && e.target.closest('.login') && e.target.tagName === 'INPUT') doLogin(); });
+window.addEventListener('online', () => toast('通信が戻りました'));
+window.addEventListener('offline', () => toast('通信が切れています。入力は端末に保存されます'));
+
+/* ---------- boot ---------- */
+(async function boot(){
+  try { B = TEST ? makeMemBackend(TEST) : await makeFirebaseBackend(); }
+  catch (e) { $('#root').innerHTML = '<div class="login"><div class="logo">X8</div><div class="note" style="margin:24px 0">アプリを読み込めませんでした。電波を確認して、画面を開き直してください。</div><button class="btn" onclick="location.reload()">開き直す</button></div>'; return; }
+  window.__X8MG = { S, B };
+  B.onAuth((info) => { if (!info) { resetState(); renderLogin(); } else setupUser(info); });
+})();
+</script>
+</body>
+</html>
