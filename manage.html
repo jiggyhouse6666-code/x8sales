@@ -546,7 +546,7 @@ async function getFullSales(ym){
   const d = await B.get('full', ym); let out = null;
   if (d && d.payload) { try {
     const M = JSON.parse(d.payload); const per = {};
-    (M.employees || []).forEach(e => { const rows = []; Object.keys(M.days || {}).forEach(dd => { const r = M.days[dd].rows && M.days[dd].rows[e.id]; if (r) rows.push(r); }); per[hexOf(e.name)] = Object.assign(sumRows(rows), { name: e.name, kind: e.kind }); });
+    (M.employees || []).forEach(e => { const rows = []; Object.keys(M.days || {}).forEach(dd => { const r = M.days[dd].rows && M.days[dd].rows[e.id]; if (r) rows.push(r); }); per[hexOf(e.name)] = Object.assign(sumRows(rows), { name: e.name, kind: e.kind, title: (M.titles && M.titles[e.id]) || '' }); });
     out = per;
   } catch (e) {} }
   return (salesCache[k] = out);
@@ -867,7 +867,7 @@ async function importSales(){ try { await importSales0(); } catch (e) { toast('�
 async function importSales0(){
   const ms = await salesMonths(); if (!ms.length) { toast('売上アプリのデータがまだありません'); return; }
   const per = await getFullSales(ms[ms.length - 1]); if (!per) { toast('売上データを読めませんでした'); return; }
-  const add = Object.keys(per).filter(h => !S.casts[h] && per[h].kind !== 'ops'); if (!add.length) { toast('取り込める新しい人はいません'); return; }
+  const add = Object.keys(per).filter(h => !S.casts[h] && per[h].kind !== 'ops' && !per[h].title); if (!add.length) { toast('取り込める新しい人はいません'); return; }
   S.impList = add.map(h => ({ h, name: per[h].name, ops: per[h].kind === 'ops' })).sort((a, b) => (a.ops ? 1 : 0) - (b.ops ? 1 : 0));
   openSheet(`<h2 style="margin:0 0 6px">追加する従業員を選ぶ</h2><div class="sub" style="margin-bottom:10px">売上アプリ(${esc(ymlab(ms[ms.length - 1]))})の従業員です。追加したい人にチェックして、区分を選んでください。</div>
   <div class="btnrow" style="margin-bottom:8px"><button class="btn ghost" data-a="impAll" data-v="1">全部チェック</button><button class="btn ghost" data-a="impAll" data-v="0">全部外す</button></div>
