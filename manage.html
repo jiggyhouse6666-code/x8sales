@@ -863,15 +863,23 @@ async function castSave(){
   try { await B.set('mg_cast', hex, o, true); S.casts[hex] = Object.assign({}, S.casts[hex] || {}, o, { id: hex }); closeSheet(); toast('保存しました'); refresh(); }
   catch (e) { er.textContent = '保存できませんでした。通信を確認してください。'; }
 }
+const TITLED_SEED = ['るい', 'めい', 'とむ', 'いぶ', 'れい', 'ときな', 'あおい', 'こうや', 'ふく', 'はるの'];
 async function dropTitled(){ try {
-  const ms = await salesMonths(); if (!ms.length) { toast('売上アプリのデータがまだありません'); return; }
-  const per = await getFullSales(ms[ms.length - 1]); if (!per) { toast('売上データを読めませんでした'); return; }
-  if (!Object.values(per).some(x => x.title)) { toast('役職の情報がありません。売上アプリでExcelを取り込み直してください'); return; }
-  const hit = castList().filter(c => c.active !== false && per[c.id] && (per[c.id].kind === 'ops' || per[c.id].title));
-  if (!hit.length) { toast('外す人はいません'); return; }
-  if (!(await askOk('次の' + hit.length + '名を一覧から外します(退店扱い・あとで戻せます)。\n\n' + hit.map(c => c.name).join('、')))) return;
+  let per = null; try { const ms = await salesMonths(); if (ms.length) per = await getFullSales(ms[ms.length - 1]); } catch (e) {}
+  const seed = new Set(TITLED_SEED.map(hexOf));
+  const isT = (c) => (per && per[c.id] && (per[c.id].kind === 'ops' || per[c.id].title)) || seed.has(c.id) || c.role === 'operator' || !!c.title;
+  const all = castList().filter(c => c.active !== false);
+  if (!all.length) { toast('キャストがいません'); return; }
+  S.dropList = all.map(c => c.id);
+  openSheet(`<h2 style="margin:0 0 6px">一覧から外す人を選ぶ</h2><div class="sub" style="margin-bottom:10px">役職者に最初からチェックを入れています。違う人は外して、「チェックした人を外す」を押してください。(退店扱いで、あとで戻せます)</div>
+  ${all.map((c, i) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #2a2720"><input type="checkbox" id="dpc${i}" style="width:22px;height:22px" ${isT(c) ? 'checked' : ''}><label for="dpc${i}" style="flex:1;font-size:15px">${esc(c.name)}</label></div>`).join('')}
+  <div class="btnrow" style="margin-top:14px"><button class="btn" data-a="dropGo">チェックした人を外す</button><button class="btn ghost" data-a="sheetClose">閉じる</button></div>`);
+} catch (e) { toast('エラー: ' + ((e && (e.code || e.message)) || e)); } }
+async function dropGo(){ try {
+  const hit = (S.dropList || []).map((id, i) => ({ id, on: (document.getElementById('dpc' + i) || {}).checked })).filter(x => x.on).map(x => S.casts[x.id]).filter(Boolean);
+  if (!hit.length) { toast('誰もチェックされていません'); return; }
   const items = hit.map(c => { const d = Object.assign({}, c, { active: false, updatedAt: Date.now() }); delete d.id; return { col: 'mg_cast', id: c.id, data: d }; });
-  await B.setMany(items); await loadCasts(); toast(hit.length + '名を外しました'); refresh();
+  await B.setMany(items); await loadCasts(); closeSheet(); toast(hit.length + '名を外しました'); refresh();
 } catch (e) { toast('外せませんでした: ' + ((e && (e.code || e.message)) || e)); } }
 async function importSales(){ try { await importSales0(); } catch (e) { toast('取り込みエラー: ' + ((e && (e.code || e.message)) || e)); } }
 async function importSales0(){
@@ -1129,6 +1137,7 @@ const A = {
   castSave(){ castSave(); },
   importSales(){ importSales(); },
   dropTitled(){ dropTitled(); },
+  dropGo(){ dropGo(); },
   impAll(el){ (S.impList || []).forEach((x, i) => { const c = document.getElementById('imc' + i); if (c) c.checked = el.dataset.v === '1'; }); },
   impGo(){ importGo(); },
   toggleQuit(){ S.showQuit = !S.showQuit; refresh(); },
