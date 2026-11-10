@@ -586,6 +586,11 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
         else if (lb.indexOf('在籍人数') >= 0) hq.zaiseki = hv;
       }
     } catch (e) {}
+    var titles = {};
+    try {
+      var wsT = wb.Sheets['設定'];
+      if (wsT) { for (var rt = 3; rt <= 130; rt++) { var nmT = cleanName(val(wsT, rt, 5)), tT = str(val(wsT, rt, 7)); if (!nmT || !tT || nmT === '登録名' || tT === '役職') continue; titles[nameId(nmT)] = tT.replace(/[\s\u3000]+/g, ' ').trim(); } }
+    } catch (e) {}
     var entry = {};
     try {
       var wsS = wb.Sheets['設定'];
@@ -605,7 +610,7 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
     } catch (e) {}
     var achObj = null; try { achObj = parseAch(XLSX, wb); } catch (e) { report.warnings.push({ level: 'warn', msg: '達成率シートを読み込めませんでした: ' + (e && e.message || e) }); }
     var monthObj = {
-      pay: payMap, ach: achObj, entry: entry, joined: joined, hq: hq,
+      pay: payMap, ach: achObj, titles: titles, entry: entry, joined: joined, hq: hq,
       ym: ym, year: year, month: mon, daysInMonth: daysInMonth,
       employees: employees.map(function (e) { return { id: e.id, name: e.name, kind: e.kind }; }),
       days: days,
@@ -830,7 +835,7 @@ function hiddenSum(M){ const t = {}; KEYS8.forEach(k => t[k] = 0); dayList(M).fo
 const hexOf = (name) => { const s = String(name == null ? '' : name).normalize('NFKC').trim(); let h = 'u'; for (let i = 0; i < s.length; i++) h += s.charCodeAt(i).toString(16).padStart(4, '0'); return h; };
 // 公開用の月データ（個人の日別は入れない）と、個人ごとの日別データに分ける
 function splitMonth(M){
-  const pub = { ym: M.ym, year: M.year, month: M.month, daysInMonth: M.daysInMonth, employees: M.employees, metrics: M.metrics, entry: M.entry || {}, joined: M.joined || {}, hq: M.hq || {}, days: {}, totals: {} };
+  const pub = { ym: M.ym, year: M.year, month: M.month, daysInMonth: M.daysInMonth, employees: M.employees, metrics: M.metrics, entry: M.entry || {}, titles: M.titles || {}, joined: M.joined || {}, hq: M.hq || {}, days: {}, totals: {} };
   const privs = {};
   M.employees.forEach(e => { privs[e.id] = { days: {} }; if (M.pay && M.pay[e.id]) privs[e.id].pay = M.pay[e.id]; const t = new Array(9).fill(0); pub.totals[e.id] = t; });
   Object.keys(M.days).forEach(dd => {
@@ -1371,7 +1376,7 @@ function viewStaff(){
   };
   const order = teamNames.concat(byTeam[''] ? [''] : []);
   const tag = e => { const a = []; if (entry[e.id]) a.push(entry[e.id]); const n = nc.out.find(o => o.id === e.id); if (n) a.push(n.settled ? '定着' : '新規'); return a.length ? '<small>' + a.join('・') + '</small>' : ''; };
-  const row = e => { const d = empMonth(M, e.id).days; return `<div class="rk"><div class="nm">${esc(e.name)}${e.kind === 'ops' ? '<small>運営</small>' : tag(e)}</div><div class="vl" style="${d ? '' : 'color:var(--dim)'}">${d}<small>日出勤</small></div></div>`; };
+  const row = e => { const d = empMonth(M, e.id).days; return `<div class="rk"><div class="nm">${esc(e.name)}${e.kind === 'ops' ? '<small>' + esc((M.titles && M.titles[e.id]) || '運営') + '</small>' : tag(e)}</div><div class="vl" style="${d ? '' : 'color:var(--dim)'}">${d}<small>日出勤</small></div></div>`; };
   return `
   <div class="card"><h2>従業員（${ymLabel(M.ym)}）</h2>
     <div class="kpis">${kpi(emps.length + '人', '従業員')}${kpi(emps.filter(e => empMonth(M, e.id).days > 0).length + '人', '今月出勤あり')}${kpi(avg.toFixed(1), '平均出勤者/日')}</div>
