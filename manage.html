@@ -821,7 +821,7 @@ async function vCasts(){
   const all = castList(), shown = all.filter(c => S.showQuit || c.active !== false);
   const opName = (c) => c.operator && S.casts[c.operator] ? S.casts[c.operator].name : '';
   return `<h1 class="pt">キャスト管理</h1>
-  ${isAdmin() ? `<div class="btnrow" style="margin-bottom:12px"><button class="btn" data-a="castNew">＋ キャスト追加</button><button class="btn ghost" data-a="importSales">売上アプリから取り込む</button></div>` : ''}
+  ${isAdmin() ? `<div class="btnrow" style="margin-bottom:12px"><button class="btn" data-a="castNew">＋ キャスト追加</button><button class="btn ghost" data-a="dropTitled">役職者を外す</button><button class="btn ghost" data-a="importSales">売上アプリから取り込む</button></div>` : ''}
   ${all.length ? '' : empty('キャストがまだ登録されていません', isAdmin() ? '「売上アプリから取り込む」で、売上アプリの従業員をまとめて登録できます。' : '管理者が登録すると表示されます。')}
   ${shown.length ? `<div class="card"><div class="list">${shown.map(c => { const rep = ((S.R[c.id] || {})[today]) || {}; const m = agg(c.id, rangeOf('month', today)); const reg = !isAdmin() || !S.members ? '' : S.members.includes(c.id) ? '' : '<span class="badge b-gry">未登録</span>'; return `<div class="it" data-a="cast" data-v="${c.id}" style="cursor:pointer">${avatar(c)}<div class="grow"><div class="nm">${esc(c.name)} ${c.role === 'operator' ? '<span class="badge b-blu">運営者</span>' : ''} ${c.active === false ? '<span class="badge b-gry">退店</span>' : ''} ${reg}</div><div class="sub">${esc(c.title || '役職なし')}${opName(c) ? '・担当 ' + esc(opName(c)) : ''}</div></div><div style="text-align:right"><div class="note">今月 新規${m.newVisit} 指名${m.shimei}</div>${isTracked(c) ? (rep.submitted ? '<span class="badge b-grn">本日提出</span>' : '<span class="badge b-red">本日未提出</span>') : ''}</div></div>`; }).join('')}</div></div>` : ''}
   ${all.some(c => c.active === false) ? `<button class="btn ghost sm" data-a="toggleQuit">${S.showQuit ? '退店した人を隠す' : '退店した人も表示'}</button>` : ''}`;
@@ -863,6 +863,16 @@ async function castSave(){
   try { await B.set('mg_cast', hex, o, true); S.casts[hex] = Object.assign({}, S.casts[hex] || {}, o, { id: hex }); closeSheet(); toast('保存しました'); refresh(); }
   catch (e) { er.textContent = '保存できませんでした。通信を確認してください。'; }
 }
+async function dropTitled(){ try {
+  const ms = await salesMonths(); if (!ms.length) { toast('売上アプリのデータがまだありません'); return; }
+  const per = await getFullSales(ms[ms.length - 1]); if (!per) { toast('売上データを読めませんでした'); return; }
+  if (!Object.values(per).some(x => x.title)) { toast('役職の情報がありません。売上アプリでExcelを取り込み直してください'); return; }
+  const hit = castList().filter(c => c.active !== false && per[c.id] && (per[c.id].kind === 'ops' || per[c.id].title));
+  if (!hit.length) { toast('外す人はいません'); return; }
+  if (!(await askOk('次の' + hit.length + '名を一覧から外します(退店扱い・あとで戻せます)。\n\n' + hit.map(c => c.name).join('、')))) return;
+  const items = hit.map(c => { const d = Object.assign({}, c, { active: false, updatedAt: Date.now() }); delete d.id; return { col: 'mg_cast', id: c.id, data: d }; });
+  await B.setMany(items); await loadCasts(); toast(hit.length + '名を外しました'); refresh();
+} catch (e) { toast('外せませんでした: ' + ((e && (e.code || e.message)) || e)); } }
 async function importSales(){ try { await importSales0(); } catch (e) { toast('取り込みエラー: ' + ((e && (e.code || e.message)) || e)); } }
 async function importSales0(){
   const ms = await salesMonths(); if (!ms.length) { toast('売上アプリのデータがまだありません'); return; }
@@ -1118,6 +1128,7 @@ const A = {
   castEdit(el){ castSheet(el.dataset.v); },
   castSave(){ castSave(); },
   importSales(){ importSales(); },
+  dropTitled(){ dropTitled(); },
   impAll(el){ (S.impList || []).forEach((x, i) => { const c = document.getElementById('imc' + i); if (c) c.checked = el.dataset.v === '1'; }); },
   impGo(){ importGo(); },
   toggleQuit(){ S.showQuit = !S.showQuit; refresh(); },
