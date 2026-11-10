@@ -867,16 +867,16 @@ async function importSales(){ try { await importSales0(); } catch (e) { toast('�
 async function importSales0(){
   const ms = await salesMonths(); if (!ms.length) { toast('売上アプリのデータがまだありません'); return; }
   const per = await getFullSales(ms[ms.length - 1]); if (!per) { toast('売上データを読めませんでした'); return; }
-  const add = Object.keys(per).filter(h => !S.casts[h] && per[h].kind !== 'ops'); if (!add.length) { toast('取り込める新しい人はいません'); return; }
-  S.impList = add.map(h => ({ h, name: per[h].name }));
+  const add = Object.keys(per).filter(h => !S.casts[h]); if (!add.length) { toast('取り込める新しい人はいません'); return; }
+  S.impList = add.map(h => ({ h, name: per[h].name, ops: per[h].kind === 'ops' })).sort((a, b) => (a.ops ? 1 : 0) - (b.ops ? 1 : 0));
   openSheet(`<h2 style="margin:0 0 6px">追加する従業員を選ぶ</h2><div class="sub" style="margin-bottom:10px">売上アプリ(${esc(ymlab(ms[ms.length - 1]))})の従業員です。追加したい人にチェックして、区分を選んでください。</div>
   <div class="btnrow" style="margin-bottom:8px"><button class="btn ghost" data-a="impAll" data-v="1">全部チェック</button><button class="btn ghost" data-a="impAll" data-v="0">全部外す</button></div>
-  ${S.impList.map((x, i) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #2a2720"><input type="checkbox" id="imc${i}" style="width:22px;height:22px"><label for="imc${i}" style="flex:1;font-size:15px">${esc(x.name)}</label><select id="imr${i}" style="width:auto"><option value="cast">キャスト</option><option value="operator">運営者</option></select></div>`).join('')}
+  ${S.impList.map((x, i) => `<div style="padding:8px 0;border-bottom:1px solid #2a2720"><div style="display:flex;align-items:center;gap:10px"><input type="checkbox" id="imc${i}" style="width:22px;height:22px"><label for="imc${i}" style="flex:1;font-size:15px">${esc(x.name)}${x.ops ? ' <small style="color:var(--gold)">役職者</small>' : ''}</label><select id="imr${i}" style="width:auto"><option value="cast">キャスト</option><option value="operator" ${x.ops ? 'selected' : ''}>運営者</option></select></div><input type="text" id="imt${i}" placeholder="役職名(例: 主任・幹部)" style="margin-top:6px;width:100%"></div>`).join('')}
   <div class="btnrow" style="margin-top:14px"><button class="btn" data-a="impGo">選んだ人を追加</button><button class="btn ghost" data-a="sheetClose">閉じる</button></div>`);
 }
 async function importGo(){
   const items = [];
-  (S.impList || []).forEach((x, i) => { const c = document.getElementById('imc' + i); if (c && c.checked) items.push({ col: 'mg_cast', id: x.h, data: { name: x.name, role: val('imr' + i) === 'operator' ? 'operator' : 'cast', title: '', joinDate: '', operator: '', opName: '', track: true, rot: true, nurture: false, active: true, createdAt: Date.now(), updatedAt: Date.now() } }); });
+  (S.impList || []).forEach((x, i) => { const c = document.getElementById('imc' + i); if (c && c.checked) items.push({ col: 'mg_cast', id: x.h, data: { name: x.name, role: val('imr' + i) === 'operator' ? 'operator' : 'cast', title: val('imt' + i).trim(), joinDate: '', operator: '', opName: '', track: true, rot: true, nurture: false, active: true, createdAt: Date.now(), updatedAt: Date.now() } }); });
   if (!items.length) { toast('誰もチェックされていません'); return; }
   try { await B.setMany(items); await loadCasts(); closeSheet(); toast(items.length + '名を追加しました'); refresh(); } catch (e) { toast('取り込めませんでした: ' + ((e && (e.code || e.message)) || e)); }
 }
