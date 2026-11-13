@@ -783,7 +783,7 @@ const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや', 'りあ'];  // 店
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-77 - 2026-11-06';
+const BUILD = 'sales-78 - 2026-11-13';
 
 const GRP_RANK = { asof: '10月31日営業終了時点', lists: [
   { k:'a', label:'総合', asof:'10月31日営業終了時点', rows: [[1,"結月瑠衣","社長","X8-本店-",17906200],[2,"ひかる","社長","Taurus/X8-Scorpius-",4494900],[3,"結城春乃","VP","X8-本店-",4074200],[4,"春葵るか","PD","X8-本店-",3884900],[5,"ねむ","支配人","Taurus/X8-Scorpius-",3607700],[6,"酸りお","SV","X8-本店-",3557900],[7,"りくと","店長","Attirant",3064500],[8,"白馬 皐矢","統括","X8-本店-",2436300],[9,"千冬","主任","222",2409200],[10,"レオなるド","代表代理","Diamant",2274800],[11,"成宮鳴","Legacy Player","X8-本店-",2273100],[12,"るな","店長","Diamant",2118100],[13,"皇 澪旺","代表代理","Attirant",2082100],[14,"蒼森璃央","支配人","Believe",1948500],[15,"凪咲なぎさ","支配人","Diamant",1946400],[16,"椿 雅","店長","Believe",1812900],[17,"にの","副主任","Taurus",1568200],[18,"一ノ瀬紅","店長","222",1505400],[19,"あおい","店長","X8-Scorpius-",1487200],[20,"れん","社長","Attirant",1440700],[21,"まさや","副主任","222",1427400],[22,"神宮寺 福","Lead Player","X8-本店-",1133500],[23,"あおい","幹部補佐","X8-本店-",1130800],[24,"楓","","X8-本店-",1097300],[25,"黒崎斗夢","副主任","X8-本店-",1066600],[26,"イヴ","幹部補佐","X8-本店-",1052300],[27,"暁ときな","幹部補佐","X8-本店-",845600],[28,"N","","Believe",795400],[29,"美澄奏多","AAD","X8-本店-",784800],[30,"椿 翔大","PADV","222",779800],[31,"叶桜","","X8-Scorpius-",761600],[32,"麗夜","","Diamant",604600],[33,"りゅうが","","Believe",584200],[34,"神崎零","幹部","X8-本店-",580600],[35,"そら","PMG","X8-Scorpius-",563800],[36,"ゆうと","PMG","Attirant",557900],[37,"メロ","副主任","Taurus",534800],[38,"あまと","","Diamant",481900],[39,"アヤト","","Believe",445100],[40,"佳夜","","X8-Scorpius-",340700],[41,"しゅん","","222",276400],[42,"ミナミ","","Attirant",255600],[43,"カヲ","PMG","X8-Scorpius-",253900],[44,"こはく","","Diamant",244200],[45,"雨宮 楓","","Attirant",216600],[46,"奏","","X8-本店-",213400],[47,"はんぞう","","Taurus",209500],[48,"密","","X8-本店-",174400],[49,"うた","","Taurus",173500],[50,"冬夜","","X8-本店-",168500]] },
@@ -1085,7 +1085,7 @@ function grpHomeCard(){
   const row = (r) => `<div class="rk r${r[0] <= 3 ? r[0] : ''}"><div class="no">${r[0]}</div><div class="nm">${esc(r[1])}${r[2] ? `<small>${esc(r[2])}</small>` : ''}</div><div class="vl">${yen(r[4])}<small>${esc(r[3].replace(/^-|-$/g, ''))}</small></div></div>`;
   return `<div class="card"><h2>総合売上ランキング TOP10</h2><div class="note" style="margin-top:0">${(GRP_RANK.lists[0].asof || GRP_RANK.asof)}</div>
     ${GRP_RANK.lists[0].rows.slice(0, 10).map(row).join('')}
-    <div style="margin-top:10px"><button class="btn ghost small" data-a="grpgo" data-k="grp_a">総合をすべて見る</button> <button class="btn ghost small" data-a="grpgo" data-k="grp_b">HBR</button></div>
+    <div style="margin-top:10px"><button class="btn ghost small" data-a="grpgo" data-k="grp_a">総合をすべて見る</button>${grpLists().some(x => x.k === 'b') ? ' <button class="btn ghost small" data-a="grpgo" data-k="grp_b">HBR</button>' : ''}</div>
   </div>`;
 }
 function viewHomeLite(){
@@ -1558,13 +1558,17 @@ function viewCompare(M, m){
 
 const grpOk = () => !ME_MODE && (S.role === 'admin' || S.role === 'staff');  // 店売り側（全体用index）だけ。個人ページには出さない  // 金額なし。全体用(index)は従業員ログインも、個人用は店売りが見える4人
 const storeRankOk = () => !ME_MODE || (ME_MODE && S.role === 'member' && RANK_VIEW_NAMES.some(n => hexOf(n) === S.hex));
-const grpKey = () => (S.rankMetric || '').startsWith('grp_') && grpOk() ? S.rankMetric.slice(4) : null;
+// HBRは年2回のイベント。HBR_YM（2026年10月）を開いている時だけ出す。他の月はボタンも表も出さない
+const HBR_YM = '2026-10';
+const grpLists = () => GRP_RANK.lists.filter(x => x.k !== 'b' || S.ym === HBR_YM);
+const grpKey = () => (S.rankMetric || '').startsWith('grp_') && grpOk() && grpLists().some(x => 'grp_' + x.k === S.rankMetric) ? S.rankMetric.slice(4) : null;
 function rankChips(activeK){
   const a = storeRankOk() ? metList().map(z => `<button class="${z.k === activeK ? 'on' : ''}" data-a="rmetric" data-k="${z.k}">${z.label}</button>`) : [];
-  const g = grpOk() ? GRP_RANK.lists.map(x => `<button class="${'grp_' + x.k === activeK ? 'on' : ''}" data-a="rmetric" data-k="grp_${x.k}">${x.k === 'a' ? '総合' : x.label}</button>`) : [];
+  const g = grpOk() ? grpLists().map(x => `<button class="${'grp_' + x.k === activeK ? 'on' : ''}" data-a="rmetric" data-k="grp_${x.k}">${x.k === 'a' ? '総合' : x.label}</button>`) : [];
   return (a.length ? `<div class="seg">${a.join('')}</div>` : '') + (g.length ? `<div class="seg">${g.join('')}</div>` : '');
 }
 function viewRank(){
+  if ((S.rankMetric || '').startsWith('grp_') && !grpLists().some(x => 'grp_' + x.k === S.rankMetric)) S.rankMetric = storeRankOk() ? metList()[0].k : 'grp_a';
   if (!storeRankOk() && grpOk() && !grpKey()) S.rankMetric = 'grp_a';
   if (grpKey()) return rankChips(S.rankMetric) + viewGrp(grpKey()) + updatedLine();
   const M = S.M; if (!M) return noData();
