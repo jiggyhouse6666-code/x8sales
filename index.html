@@ -390,18 +390,29 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
     var gross = pNum(g(33, 2)), dedT = pNum(g(35, 5)), net = pNum(g(5, 2));
     var sp = pay.reduce(function (a, x) { return a + x.v; }, 0);
     if (Math.abs(sp - gross) > 20) report.warnings.push({ level: 'warn', msg: name + ' さんの給料明細：支給の合計が、シートの合計と合いません（' + sp + ' / ' + pRound(gross) + '）' });
+    var sdc = ded.reduce(function (a, x) { return a + x.v; }, 0);
+    if (Math.abs(sdc - dedT) > 20) report.warnings.push({ level: 'warn', msg: name + ' さんの給料明細：控除の合計が、シートの合計と合いません（' + sdc + ' / ' + pRound(dedT) + '）' });
+    var ncc = Math.floor((pRound(gross) + pRound(dedT)) / 10) * 10;
+    if (Math.abs(ncc - pRound(net)) > 10) report.warnings.push({ level: 'warn', msg: name + ' さんの給料明細：差引支給額が、支給額合計 − 控除額合計と合いません（' + pRound(net) + ' / ' + ncc + '）' });
     var adj = pNum(g(17, 9));  // 「調整分時給」（遅出勤・早帰りの計算に使う。30分あたり＝時給÷2）
     return { label: label, net: pRound(net), gross: pRound(gross), dedTotal: pRound(dedT), pay: pay, ded: ded, adjHourly: adj && adj > 0 ? pRound(adj) : null };
   }
   function payOps(rows, label, name, report) {
     var g = function (r, c) { var rw = rows[r - 1]; return rw ? rw[c] : null; };
+    // 表の位置はExcelの版で動く（10月は「支出合計」が20行目、11月は26行目）。I列の見出しを探して位置を決める
+    var findRow = function (lab, from, to) { for (var q = from; q <= to; q++) { var t = g(q, 8); if (typeof t === 'string' && t.replace(/[\s\u3000]/g, '') === lab) return q; } return 0; };
+    var rKyu = findRow('給与', 1, 14) || 8, rBon = findRow('賞与', rKyu + 1, 18) || 9;
+    var rExp = findRow('支出合計', rBon + 1, 80) || 20, rEnd = findRow('差引額', rExp + 1, 100) || (rExp + 8);
     var pay = [], ded = [];
-    var kyu = pNum(g(8, 10)); if (kyu) pay.push({ k: '給与', v: pRound(kyu), note: '総売の50%' });
-    for (var r = 11; r <= 16; r++) { var l = g(r, 8), v = pNum(g(r, 10)); if (typeof l === 'string' && l.trim() && v) pay.push({ k: l.trim(), v: pRound(v) }); }
-    for (var d = 22; d <= 26; d++) { var dl = g(d, 8), dv = pNum(g(d, 10)); if (typeof dl === 'string' && dl.trim() && dv) ded.push({ k: dl.trim(), v: -pRound(dv) }); }
-    var gross = kyu + pNum(g(9, 10)), dedT = -pNum(g(20, 10)), net = pNum(g(6, 9));
-    var sp = pay.reduce(function (a, x) { return a + x.v; }, 0);
+    var kyu = pNum(g(rKyu, 10)); if (kyu) pay.push({ k: '給与', v: pRound(kyu), note: '総売の50%' });
+    for (var r = rBon + 2; r < rExp; r++) { var l = g(r, 8), v = pNum(g(r, 10)); if (typeof l === 'string' && l.trim() && v) pay.push({ k: l.trim(), v: pRound(v) }); }
+    for (var d = rExp + 2; d < rEnd; d++) { var dl = g(d, 8), dv = pNum(g(d, 10)); if (typeof dl === 'string' && dl.trim() && dv) ded.push({ k: dl.trim(), v: -pRound(dv) }); }
+    var gross = kyu + pNum(g(rBon, 10)), dedT = -pNum(g(rExp, 10)), net = pNum(g(6, 9));
+    var sp = pay.reduce(function (a, x) { return a + x.v; }, 0), sd = ded.reduce(function (a, x) { return a + x.v; }, 0);
     if (Math.abs(sp - gross) > 20) report.warnings.push({ level: 'warn', msg: name + ' さんの給料明細：支給の合計が、シートの合計と合いません（' + sp + ' / ' + pRound(gross) + '）' });
+    if (Math.abs(sd - dedT) > 20) report.warnings.push({ level: 'warn', msg: name + ' さんの給料明細：控除の合計が、シートの合計と合いません（' + sd + ' / ' + pRound(dedT) + '）' });
+    var ncalc = Math.floor((pRound(gross) + pRound(dedT)) / 10) * 10;
+    if (Math.abs(ncalc - pRound(net)) > 10) report.warnings.push({ level: 'warn', msg: name + ' さんの給料明細：差引支給額が、支給額合計 − 控除額合計と合いません（' + pRound(net) + ' / ' + ncalc + '）' });
     return { label: label, net: pRound(net), gross: pRound(gross), dedTotal: pRound(dedT), pay: pay, ded: ded };
   }
   function parsePayslips(XLSX, data, allNames, employees, mon, report) {
