@@ -103,7 +103,7 @@ main{padding-top:14px;}
 .grid td.z{color:#4b4658;}
 .grid td.hi{color:var(--gold); font-weight:700;}
 .scrollx{overflow-x:auto; margin:0 -6px; padding:0 6px;}
-input[type=text],input[type=password],input[type=number],select{width:100%; background:#0f0d14; border:1px solid var(--line); color:var(--text); border-radius:10px; padding:12px; font-size:16px; font-family:inherit;}
+input[type=text],input[type=password],input[type=number],input[type=date],select{width:100%; background:#0f0d14; border:1px solid var(--line); color:var(--text); border-radius:10px; padding:12px; font-size:16px; font-family:inherit;}
 .btn{display:block; width:100%; background:linear-gradient(180deg,#e9c97f,#c99a3e); color:#2a1c00; font-weight:700; border:none; border-radius:12px; padding:14px; font-size:16px;}
 .btn.ghost{background:transparent; color:var(--gold); border:1px solid var(--gold2);}
 .btn.danger{background:#5a2229; color:#ffd6da;}
@@ -130,6 +130,35 @@ input[type=text],input[type=password],input[type=number],select{width:100%; back
 .who{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;}
 .who button{background:var(--card2); border:1px solid var(--line); border-radius:10px; padding:11px 4px; font-size:14px; color:var(--text);}
 .who button small{display:block; font-size:10.5px; color:var(--dim);}
+.who button.negb{border-color:var(--neg); background:rgba(229,83,90,.10);}
+.who button small.negs{color:var(--neg); font-weight:700;}
+.negcard{border-color:rgba(229,83,90,.55);}
+.negcard h2{color:#ff9aa3;}
+.negtop{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:4px;}
+.negrow .nm small{display:inline; margin-left:6px;}
+.negrow .vl{font-size:16px; line-height:1.4; color:var(--text);}
+.negrow .vl div{white-space:nowrap;}
+.negrow .vl small{display:inline; margin-right:6px; font-size:10.5px; font-weight:400; color:var(--dim);}
+.negrow .vl .neg{color:var(--neg);} .negrow .vl .dim{color:var(--dim); font-weight:500;}
+.negbanner{background:#3a1d22; border:1px solid #6a2c35; color:#ffd6da; border-radius:14px; padding:12px 14px; margin-bottom:12px; font-size:14px;}
+.negbanner b{font-family:'Oswald','Noto Sans JP'; font-size:18px; color:#ff9aa3; font-weight:700;}
+.negbanner b.okv{color:var(--text);}
+.negbanner > b:first-of-type{font-family:'Noto Sans JP'; font-size:15px;}
+.psneg .ps-net .big{background:none; -webkit-background-clip:border-box; background-clip:border-box; color:var(--neg);}
+.nykcard{border-color:rgba(56,202,160,.5);}
+.nykcard h2{color:#7fe0c3;}
+.nykrow{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid rgba(255,255,255,.07); font-size:15px;}
+.nykrow .k{flex:1; min-width:0;}
+.nykrow .k small{display:block; font-size:11px; color:var(--dim); margin-top:1px; word-break:break-all;}
+.nykrow b{font-family:'Oswald','Noto Sans JP',sans-serif; font-size:18px; white-space:nowrap; letter-spacing:.3px;}
+.nykrow.tot{border-bottom:none; padding-top:12px;}
+.nykrow.tot .k{font-weight:700;}
+.nykrow.tot b{font-size:26px;}
+.nykx{background:none; border:1px solid var(--line); color:var(--dim); border-radius:8px; font-size:12px; padding:5px 9px; white-space:nowrap;}
+.nykform{display:grid; gap:8px; margin-top:8px;}
+.nykform .two{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8px;}
+.nykform input{min-width:0;}
+.ps-v.pos{color:var(--pos);}
 label.chk{display:flex; gap:10px; align-items:flex-start; font-size:13px; margin:8px 0;}
 label.chk input{width:20px; height:20px; margin-top:2px;}
 .ps{padding:0;overflow:hidden;font-family:'Shippori Mincho B1','Noto Sans JP',serif;border:1px solid rgba(232,199,122,.45)}
@@ -159,7 +188,7 @@ label.chk input{width:20px; height:20px; margin-top:2px;}
 #printroot .ps-h{background:#f6ecd0!important;color:#6b4d0a!important;border-color:#ddd!important;font-size:12pt;padding:5px 20px}
 #printroot .ps-r{border-bottom:1px solid #e3e3e3;padding:4px 20px;font-size:11.5pt;color:#111!important}
 #printroot .ps-n{color:#666!important;font-size:10pt}
-#printroot .ps-v{font-size:14pt;color:#111!important}#printroot .ps-v.neg{color:#c0262d!important}
+#printroot .ps-v{font-size:14pt;color:#111!important}#printroot .ps-v.neg{color:#c0262d!important}#printroot .ps-v.pos{color:#1a7f4b!important}
 #printroot .ps-t{background:#f4f4f4!important}
 #printroot .ps-fin .ps-v{color:#8a6410!important;font-size:17pt}#printroot .ps-fin2{background:#f6ecd0!important}#printroot .ps-fin2 .ps-v{font-size:19pt}
 #printroot .ps-foot{display:block;color:#888!important;padding:4px 20px}
@@ -794,7 +823,7 @@ const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや', 'りあ'];  // 店
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-81 - 2026-11-14';
+const BUILD = 'sales-86 - 2026-11-16';
 
 const GRP_RANK = { asof: '10月31日営業終了時点', lists: [
   { k:'a', ym:'2026-10', label:'総合', asof:'10月31日営業終了時点', rows: [[1,"結月瑠衣","社長","X8-本店-",17906200],[2,"ひかる","社長","Taurus/X8-Scorpius-",4494900],[3,"結城春乃","VP","X8-本店-",4074200],[4,"春葵るか","PD","X8-本店-",3884900],[5,"ねむ","支配人","Taurus/X8-Scorpius-",3607700],[6,"酸りお","SV","X8-本店-",3557900],[7,"りくと","店長","Attirant",3064500],[8,"白馬 皐矢","統括","X8-本店-",2436300],[9,"千冬","主任","222",2409200],[10,"レオなるド","代表代理","Diamant",2274800],[11,"成宮鳴","Legacy Player","X8-本店-",2273100],[12,"るな","店長","Diamant",2118100],[13,"皇 澪旺","代表代理","Attirant",2082100],[14,"蒼森璃央","支配人","Believe",1948500],[15,"凪咲なぎさ","支配人","Diamant",1946400],[16,"椿 雅","店長","Believe",1812900],[17,"にの","副主任","Taurus",1568200],[18,"一ノ瀬紅","店長","222",1505400],[19,"あおい","店長","X8-Scorpius-",1487200],[20,"れん","社長","Attirant",1440700],[21,"まさや","副主任","222",1427400],[22,"神宮寺 福","Lead Player","X8-本店-",1133500],[23,"あおい","幹部補佐","X8-本店-",1130800],[24,"楓","","X8-本店-",1097300],[25,"黒崎斗夢","副主任","X8-本店-",1066600],[26,"イヴ","幹部補佐","X8-本店-",1052300],[27,"暁ときな","幹部補佐","X8-本店-",845600],[28,"N","","Believe",795400],[29,"美澄奏多","AAD","X8-本店-",784800],[30,"椿 翔大","PADV","222",779800],[31,"叶桜","","X8-Scorpius-",761600],[32,"麗夜","","Diamant",604600],[33,"りゅうが","","Believe",584200],[34,"神崎零","幹部","X8-本店-",580600],[35,"そら","PMG","X8-Scorpius-",563800],[36,"ゆうと","PMG","Attirant",557900],[37,"メロ","副主任","Taurus",534800],[38,"あまと","","Diamant",481900],[39,"アヤト","","Believe",445100],[40,"佳夜","","X8-Scorpius-",340700],[41,"しゅん","","222",276400],[42,"ミナミ","","Attirant",255600],[43,"カヲ","PMG","X8-Scorpius-",253900],[44,"こはく","","Diamant",244200],[45,"雨宮 楓","","Attirant",216600],[46,"奏","","X8-本店-",213400],[47,"はんぞう","","Taurus",209500],[48,"密","","X8-本店-",174400],[49,"うた","","Taurus",173500],[50,"冬夜","","X8-本店-",168500]] },
@@ -1001,7 +1030,7 @@ function makeTestBackend(){
     async listMembers(){ return T.members || { members: {}, invites: {} }; },
     async issueInvite(){ return 'TEST2345'; }, async unregister(){},
     async saveExtra(name, part){ T.extraSaved = T.extraSaved || {}; const c = T.extraSaved[name] || {}; const pa = c.ach; T.extraSaved[name] = Object.assign(c, part); if (part.ach) T.extraSaved[name].ach = Object.assign({}, pa, part.ach); },
-    async getExtra(){ return T.extra || null; }, subExtra(hex, cb){ setTimeout(() => cb(T.extra || null), 0); return () => {}; },
+    async getExtra(hex){ return (T.extraBy && hex in T.extraBy) ? T.extraBy[hex] : (T.extra || null); }, subExtra(hex, cb){ setTimeout(() => cb(T.extra || null), 0); return () => {}; },
     subMeta(cb){ setTimeout(() => cb(T.meta), 0); return () => {}; },
     subMonth(ym, cb){ setTimeout(() => cb(T.months[ym] ? JSON.parse(JSON.stringify(T.months[ym])) : null, T.updatedAt || Date.now()), 0); return () => {}; },
     async getMonthOnce(ym){ return T.months[ym] ? JSON.parse(JSON.stringify(T.months[ym])) : null; },
@@ -1024,7 +1053,8 @@ const S = {
   empId: lsGet('x8s_emp') || null, empQuery: '',
   dayDetail: null,        // 日別画面で詳細表示中のdd
   loginRole: ME_MODE ? 'member' : 'admin', regMode: false, hex: null, priv: null, memberInfo: null, loginErr: '', loginBusy: false,
-  imp: null, ex: null, extra: null, extraCache: {}, importsList: null, targetDraft: ''
+  imp: null, ex: null, extra: null, extraCache: {}, importsList: null, targetDraft: '',
+  nyk: { key: '', v: '', d: '', m: '', busy: false }   // 入金の記録フォームの入力中の内容（人＋月ごと）
 };
 let unsubMonth = null, unsubMeta = null, unsubPriv = null, unsubPrivPrev = null, unsubExtra = null;
 
@@ -1220,21 +1250,25 @@ function shokaiDaily(M){
 }
 const STAFF_CARD_SKIP = ['しん', 'ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう', 'のあ', 'りあ', 'りょーた', 'まや', 'ゆうま']; // 運営のため増減の集計から外す
 const NOT_NEW = ['そら', 'ひそか', 'りあ', 'りょーた', 'まや', 'ゆうま'];  // 運営で前からいる人。10月を取り込んだ時は集計の対象外だったので、新規扱いにしない
+const OPS_STAFF = ['るか', 'りお', 'かなた'];  // 運営だけど、従業員の人数に入れる人（プレイヤーと同じ扱い）
+const NOT_STAFF = ['しん', 'ゆきを', 'えぬ', 'るーかす', 'まぁきゅん', 'みや', 'りょう', 'りあ', 'りょーた', 'まや', 'ゆうま', 'そら', 'ひそか'];  // 従業員の人数に入れない人（運営など）。のあ（＝じゅうぞう）は数える
+const isStaff = e => OPS_STAFF.indexOf(e.name) >= 0 || (e.kind !== 'ops' && NOT_STAFF.indexOf(e.name) < 0);  // 従業員＝キャスト＋るか・りお・かなた
+const staffOf = M => M.employees.filter(isStaff);
 // 新規入店者：今月出勤があって、前月は出勤がなかった人（しんさんの個人ページにだけ出す）
 function newcomerCard(M, e){
   if (!e || !NEWCOMER_NAMES.includes(e.name)) return '';
   if (!(S.role === 'admin' || (S.role === 'member' && hexOf(e.name) === S.hex))) return '';
   const nl = newcomerList(M);
   const fd = d => (d.getMonth() + 1) + '/' + d.getDate();
-  const nw = nl.out.filter(o => !o.settled), st = nl.out.filter(o => o.settled);
-  const chips = (L, mark) => L.length ? L.map(o => `<span class="chip">${mark}${esc(o.name)}　本入店${fd(o.jd)}・${o.total}日</span>`).join('') : '<span class="dim">いません</span>';
+  const nw = nl.out, st = nl.out.filter(o => o.settled);   // 定着した人も、本入店から1ヶ月のあいだは新規入店者に残す（✓＝定着した人）
+  const chips = L => L.length ? L.map(o => `<span class="chip">${o.settled ? '✓ ' : ''}${esc(o.name)}　本入店${fd(o.jd)}・${o.total}日</span>`).join('') : '<span class="dim">いません</span>';
   return `<div class="card"><h2>🆕 新規入店者（本入店から1ヶ月以内）</h2>
     <div class="big sm">${nw.length}人</div>
-    <div class="chips" style="margin-top:8px">${chips(nw, '')}</div>
+    <div class="chips" style="margin-top:8px">${chips(nw)}</div>
     <div class="hr"></div><div class="lbl">定着（本入店から10日以上出勤）</div>
     <div class="big sm">${st.length}人</div>
-    <div class="chips" style="margin-top:8px">${chips(st, '✓ ')}</div>
-    <div class="note">${nl.hasJoin ? '本入店の日付は、Excelの個人シートの「本入店」のメモから読みます。' : '本入店の日付がまだ入っていません。Excelの個人シートに「2026.10.27本入店」のように書いて、取り込むと出ます。'}</div></div>`;
+    <div class="chips" style="margin-top:8px">${chips(st)}</div>
+    <div class="note">${nl.hasJoin ? '本入店の日付は、Excelの個人シートの「本入店」のメモから読みます。定着した人（✓）も、本入店から1ヶ月のあいだは新規入店者に残ります。' : '本入店の日付がまだ入っていません。Excelの個人シートに「2026.10.27本入店」のように書いて、取り込むと出ます。'}</div></div>`;
 }
 function staffChangeCard(M){
   const keep = e => STAFF_CARD_SKIP.indexOf(e.name) < 0 && NOT_NEW.indexOf(e.name) < 0;
@@ -1345,23 +1379,24 @@ function rolesCard(){
 function viewStaff(){
   if (S.role !== 'admin') return '<div class="empty">管理者のみ使えます</div>';
   const M = S.M; if (!M) return noData();
-  const keep = x => STAFF_CARD_SKIP.indexOf(x.name) < 0;
-  const emps = M.employees.filter(keep);
+  const emps = staffOf(M);   // 従業員＝キャスト（のあ含む）＋運営のるか・りお・かなた
   const teams = Object.assign({}, TEAM_DEFAULT, S.meta.teams || {});
   const teamOf = e => teams[hexOf(e.name)] || '';
+  const opsOut = M.employees.filter(e => !emps.includes(e) && STAFF_CARD_SKIP.indexOf(e.name) < 0);   // 人数には入れないけど、前から一覧に出していた運営（そら・ひそか）
   const entry = M.entry || {};
   const WORKS = ['A出勤', 'B出勤', '遅刻'];
   const days = dayList(M);
   const cnt = days.map(dd => emps.filter(e => { const r = M.days[dd] && M.days[dd].rows && M.days[dd].rows[e.id]; return r && (WORKS.includes(r[8]) || (!r[8] && r.slice(0, 8).some(n => n !== 0))); }).length);
   const avg = days.length ? (cnt.reduce((a, b) => a + b, 0) / days.length) : 0;
   const nc = newcomerList(M);
-  const nw = nc.out.filter(o => !o.settled), st = nc.settledAll.map(o => { const f = nc.out.find(z => z.id === o.id); return f || { id: o.id, name: o.name, jd: o.jd, total: 10 }; });
+  const nw = nc.out, st = nc.settledAll.map(o => { const f = nc.out.find(z => z.id === o.id); return f || { id: o.id, name: o.name, jd: o.jd, total: 10 }; });
   const hq = M.hq || {};
   const hasHq = hq.taiken != null || hq.hon != null;
   const JM = joinedMap(M);
   const honNames = emps.filter(e => JM[e.id] && JM[e.id].slice(0, 7) === M.ym);
   const fd = d => (d.getMonth() + 1) + '/' + d.getDate();
   const chip = o => `<span class="chip">${esc(o.name)}<small>本入店${fd(o.jd)}・${o.total}日</small></span>`;
+  const chipNew = o => `<span class="chip">${o.settled ? '✓ ' : ''}${esc(o.name)}<small>本入店${fd(o.jd)}・${o.total}日</small></span>`;   // 定着した人は✓つきで新規にも残す
   const chipN = e => `<span class="chip">${TEAM_LEADER[teamOf(e)] === e.name ? '◎' : ''}${esc(e.name)}</span>`;
   const none = '<span class="dim">いません</span>';
   const kpi = (v, l) => `<div class="kpi"><div class="v" style="font-size:24px">${v}</div><div class="l">${l}</div></div>`;
@@ -1378,7 +1413,7 @@ function viewStaff(){
     const gross = ms.reduce((a, e) => a + gOf(e), 0);
     const maxD = Math.max(1, days.length);
     const nm = e => e.name === 'のあ' ? 'じゅうぞう' : e.name;
-    const badge = e => { const a = []; if (entry[e.id]) a.push(entry[e.id]); const n = nc.out.find(o => o.id === e.id); if (n) a.push(n.settled ? '定着' : '新規'); return a.map(x => `<span style="font-size:10px;padding:1px 6px;border-radius:999px;background:${x === '新規' ? '#2a5d4a' : x === '定着' ? '#5a4a1c' : '#3a3550'};margin-left:4px">${x}</span>`).join(''); };
+    const badge = e => { const a = []; if (entry[e.id]) a.push(entry[e.id]); const n = nc.out.find(o => o.id === e.id); if (n) { a.push('新規'); if (n.settled) a.push('定着'); } return a.map(x => `<span style="font-size:10px;padding:1px 6px;border-radius:999px;background:${x === '新規' ? '#2a5d4a' : x === '定着' ? '#5a4a1c' : '#3a3550'};margin-left:4px">${x}</span>`).join(''); };
     const card = (e, isLead) => { const d = dOf(e); const bg = isLead ? 'background:linear-gradient(135deg,#f3d58a,#b8872b);color:#2a1c00;border-color:transparent' : 'background:var(--card2);border:1px solid var(--line)';
       return `<div style="${bg};border-radius:12px;padding:10px 12px;${d === 0 ? 'opacity:.55' : ''}"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:700;font-size:${isLead ? 17 : 15}px">${isLead ? '◎ ' : ''}${esc(nm(e))}${badge(e)}</div><div style="font-family:Oswald;font-size:16px">${d === null ? '<span style="font-size:11px;font-family:inherit;opacity:.7">データなし</span>' : d + '<small style="font-family:inherit;font-size:10px;opacity:.7">日</small>'}</div></div>${d === null ? '' : `<div style="height:4px;border-radius:2px;background:rgba(0,0,0,.25);margin-top:7px"><i style="display:block;height:100%;width:${Math.min(100, d / maxD * 100)}%;border-radius:2px;background:${isLead ? '#2a1c00' : 'var(--gold)'}"></i></div>`}</div>`; };
     const stat = (v, l) => `<div style="flex:1;text-align:center"><div style="font-family:Oswald;font-size:20px">${v}</div><div style="font-size:10px;color:var(--dim)">${l}</div></div>`;
@@ -1388,15 +1423,17 @@ function viewStaff(){
       <div style="display:grid;gap:8px">${L.map(e => card(e, true)).join('')}${R.map(e => card(e, false)).join('')}</div></div>`;
   };
   const order = teamNames.concat(byTeam[''] ? [''] : []);
-  const tag = e => { const a = []; if (entry[e.id]) a.push(entry[e.id]); const n = nc.out.find(o => o.id === e.id); if (n) a.push(n.settled ? '定着' : '新規'); return a.length ? '<small>' + a.join('・') + '</small>' : ''; };
+  const tag = e => { const a = []; if (entry[e.id]) a.push(entry[e.id]); const n = nc.out.find(o => o.id === e.id); if (n) { a.push('新規'); if (n.settled) a.push('定着'); } return a.length ? '<small>' + a.join('・') + '</small>' : ''; };
   const row = e => { const d = empMonth(M, e.id).days; return `<div class="rk"><div class="nm">${esc(e.name)}${e.kind === 'ops' ? '<small>' + esc((M.titles && M.titles[e.id]) || '運営') + '</small>' : tag(e)}</div><div class="vl" style="${d ? '' : 'color:var(--dim)'}">${d}<small>日出勤</small></div></div>`; };
+  const lrow = e => { const d = empMonth(M, e.id).days; return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06)"><div style="flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.name)}${e.kind === 'ops' ? '<small> 運営</small>' : tag(e)}</div><div style="font-size:13px;width:34px;text-align:right;${d ? '' : 'color:var(--dim)'}">${d}日</div><input type="text" list="teamlist" data-team="${esc(hexOf(e.name))}" value="${esc(teamOf(e))}" placeholder="チーム" style="width:84px;padding:3px 6px;font-size:12px;margin:0"></div>`; };
   return `
   <div class="card"><h2>従業員（${ymLabel(M.ym)}）</h2>
     <div class="kpis">${kpi(emps.length + '人', '従業員')}${kpi(emps.filter(e => empMonth(M, e.id).days > 0).length + '人', '今月出勤あり')}${kpi(avg.toFixed(1), '平均出勤者/日')}</div>
-    <div class="note">平均出勤者＝出勤した人数の、営業日ごとの平均です（営業${days.length}日）。</div></div>
+    <div class="note">従業員＝キャスト＋運営のるか・りお・かなたの人数です（えぬ・るーかす・まぁきゅん、そら・ひそかなど、ほかの運営は入れていません）。平均出勤者＝出勤した人数の、営業日ごとの平均です（営業${days.length}日）。</div></div>
+  ${negPayCard(M)}
   <div class="card"><h2>🆕 新規入店者（入店1ヶ月以内）</h2>
-    <div class="big sm">${nw.length}人</div><div class="chips">${nw.length ? nw.map(chip).join('') : none}</div>
-    <div class="note">${nc.hasJoin ? '本入店の日付（Excelの個人シートの「本入店」のメモ）から1ヶ月以内の人が出ます。' : '本入店の日付がまだ入っていません。Excelの個人シートに「2026.10.27本入店」のように書いて、取り込むと出ます。'}</div></div>
+    <div class="big sm">${nw.length}人</div><div class="chips">${nw.length ? nw.map(chipNew).join('') : none}</div>
+    <div class="note">${nc.hasJoin ? '本入店の日付（Excelの個人シートの「本入店」のメモ）から1ヶ月以内の人が出ます。定着した人（✓）も、1ヶ月のあいだは残ります。' : '本入店の日付がまだ入っていません。Excelの個人シートに「2026.10.27本入店」のように書いて、取り込むと出ます。'}</div></div>
   <div class="card"><h2>従業員定着（10日以上出勤）</h2>
     <div class="big sm">${st.length}人</div><div class="chips">${st.length ? st.map(chip).join('') : none}</div>
     <div class="note">本入店してから10日以上出勤した人です（本入店から1ヶ月以内の間）。</div></div>
@@ -1410,7 +1447,8 @@ function viewStaff(){
     <div class="note">チーム名は、下の全員一覧で手打ちして入れます（同じ名前を入れるとまとまります）。</div></div>
   ${rolesCard()}
   <div class="card"><h2>全員一覧（出勤なしも表示）</h2>
-    ${order.map(t => { const L = emps.filter(e => (teamOf(e) || '') === t); if (!L.length) return ''; return `<div style="margin:10px 0 2px;font-size:13px;font-weight:700;color:${t ? 'var(--gold)' : 'var(--dim)'}">${t ? esc(t) : '所属なし'}（${L.length}人）</div>` + L.map(e => { const d = empMonth(M, e.id).days; return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06)"><div style="flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.name)}${e.kind === 'ops' ? '<small> 運営</small>' : tag(e)}</div><div style="font-size:13px;width:34px;text-align:right;${d ? '' : 'color:var(--dim)'}">${d}日</div><input type="text" list="teamlist" data-team="${esc(hexOf(e.name))}" value="${esc(teamOf(e))}" placeholder="チーム" style="width:84px;padding:3px 6px;font-size:12px;margin:0"></div>`; }).join(''); }).join('')}
+    ${order.map(t => { const L = emps.filter(e => (teamOf(e) || '') === t); if (!L.length) return ''; return `<div style="margin:10px 0 2px;font-size:13px;font-weight:700;color:${t ? 'var(--gold)' : 'var(--dim)'}">${t ? esc(t) : '所属なし'}（${L.length}人）</div>` + L.map(lrow).join(''); }).join('')}
+    ${opsOut.length ? `<div style="margin:14px 0 2px;font-size:13px;font-weight:700;color:var(--dim)">人数に入れない運営（${opsOut.length}人）</div>` + opsOut.map(lrow).join('') : ''}
   </div>`;
 }
 function compareCard(M, tot, prevTo, prevTot, lastN, prevToN){
@@ -1941,6 +1979,11 @@ function reportHtml(){
     });
   }
   const curSet = (nl.settledAll || []).map(o => o.name);
+  // 従業員数：Excelの在籍人数があれば「えぬ・るーかす・まぁきゅん」を引いて「るか・りお・かなた」を足す。なければ、今月は名簿の人数、過ぎた月は出勤した人
+  const stNow = hq.zaiseki != null
+    ? { n: hq.zaiseki - M.employees.filter(e => EXCL3.indexOf(e.name) >= 0).length + M.employees.filter(e => OPS_STAFF.indexOf(e.name) >= 0).length, note: '' }
+    : M.ym < jstCurYm() ? { n: staffOf(M).filter(e => empMonth(M, e.id).days > 0).length, note: '（出勤した人）' }
+    : { n: staffOf(M).length, note: '（名簿の人数）' };
   const now = new Date();
   return `<div id="reportpaper" style="width:794px;box-sizing:border-box;padding:40px 44px;background:#fff;color:#1a1a1a;font-family:'Noto Sans JP',sans-serif">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #1b1824;padding-bottom:10px">
@@ -1956,13 +1999,13 @@ function reportHtml(){
     ${sec('従業員')}
     <table style="width:100%;border-collapse:collapse">
       <tr><th style="${th};text-align:left">項目</th>${P ? `<th style="${th};text-align:left">${pm}</th>` : ''}<th style="${th};text-align:left">${cm}${complete ? '' : '（途中）'}</th></tr>
-      <tr><td style="${tdl};width:130px">全体の従業員数</td>${P ? `<td style="${td};text-align:left;white-space:normal">${P.employees.filter(e => e.kind !== 'ops' && NOT_NEW.indexOf(e.name) < 0 && EXCL3.indexOf(e.name) < 0 && empMonth(P, e.id).days > 0).length}人<span style="font-size:10px;color:#777">（キャストで出勤した人）</span></td>` : ''}<td style="${td};text-align:left;white-space:normal">${hq.zaiseki != null ? (hq.zaiseki - M.employees.filter(e => EXCL3.indexOf(e.name) >= 0).length) + '人' : (M.employees.filter(e => EXCL3.indexOf(e.name) < 0 && empMonth(M, e.id).days > 0).length + '人')}${hq.zaiseki != null ? '' : '<span style="font-size:10px;color:#777">（出勤した人）</span>'}</td></tr>
+      <tr><td style="${tdl};width:130px">全体の従業員数</td>${P ? `<td style="${td};text-align:left;white-space:normal">${staffOf(P).filter(e => empMonth(P, e.id).days > 0).length}人<span style="font-size:10px;color:#777">（出勤した人）</span></td>` : ''}<td style="${td};text-align:left;white-space:normal">${stNow.n}人${stNow.note ? `<span style="font-size:10px;color:#777">${stNow.note}</span>` : ''}</td></tr>
       <tr><td style="${tdl}">本入店</td>${P ? `<td style="${td};text-align:left;white-space:normal">${pHon.length}人${pHon.length ? '　' + pHon.map(esc).join('、') : ''}</td>` : ''}<td style="${td};text-align:left;white-space:normal">${hq.hon != null ? Math.max(hq.hon, honNames.length) : honNames.length}人${honNames.length ? '　' + honNames.map(esc).join('、') : ''}</td></tr>
       <tr><td style="${tdl}">定着</td>${P ? `<td style="${td};text-align:left;white-space:normal">${pSet.length}人${pSet.length ? '　' + pSet.map(esc).join('、') : ''}</td>` : ''}<td style="${td};text-align:left;white-space:normal">${curSet.length}人${curSet.length ? '　' + curSet.map(esc).join('、') : ''}</td></tr>
       ${P ? `<tr><td style="${tdl}">来なくなった従業員<br><span style="font-size:10px;font-weight:400;color:#777">名簿から消えた人</span></td><td style="${td};text-align:left;white-space:normal" colspan="2">${gone.out.length}人　${goneTxt(gone.out)}</td></tr>
       <tr><td style="${tdl}">今月まだ出勤なし<br><span style="font-size:10px;font-weight:400;color:#777">名簿にはいる人</span></td><td style="${td};text-align:left;white-space:normal" colspan="2">${gone.stay.length}人　${goneTxt(gone.stay)}</td></tr>` : ''}
     </table>
-    <div style="font-size:11px;color:#777;margin-top:6px">本入店＝その月に本入店した人（個人シートの「本入店」の日付）。定着＝本入店から1ヶ月以内に10日出勤した人（定着した月にだけ載せます。いちど定着した人は、その後ずっと定着です）。従業員数は、11月がExcelの「本部報告」の在籍人数、10月は、キャストで出勤した人の数です（運営のるか・りお・かなた・しん・そら・ひそかは、どちらにも入れていません。えぬ・るーかす・まぁきゅんも入れていません）。来なくなった従業員＝前月に出勤があって、今月の名簿から消えた人。今月まだ出勤なしの人は、月の途中なので、まだ辞めたとは限りません。</div>
+    <div style="font-size:11px;color:#777;margin-top:6px">本入店＝その月に本入店した人（個人シートの「本入店」の日付）。定着＝本入店から1ヶ月以内に10日出勤した人（定着した月にだけ載せます。いちど定着した人は、その後ずっと定着です）。従業員数は、キャストに、運営のるか・りお・かなたを足した人数です。今月は名簿の人数、過ぎた月は出勤した人の数です（しん・そら・ひそかなど、ほかの運営と、えぬ・るーかす・まぁきゅんは入れていません）。来なくなった従業員＝前月に出勤があって、今月の名簿から消えた人。今月まだ出勤なしの人は、月の途中なので、まだ辞めたとは限りません。</div>
   </div>`;
 }
 async function reportPdf(btn){
@@ -2036,9 +2079,15 @@ function payslipCard(rec, ym, ex, e){
   const row = (k, v, note, cls) => `<div class="ps-r ${cls || ''}"><div class="ps-k">${esc(k)}${note ? `<div class="ps-n">${esc(note)}</div>` : ''}</div><div class="ps-v ${v < 0 ? 'neg' : ''}">${sg(v)}</div></div>`;
   const uri = hm ? hm.uri : null;
   const after = uri != null ? rec.net - uri : null;
-  return `<div class="card ps"><div class="ps-title">給　与　明　細　書</div>
+  const negNet = S.role === 'admin' && rec.net < 0;
+  // 入金の記録（マイナスの人が返してくれた分）があれば、売掛控除後の金額の下に「入金」と「残り」を出す
+  const pays = nykOf(ex, ym), base = after != null ? Math.min(rec.net, after) : rec.net, left = base + pays.reduce((s, x) => s + x.v, 0);
+  const nykRows = (pays.length && base < 0)
+    ? `${uri == null ? '<div class="ps-h">入 金</div>' : ''}${pays.map(p => `<div class="ps-r"><div class="ps-k">入金${p.d ? '　' + esc(mdOf(p.d)) : ''}${p.memo ? `<div class="ps-n">${esc(p.memo)}</div>` : ''}</div><div class="ps-v pos">+${yen(p.v)}</div></div>`).join('')}${row(left < 0 ? '残り（まだ足りない分）' : '残りなし', left < 0 ? left : 0, (after != null ? '売掛控除後の金額' : '差引支給額') + ' + 入金' + (left > 0 ? '（' + yen(left) + ' 多く入金）' : left === 0 ? '（入金で全額もどりました）' : ''), 'ps-t ps-fin2')}`
+    : '';
+  return `<div class="card ps${negNet ? ' psneg' : ''}"><div class="ps-title">給　与　明　細　書</div>
     <div class="ps-sub"><span>${ymLabel(ym)}分${(() => { const d = new Date(Date.now() + 9*3600e3 - 5*3600e3); return ym === d.getUTCFullYear() + '-' + String(d.getUTCMonth()+1).padStart(2,'0') ? '（現状・月の途中）' : ''; })()}</span><span>${esc(e ? e.name : '')} 様</span></div>
-    <div class="ps-net"><div class="lbl">差引支給額（お給料）</div><div class="big">${yen(rec.net)}</div></div>
+    <div class="ps-net"><div class="lbl">差引支給額（お給料）</div><div class="big">${negNet ? sg(rec.net) : yen(rec.net)}</div></div>
     <div class="ps-h">支 給 項 目</div>
     ${rec.pay.map(x => row(x.k, x.v, x.note)).join('') || '<div class="dim" style="padding:8px 0">なし</div>'}
     ${row('支給額合計', rec.gross, '', 'ps-t')}
@@ -2049,6 +2098,7 @@ function payslipCard(rec, ym, ex, e){
     ${uri != null ? `<div class="ps-h">売 掛 精 算</div>
       ${row('売掛金（お客様の掛け）', -uri, hm.label + 'の売掛')}
       ${row('売掛控除後の金額', after, '差引支給額 − 売掛金', 'ps-t ps-fin2')}` : ''}
+    ${nykRows}
     <div class="ps-foot">X8 本店</div>
   </div>
   <div class="ps-act"><button class="btn" data-a="pdfps" data-t="${esc('給与明細_' + (e ? e.name : '') + '_' + ym)}">📄 PDFで保存</button><button class="btn ghost" data-a="printps" data-t="${esc('給与明細_' + (e ? e.name : '') + '_' + ym)}">🖨 印刷(A4)</button></div>`;
@@ -2105,6 +2155,121 @@ function achCard(e){
       ${a.tbl ? achTable(a.tbl, a.gross, target) : ''}`; }
   return `<div class="card"><h2>🎯 お店の達成率</h2>${body}</div>`;
 }
+/* ---------- 給料がマイナスの人（管理者だけ） ---------- */
+// 「お給料」＝給与明細の差引支給額。「売掛を引くと」＝差引支給額 − 売掛金（報酬一覧を取り込んである人だけ計算）
+const sgn = (v) => (v < 0 ? '−' : '') + yen(Math.abs(v));
+const jstCurYm = () => { const d = new Date(Date.now() + 9 * 3600e3 - 5 * 3600e3); return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0'); };
+let exRenderT = null;
+// 全員の売掛（人ごとの保存データ）を先に読んでおく。読み終わると画面を描き直す
+function prefetchExtras(M){
+  if (S.role !== 'admin' || !M || !backend) return;
+  M.employees.forEach(e => {
+    const hx = hexOf(e.name); if (hx in S.extraCache) return;
+    S.extraCache[hx] = null; S.exPend = (S.exPend || 0) + 1;
+    Promise.resolve().then(() => backend.getExtra(hx)).then(x => { S.extraCache[hx] = x; if (S.exFail) delete S.exFail[hx]; }).catch(() => { (S.exFail = S.exFail || {})[hx] = true; })
+      .then(() => {
+        S.exPend = Math.max(0, (S.exPend || 1) - 1); clearTimeout(exRenderT);
+        exRenderT = setTimeout(() => { const a = document.activeElement; if (a && a.dataset && a.dataset.team !== undefined) return; if (S.phase === 'app' && (S.tab === 'pers' || S.tab === 'staff')) render(); }, S.exPend ? 300 : 0);
+      });
+  });
+}
+// 入金の記録＝マイナスの人が返してくれた分。個人ごとの保存データ(extra)の nyukin に [{id, ym, v, d, memo}] で入れる
+// （Excelや報酬一覧を取り込み直しても消えない。残り＝「売掛を引くと」＋入金の合計）
+const nykOf = (ex, ym) => (ex && Array.isArray(ex.nyukin) ? ex.nyukin : []).filter(x => x && x.ym === ym && x.v > 0);
+const nykSum = (ex, ym) => nykOf(ex, ym).reduce((s, x) => s + x.v, 0);
+const jstToday = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+function negInfo(M, e, ex){
+  const raw = M && M.pay && M.pay[e.id]; if (!raw) return null;
+  const rec = psAdjust(raw, M.ym, e) || raw;
+  const mon = Number(M.ym.split('-')[1]);
+  const hm = ex && ex.hoshu ? ex.hoshu.find(m => m.n === mon) : null;
+  const uri = hm ? hm.uri : null, net = rec.net;
+  const after = uri != null ? net - uri : null;
+  const worst = after != null ? Math.min(net, after) : net;              // いちばん低い数字（足りない額のもと）
+  const paid = nykSum(ex, M.ym);                                          // 記録した入金の合計
+  const minus = worst < 0, remain = minus ? worst + paid : null;          // 入金を引いた残り（0以上なら全額もどった）
+  return { net, uri, after, worst, paid, remain, minus, bad: minus && remain < 0 };
+}
+function negPayList(M){
+  if (S.role !== 'admin' || !M || !M.pay) return [];
+  return M.employees.map(e => ({ e, i: negInfo(M, e, S.extraCache[hexOf(e.name)]) })).filter(x => x.i && x.i.bad).sort((a, b) => a.i.remain - b.i.remain);
+}
+function negPayCard(M){
+  if (S.role !== 'admin' || !M || !M.pay) return '';
+  prefetchExtras(M);
+  const list = negPayList(M);
+  const nNet = list.filter(x => x.i.net < 0).length, nAft = list.length - nNet;
+  const fails = Object.keys(S.exFail || {}).filter(h => h in S.extraCache).length;
+  const notes = `<div class="note">お給料＝給与明細の差引支給額。売掛を引くと＝差引支給額 − 売掛金（報酬一覧を取り込んである人だけ計算）。入金を記録した人は、入金を引いた「残り」も出ます。名前を押すと給与明細が開きます。${M.ym === jstCurYm() ? '<br>今月は月の途中の数字なので、売上が増えると変わります。' : ''}${(S.exPend || 0) > 0 ? '<br>売掛を読み込み中…' : ''}${fails ? `<br>売掛を読み込めなかった人が${fails}人います。その人はお給料だけで見ています（ページを開き直すと読み直します）。` : ''}</div>`;
+  if (!list.length) return `<div class="card"><h2>給料がマイナスの人（${ymLabel(M.ym)}）</h2>${(S.exPend || 0) > 0 ? '<div class="dim" style="font-size:15px">確認中…</div>' : '<div class="pos" style="font-size:16px;font-weight:700">いません ✓</div>'}${notes}</div>`;
+  const row = x => `<div class="rk tap negrow" data-a="person" data-id="${esc(x.e.id)}"><div class="nm">${esc(x.e.name)}${x.e.kind === 'ops' ? '<small>運営</small>' : ''}</div><div class="vl"><div class="${x.i.net < 0 ? 'neg' : 'dim'}"><small>お給料</small>${sgn(x.i.net)}</div>${x.i.after != null ? `<div class="${x.i.after < 0 && !x.i.paid ? 'neg' : 'dim'}"><small>売掛を引くと</small>${sgn(x.i.after)}</div>` : ''}${x.i.paid ? `<div class="neg"><small>入金 ${yen(x.i.paid)} → 残り</small><b>${sgn(x.i.remain)}</b></div>` : ''}</div></div>`;
+  return `<div class="card negcard"><h2>⚠ 給料がマイナスの人（${ymLabel(M.ym)}）</h2>
+    <div class="negtop"><span class="big sm neg">${list.length}人</span><span class="dim" style="font-size:12px">お給料がマイナス ${nNet}人${nAft ? '　＋　売掛を引くとマイナス ' + nAft + '人' : ''}</span></div>
+    ${list.map(row).join('')}${notes}</div>`;
+}
+function negBanner(M, e){
+  if (S.role !== 'admin') return '';
+  const i = negInfo(M, e, extraFor(e)); if (!i || !i.bad) return '';
+  return `<div class="negbanner">⚠ <b>給料がマイナスです</b>
+    <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:baseline;gap:10px"><span>お給料（差引支給額）</span><b class="${i.net < 0 ? '' : 'okv'}">${sgn(i.net)}</b></div>
+    ${i.after != null ? `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><span>売掛 ${yen(i.uri)} を引くと</span><b class="${i.after < 0 && !i.paid ? '' : 'okv'}">${sgn(i.after)}</b></div>` : ''}
+    ${i.paid ? `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><span>入金 ${yen(i.paid)} を引いた残り</span><b>${sgn(i.remain)}</b></div>` : ''}</div>`;
+}
+/* ---------- 入金の記録（管理者だけ）：マイナスの人が返してくれた分を残して、残りを出す ---------- */
+function nykDraft(){ const key = S.empId + '|' + S.ym; if (!S.nyk || S.nyk.key !== key) S.nyk = { key, v: '', d: '', m: '', busy: false }; return S.nyk; }
+function nyukinCard(M, e){
+  if (S.role !== 'admin' || !M || !e) return '';
+  const ex = extraFor(e), i = negInfo(M, e, ex); if (!i) return '';
+  const recs = nykOf(ex, M.ym);
+  if (!i.minus && !recs.length) return '';
+  const key = e.id + '|' + M.ym, dr = S.nyk && S.nyk.key === key ? S.nyk : { v: '', d: '', m: '', busy: false };
+  const left = i.minus ? i.remain : null;
+  return `<div class="card nykcard"><h2>💴 入金の記録（${ymLabel(M.ym)}）</h2>
+    ${i.minus ? `<div class="nykrow"><div class="k">${i.after != null && i.after <= i.net ? '売掛を引くと' : 'お給料'}</div><b class="neg">${sgn(i.worst)}</b></div>` : '<div class="dim" style="font-size:13px">いまはマイナスではありません（入金の記録だけ残っています）。</div>'}
+    ${recs.map(p => `<div class="nykrow"><div class="k">入金　${esc(mdOf(p.d) || '')}${p.memo ? `<small>${esc(p.memo)}</small>` : ''}</div><b class="pos">+${yen(p.v)}</b><button class="nykx" data-a="nykdel" data-id="${esc(p.id)}">取り消し</button></div>`).join('')}
+    ${i.minus ? `<div class="nykrow tot"><div class="k">残り${left >= 0 ? '<small>入金で全額もどりました</small>' : ''}</div><b class="${left < 0 ? 'neg' : 'pos'}">${left < 0 ? sgn(left) : yen(0)}</b></div>` : ''}
+    <div class="hr"></div>
+    <div class="lbl">入金を記録する</div>
+    <div class="nykform">
+      <input type="text" inputmode="numeric" id="nykv" placeholder="金額（例 4240）" value="${esc(dr.v)}" autocomplete="off">
+      <div class="two"><input type="date" id="nykd" value="${esc(dr.d || jstToday())}"><input type="text" id="nykm" placeholder="メモ（なくてOK）" maxlength="40" value="${esc(dr.m)}" autocomplete="off"></div>
+      <button class="btn" data-a="nykadd" ${dr.busy ? 'disabled' : ''}>${dr.busy ? '記録中…' : '入金を記録する'}</button>
+    </div>
+    <div class="note">記録すると、この人の給与明細（売掛精算の下）と「給料がマイナスの人」に、入金を引いた残りが出ます。Excelや報酬一覧を取り込み直しても消えません。</div>
+  </div>`;
+}
+async function doNykAdd(){
+  if (S.role !== 'admin' || !S.M || !S.empId) return;
+  const e = S.M.employees.find(x => x.id === S.empId); if (!e) return;
+  const dr = nykDraft(); if (dr.busy) return;
+  const v = Math.round(Number(String(dr.v || '').normalize('NFKC').replace(/[,\s¥￥円]/g, '')));
+  if (!(v > 0) || v > 100000000) { toast('金額を入れてください（例 4240）'); return; }
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(dr.d || '') ? dr.d : jstToday();
+  const rec = { id: 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), ym: S.M.ym, v, d, memo: String(dr.m || '').normalize('NFKC').trim().slice(0, 40) };
+  dr.busy = true; render();
+  try {
+    const hx = hexOf(e.name), cur = await backend.getExtra(hx);
+    const arr = (cur && Array.isArray(cur.nyukin) ? cur.nyukin.slice() : []).concat([rec]);
+    await backend.saveExtra(e.name, { nyukin: arr });
+    S.extraCache[hx] = Object.assign({}, cur || {}, { name: e.name, nyukin: arr });
+    S.nyk = { key: S.empId + '|' + S.ym, v: '', d: '', m: '', busy: false };
+    toast('入金を記録しました（' + yen(v) + '）');
+  } catch (err) { dr.busy = false; toast('保存できませんでした。もう一度おしてください'); }
+  render();
+}
+async function doNykDel(id){
+  if (S.role !== 'admin' || !S.M || !S.empId) return;
+  const e = S.M.employees.find(x => x.id === S.empId); if (!e) return;
+  if (!confirm('この入金の記録を取り消します。よろしいですか？')) return;
+  try {
+    const hx = hexOf(e.name), cur = await backend.getExtra(hx);
+    const arr = (cur && Array.isArray(cur.nyukin) ? cur.nyukin : []).filter(x => x.id !== id);
+    await backend.saveExtra(e.name, { nyukin: arr });
+    S.extraCache[hx] = Object.assign({}, cur || {}, { name: e.name, nyukin: arr });
+    toast('取り消しました');
+  } catch (err) { toast('取り消せませんでした'); }
+  render();
+}
 function viewPerson(){
   const M = S.M; if (!M) return noData();
   if (S.role === 'member' && !S.empId) { const me = M.employees.find(x => hexOf(x.name) === S.hex); if (me) S.empId = me.id; else return '<div class="card"><h2>あなたの実績</h2><div class="dim">この月の名簿にあなたの名前がありません。名前が変わった場合は、管理者に伝えてください。</div></div>'; }
@@ -2112,9 +2277,10 @@ function viewPerson(){
   if (!e && S.role !== 'member') {
     const q = S.empQuery.trim();
     const list = M.employees.filter(x => !q || x.name.includes(q));
-    return `<div class="card"><h2>だれの実績を見ますか？</h2>
+    const negMap = {}; negPayList(M).forEach(x => { negMap[x.e.id] = x.i; });
+    return negPayCard(M) + `<div class="card"><h2>だれの実績を見ますか？</h2>
       <input type="text" id="empq" placeholder="名前で検索" value="${esc(S.empQuery)}" autocomplete="off" style="margin-bottom:12px">
-      <div class="who">${list.map(x => `<button data-a="person" data-id="${esc(x.id)}">${esc(x.name)}${x.kind === 'ops' ? '<small>運営</small>' : ''}</button>`).join('') || '<div class="dim">見つかりません</div>'}</div></div>`;
+      <div class="who">${list.map(x => { const n = negMap[x.id]; return `<button data-a="person" data-id="${esc(x.id)}"${n ? ' class="negb"' : ''}>${esc(x.name)}${x.kind === 'ops' ? '<small>運営</small>' : ''}${n ? `<small class="negs">${n.paid ? '残り ' + sgn(n.remain) : (n.net < 0 ? '給料 ' : '売掛後 ') + sgn(n.worst)}</small>` : ''}</button>`; }).join('') || '<div class="dim">見つかりません</div>'}</div></div>`;
   }
   const t = empMonth(M, e.id);
   const days = dayList(M);
@@ -2129,6 +2295,7 @@ function viewPerson(){
   ${groupBackCard(e)}
   ${newcomerCard(M, e)}
   ${ME_MODE ? '' : `<button class="btn ghost small" data-a="persclear" style="margin-bottom:10px">${S.role === 'member' ? '← 自分の画面に戻る' : '← 人を選びなおす'}</button>`}
+  ${negBanner(M, e)}
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:22px;font-weight:700">${esc(e.name)}</div><span class="pill">${e.kind === 'ops' ? '運営' : 'キャスト'}</span></div>
     ${!detail ? '' : td ? `<div class="hr"></div><div class="lbl">${dayLabel(M.ym, dd)}</div>${pair(td[1], td[0])}` : `<div class="note">${dd ? dayLabel(M.ym, dd) + ' は実績なし' : ''}</div>`}
@@ -2147,7 +2314,7 @@ function viewPerson(){
     <div class="note">月間目標は店舗全体のみです（個人目標は未設定）。</div>
   </div>
   ${detail ? (() => { const x = extraFor(e); return termsCard((OPS_TERMS[e.name]) || (x && x.terms && x.terms.tiers ? x.terms : null)) + extraCards(x); })() : ''}
-  ${detail ? (() => { const rec = S.role === 'admin' ? (M.pay && M.pay[e.id]) : (S.priv && S.priv.pay); return attendanceCard(M, e, rec) + payslipCard(rec, M.ym, extraFor(e), e); })() : ''}
+  ${detail ? (() => { const rec = S.role === 'admin' ? (M.pay && M.pay[e.id]) : (S.priv && S.priv.pay); return attendanceCard(M, e, rec) + payslipCard(rec, M.ym, extraFor(e), e) + nyukinCard(M, e); })() : ''}
   ${!detail ? '<div class="card"><h2>🔒 日別履歴</h2><div class="dim">日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div></div>' : `<div class="card"><h2>日別履歴</h2>
     <div class="scrollx"><table class="tbl"><thead><tr><th>営業日</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
     ${hist.slice().reverse().map(({ d, r }) => `<tr ${S.role === 'admin' ? `class="tap" data-a="openday" data-d="${d}"` : ''}><td>${Number(M.ym.split('-')[1])}/${Number(d)}</td><td>${fmt(r[0])}</td><td>${fmt(r[1])}</td>${[2, 4, 5, 7, 6, 3].map(i => `<td class="${r[i] ? '' : 'z'}">${fmt(r[i])}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="9" class="dim">実績なし</td></tr>'}
@@ -2423,15 +2590,21 @@ document.addEventListener('click', async (ev) => {
   else if (a === 'settarget') doSetTarget();
   else if (a === 'loadimports') { try { S.importsList = await backend.listImports(); } catch (e) { toast('履歴を読み込めませんでした'); } render(); }
   else if (a === 'restore') doRestore();
+  else if (a === 'nykadd') doNykAdd();
+  else if (a === 'nykdel') doNykDel(el.dataset.id);
 });
 document.addEventListener('input', (ev) => {
   if (ev.target.id === 'empq') { S.empQuery = ev.target.value; render(); }
   if (ev.target.id === 'tgt') S.targetDraft = ev.target.value;
+  if (ev.target.id === 'nykv') nykDraft().v = ev.target.value;
+  if (ev.target.id === 'nykd') nykDraft().d = ev.target.value;
+  if (ev.target.id === 'nykm') nykDraft().m = ev.target.value;
 });
 document.addEventListener('change', (ev) => {
   if (ev.target.id === 'efile' && ev.target.files && ev.target.files.length) { const fs = Array.from(ev.target.files); ev.target.value = ''; doParseExtra(fs); }
   if (ev.target.id === 'xfile' && ev.target.files && ev.target.files[0]) { const fs = Array.from(ev.target.files).sort((a, b) => a.name.localeCompare(b.name)); ev.target.value = ''; S.impQueue = fs.slice(1); doParse(fs[0]); }
   if (ev.target.id === 'allowrm' && S.imp) S.imp.allowRemove = ev.target.checked;
+  if (ev.target.id === 'nykd') nykDraft().d = ev.target.value;
 });
 document.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && ['pw', 'pw2', 'nm', 'code'].includes(ev.target.id)) doLogin(); });
 window.addEventListener('online', () => { $('#offline').style.display = 'none'; });
@@ -2584,7 +2757,7 @@ async function doRestore(){
   catch (e) { S.phase = 'fatal'; S.fatal = '接続できませんでした。電波を確認して、再読み込みしてください。'; render(); return; }
   backend.onAuth((info) => {
     if (unsubMonth) { unsubMonth(); unsubMonth = null; } if (unsubMeta) { unsubMeta(); unsubMeta = null; } if (unsubPriv) { unsubPriv(); unsubPriv = null; } if (unsubPrivPrev) { unsubPrivPrev(); unsubPrivPrev = null; } if (unsubExtra) { unsubExtra(); unsubExtra = null; }
-    S.extra = null; S.extraCache = {}; S.unlocked = false; S.priv = null; S.privPrev = null; S.empId = null; S.memberInfo = null; S.dayView = 'cal'; S.rankScope = 'month';
+    S.extra = null; S.extraCache = {}; S.unlocked = false; S.priv = null; S.privPrev = null; S.empId = null; S.memberInfo = null; S.dayView = 'cal'; S.rankScope = 'month'; S.nyk = { key: '', v: '', d: '', m: '', busy: false };
     if (!info) { S.phase = 'login'; S.role = null; S.hex = null; S.M = null; S.ym = null; S.meta = { months: [], targets: {} }; render(); return; }
     S.hex = info.hex || null; if (info.role !== 'member') S.empId = lsGet('x8s_emp') || null;
     startApp(info.role);
