@@ -821,9 +821,10 @@ const NEWCOMER_NAMES = ['しん'];  // 新規入店者を見られる人
 const RANK_HIDE = ['しん', 'そら', 'りあ', 'りょーた', 'まや', 'ゆうま'];  // 個人ページ・給料明細だけ。ランキングには出さない
 const ACH_NAMES = ['しん', 'るい', 'るか', 'こうや', 'りあ'];  // 店の達成率を個人ページで見られる人
 const EXTRA_NAMES = ['るか', 'しん'];  // 売掛・前入金を個人ページに出す人（この人だけ）
+const YEAR_SALES = { 'はいる': { asof: '11月は途中（11月18日時点のExcel）', rows: [[1,773800,9],[2,292000,11],[3,534200,22],[4,395700,12],[5,346000,12],[6,385700,12],[7,495000,15],[8,1292500,16],[9,107300,13],[10,138700,12],[11,326400,9]] } };  // 年間ランキングExcelの月別（総売・本数）。この人だけ。個人ページ（本人）と管理者の個人タブに出す
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-87 - 2026-11-16';
+const BUILD = 'sales-88 - 2026-11-18';
 
 const GRP_RANK = { asof: '10月31日営業終了時点', lists: [
   { k:'a', ym:'2026-10', label:'総合', asof:'10月31日営業終了時点', rows: [[1,"結月瑠衣","社長","X8-本店-",17906200],[2,"ひかる","社長","Taurus/X8-Scorpius-",4494900],[3,"結城春乃","VP","X8-本店-",4074200],[4,"春葵るか","PD","X8-本店-",3884900],[5,"ねむ","支配人","Taurus/X8-Scorpius-",3607700],[6,"酸りお","SV","X8-本店-",3557900],[7,"りくと","店長","Attirant",3064500],[8,"白馬 皐矢","統括","X8-本店-",2436300],[9,"千冬","主任","222",2409200],[10,"レオなるド","代表代理","Diamant",2274800],[11,"成宮鳴","Legacy Player","X8-本店-",2273100],[12,"るな","店長","Diamant",2118100],[13,"皇 澪旺","代表代理","Attirant",2082100],[14,"蒼森璃央","支配人","Believe",1948500],[15,"凪咲なぎさ","支配人","Diamant",1946400],[16,"椿 雅","店長","Believe",1812900],[17,"にの","副主任","Taurus",1568200],[18,"一ノ瀬紅","店長","222",1505400],[19,"あおい","店長","X8-Scorpius-",1487200],[20,"れん","社長","Attirant",1440700],[21,"まさや","副主任","222",1427400],[22,"神宮寺 福","Lead Player","X8-本店-",1133500],[23,"あおい","幹部補佐","X8-本店-",1130800],[24,"楓","","X8-本店-",1097300],[25,"黒崎斗夢","副主任","X8-本店-",1066600],[26,"イヴ","幹部補佐","X8-本店-",1052300],[27,"暁ときな","幹部補佐","X8-本店-",845600],[28,"N","","Believe",795400],[29,"美澄奏多","AAD","X8-本店-",784800],[30,"椿 翔大","PADV","222",779800],[31,"叶桜","","X8-Scorpius-",761600],[32,"麗夜","","Diamant",604600],[33,"りゅうが","","Believe",584200],[34,"神崎零","幹部","X8-本店-",580600],[35,"そら","PMG","X8-Scorpius-",563800],[36,"ゆうと","PMG","Attirant",557900],[37,"メロ","副主任","Taurus",534800],[38,"あまと","","Diamant",481900],[39,"アヤト","","Believe",445100],[40,"佳夜","","X8-Scorpius-",340700],[41,"しゅん","","222",276400],[42,"ミナミ","","Attirant",255600],[43,"カヲ","PMG","X8-Scorpius-",253900],[44,"こはく","","Diamant",244200],[45,"雨宮 楓","","Attirant",216600],[46,"奏","","X8-本店-",213400],[47,"はんぞう","","Taurus",209500],[48,"密","","X8-本店-",174400],[49,"うた","","Taurus",173500],[50,"冬夜","","X8-本店-",168500]] },
@@ -1841,6 +1842,17 @@ function backInfoFor(e, ym){
   const x = S.extra && S.extra.sb && S.extra.sb[ym];
   return x ? { tf, g: null, r: { cur: x.th ? { th: x.th } : null, next: null, back: x.back } } : { tf, g: null };
 }
+function yearCard(e){
+  const Y = YEAR_SALES[e.name]; if (!Y || !canDetail(e)) return '';
+  const tg = Y.rows.reduce((a, r) => a + r[1], 0), tn = Y.rows.reduce((a, r) => a + r[2], 0);
+  return `<div class="card"><h2>2026年 月別の実績</h2>
+    <div class="scrollx"><table class="tbl"><thead><tr><th>月</th><th>総売</th><th>本数</th></tr></thead><tbody>
+    ${Y.rows.map(r => `<tr><td>${r[0]}月</td><td>${yen(r[1])}</td><td>${fmt(r[2])}</td></tr>`).join('')}
+    <tr style="font-weight:700"><td>合計</td><td>${yen(tg)}</td><td>${fmt(tn)}</td></tr>
+    </tbody></table></div>
+    <div class="note">${esc(Y.asof)}。年間ランキングのExcelの数字です。</div>
+  </div>`;
+}
 function groupBackCard(e){
   const tf = tbFor(e); if (!tf) return '';
   if (!(S.role === 'admin' || (S.role === 'member' && hexOf(e.name) === S.hex))) return '';
@@ -2293,6 +2305,7 @@ function viewPerson(){
   return `
   ${achCard(e)}
   ${groupBackCard(e)}
+  ${yearCard(e)}
   ${newcomerCard(M, e)}
   ${ME_MODE ? '' : `<button class="btn ghost small" data-a="persclear" style="margin-bottom:10px">${S.role === 'member' ? '← 自分の画面に戻る' : '← 人を選びなおす'}</button>`}
   ${negBanner(M, e)}
