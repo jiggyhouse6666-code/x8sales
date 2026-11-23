@@ -825,7 +825,7 @@ const YEAR_SALES = { 'はいる': { asof: '11月は途中（11月18日時点のE
 const DORM = {"いぶ":[[10,40000],[11,40000]],"とうや":[[10,40000],[11,40000]],"ざくろ":[[10,40000],[11,40000]],"ひそか":[[10,40000]],"れお":[[10,40000],[11,40000]],"はるの":[[10,70000]],"みかげ":[[10,50000],[11,50000]],"まお":[[10,40000],[11,40000]],"あおい":[[11,40000]]};  // 寮費（給与シート）10月確定・11月は11/21時点のExcel
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-93 - 2026-11-23';
+const BUILD = 'sales-94 - 2026-11-23';
 
 const GRP_RANK = { asof: '10月31日営業終了時点', lists: [
   { k:'a', ym:'2026-10', label:'総合', asof:'10月31日営業終了時点', rows: [[1,"結月瑠衣","社長","X8-本店-",17906200],[2,"ひかる","社長","Taurus/X8-Scorpius-",4494900],[3,"結城春乃","VP","X8-本店-",4074200],[4,"春葵るか","PD","X8-本店-",3884900],[5,"ねむ","支配人","Taurus/X8-Scorpius-",3607700],[6,"酸りお","SV","X8-本店-",3557900],[7,"りくと","店長","Attirant",3064500],[8,"白馬 皐矢","統括","X8-本店-",2436300],[9,"千冬","主任","222",2409200],[10,"レオなるド","代表代理","Diamant",2274800],[11,"成宮鳴","Legacy Player","X8-本店-",2273100],[12,"るな","店長","Diamant",2118100],[13,"皇 澪旺","代表代理","Attirant",2082100],[14,"蒼森璃央","支配人","Believe",1948500],[15,"凪咲なぎさ","支配人","Diamant",1946400],[16,"椿 雅","店長","Believe",1812900],[17,"にの","副主任","Taurus",1568200],[18,"一ノ瀬紅","店長","222",1505400],[19,"あおい","店長","X8-Scorpius-",1487200],[20,"れん","社長","Attirant",1440700],[21,"まさや","副主任","222",1427400],[22,"神宮寺 福","Lead Player","X8-本店-",1133500],[23,"あおい","幹部補佐","X8-本店-",1130800],[24,"楓","","X8-本店-",1097300],[25,"黒崎斗夢","副主任","X8-本店-",1066600],[26,"イヴ","幹部補佐","X8-本店-",1052300],[27,"暁ときな","幹部補佐","X8-本店-",845600],[28,"N","","Believe",795400],[29,"美澄奏多","AAD","X8-本店-",784800],[30,"椿 翔大","PADV","222",779800],[31,"叶桜","","X8-Scorpius-",761600],[32,"麗夜","","Diamant",604600],[33,"りゅうが","","Believe",584200],[34,"神崎零","幹部","X8-本店-",580600],[35,"そら","PMG","X8-Scorpius-",563800],[36,"ゆうと","PMG","Attirant",557900],[37,"メロ","副主任","Taurus",534800],[38,"あまと","","Diamant",481900],[39,"アヤト","","Believe",445100],[40,"佳夜","","X8-Scorpius-",340700],[41,"しゅん","","222",276400],[42,"ミナミ","","Attirant",255600],[43,"カヲ","PMG","X8-Scorpius-",253900],[44,"こはく","","Diamant",244200],[45,"雨宮 楓","","Attirant",216600],[46,"奏","","X8-本店-",213400],[47,"はんぞう","","Taurus",209500],[48,"密","","X8-本店-",174400],[49,"うた","","Taurus",173500],[50,"冬夜","","X8-本店-",168500]] },
@@ -2110,8 +2110,30 @@ function psAdjust(rec, ym, e){
   const gross = rec.gross + r.back, dedTotal = rec.dedTotal - inc;
   return Object.assign({}, rec, { pay, ded, gross, dedTotal, net: Math.floor((gross + dedTotal) / 10) * 10 });
 }
+// めいの給料明細：総売折半（2026年11月分から）。総売の50%・遅刻1回ごとに総売の0.5%・規定の休みを超えた欠勤1日ごとに給料の1%引く・総売100万円ごとに有給1日
+const MEI_OFF = { '2026-11': 7 };   // 月ごとの規定の休み日数（入っていない月は基本の7日）
+function meiAdjust(rec, ym, e){
+  if (!rec || !e || e.name !== 'めい' || ym < '2026-11' || !S.M || S.M.ym !== ym) return rec;
+  let gross = 0; const cnt = {};
+  Object.keys(S.M.days).forEach(dd => { const r = rowOf(e, dd); if (r) { gross += Number(r[1]) || 0; const a = r[8] || ''; if (a) cnt[a] = (cnt[a] || 0) + 1; } });
+  const late = cnt['遅刻'] || 0, off = (cnt['休み'] || 0) + (cnt['当欠'] || 0) + (cnt['無欠'] || 0) + (cnt['欠勤'] || 0);
+  const lim = MEI_OFF[ym] != null ? MEI_OFF[ym] : 7, paid = Math.floor(gross / 1000000), over = Math.max(0, off - lim - paid);
+  const kosei = rec.ded.find(x => x.k === '厚生費'), kRate = kosei && rec.gross ? Math.abs(kosei.v) / rec.gross : 0;
+  const keep = rec.pay.filter(x => !/^(基本給|売上バック|.*ポイント)$/.test(x.k));
+  const salary = Math.round(gross * 0.5);
+  const lateP = Math.round(gross * 0.005 * late), absP = Math.round(salary * 0.01 * over);
+  const pay = [{ k: '給料（総売の50%）', v: salary, note: '総売 ' + yen(gross) + ' × 50%' }].concat(keep);
+  if (lateP) pay.push({ k: '遅刻（総売の0.5%×' + late + '回）', v: -lateP });
+  if (absP) pay.push({ k: '欠勤（規定の休み超過 ' + over + '日 × 給料の1%）', v: -absP });
+  const g2 = pay.reduce((a, x) => a + x.v, 0);
+  const ded = rec.ded.map(x => x.k === '厚生費' ? Object.assign({}, x, { v: -Math.round(g2 * kRate * 10) / 10 }) : x);
+  const dedTotal = ded.reduce((a, x) => a + x.v, 0);
+  const note = '休み ' + off + '日（規定 ' + lim + '日' + (paid ? ' ＋ 有給 ' + paid + '日' : '') + '）';
+  pay[0].note += '　' + note;
+  return Object.assign({}, rec, { pay, ded, gross: g2, dedTotal, net: Math.floor((g2 + dedTotal) / 10) * 10 });
+}
 function payslipCard(rec, ym, ex, e){
-  rec = psAdjust(rec, ym, e);
+  rec = meiAdjust(psAdjust(rec, ym, e), ym, e);
   if (!rec) return '';
   const mon = Number(ym.split('-')[1]);
   const hm = ex && ex.hoshu ? ex.hoshu.find(m => m.n === mon) : null;
