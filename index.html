@@ -825,7 +825,7 @@ const YEAR_SALES = { 'はいる': { asof: '11月は途中（11月18日時点のE
 const DORM = {"いぶ":[[10,40000],[11,40000]],"とうや":[[10,40000],[11,40000]],"ざくろ":[[10,40000],[11,40000]],"ひそか":[[10,40000]],"れお":[[10,40000],[11,40000]],"はるの":[[10,70000]],"みかげ":[[10,50000],[11,50000]],"まお":[[10,40000],[11,40000]],"あおい":[[11,40000]]};  // 寮費（給与シート）10月確定・11月は11/21時点のExcel
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-91 - 2026-11-22';
+const BUILD = 'sales-93 - 2026-11-23';
 
 const GRP_RANK = { asof: '10月31日営業終了時点', lists: [
   { k:'a', ym:'2026-10', label:'総合', asof:'10月31日営業終了時点', rows: [[1,"結月瑠衣","社長","X8-本店-",17906200],[2,"ひかる","社長","Taurus/X8-Scorpius-",4494900],[3,"結城春乃","VP","X8-本店-",4074200],[4,"春葵るか","PD","X8-本店-",3884900],[5,"ねむ","支配人","Taurus/X8-Scorpius-",3607700],[6,"酸りお","SV","X8-本店-",3557900],[7,"りくと","店長","Attirant",3064500],[8,"白馬 皐矢","統括","X8-本店-",2436300],[9,"千冬","主任","222",2409200],[10,"レオなるド","代表代理","Diamant",2274800],[11,"成宮鳴","Legacy Player","X8-本店-",2273100],[12,"るな","店長","Diamant",2118100],[13,"皇 澪旺","代表代理","Attirant",2082100],[14,"蒼森璃央","支配人","Believe",1948500],[15,"凪咲なぎさ","支配人","Diamant",1946400],[16,"椿 雅","店長","Believe",1812900],[17,"にの","副主任","Taurus",1568200],[18,"一ノ瀬紅","店長","222",1505400],[19,"あおい","店長","X8-Scorpius-",1487200],[20,"れん","社長","Attirant",1440700],[21,"まさや","副主任","222",1427400],[22,"神宮寺 福","Lead Player","X8-本店-",1133500],[23,"あおい","幹部補佐","X8-本店-",1130800],[24,"楓","","X8-本店-",1097300],[25,"黒崎斗夢","副主任","X8-本店-",1066600],[26,"イヴ","幹部補佐","X8-本店-",1052300],[27,"暁ときな","幹部補佐","X8-本店-",845600],[28,"N","","Believe",795400],[29,"美澄奏多","AAD","X8-本店-",784800],[30,"椿 翔大","PADV","222",779800],[31,"叶桜","","X8-Scorpius-",761600],[32,"麗夜","","Diamant",604600],[33,"りゅうが","","Believe",584200],[34,"神崎零","幹部","X8-本店-",580600],[35,"そら","PMG","X8-Scorpius-",563800],[36,"ゆうと","PMG","Attirant",557900],[37,"メロ","副主任","Taurus",534800],[38,"あまと","","Diamant",481900],[39,"アヤト","","Believe",445100],[40,"佳夜","","X8-Scorpius-",340700],[41,"しゅん","","222",276400],[42,"ミナミ","","Attirant",255600],[43,"カヲ","PMG","X8-Scorpius-",253900],[44,"こはく","","Diamant",244200],[45,"雨宮 楓","","Attirant",216600],[46,"奏","","X8-本店-",213400],[47,"はんぞう","","Taurus",209500],[48,"密","","X8-本店-",174400],[49,"うた","","Taurus",173500],[50,"冬夜","","X8-本店-",168500]] },
@@ -1902,6 +1902,23 @@ const OPS_TERMS = (() => {
     'りょーた': mk(216000, 35000, '12%', flat(0, 9000), '10万円'),
   };
 })();
+const NEW_OPS = { 'ひそか': { route: 'リクルート', title: 'リクルートエージェント', salary: 216000, allow: 0 } };  // 新・運営者制度（まずひそかだけ）
+function newOpsCard(e){
+  const t = NEW_OPS[e.name]; if (!t) return '';
+  const r = (k, v, red) => `<tr><td>${k}</td><td style="text-align:right;${red ? 'color:#ff6b6b' : ''}">${v}</td></tr>`;
+  return `<div class="card"><h2>報酬条件</h2>
+    <div class="scrollx"><table class="tbl"><tbody>
+      ${r('ルート', esc(t.route))}${r('役職', esc(t.title))}${r('月給', yen(t.salary))}${r('役職手当', t.allow ? yen(t.allow) : 'なし')}${r('個人売上バック', '総計の10%')}${r('データ管理費', '−' + yen(5000), 1)}
+    </tbody></table></div>
+    <div class="ps-h" style="margin-top:12px">日給</div>
+    <div class="dim" style="font-size:13px">30日の月　${yen(9400)}<br>31日の月　${yen(9000)}<br>22時までに出勤 → 日給満額<br>22時以降の出勤 → 日給なし</div>
+    <div class="dim" style="font-size:12px;margin-top:6px">※月給＝日給9,000円（31日の月）×24日稼働の換算。30日の月はこれより高くなります。</div>
+    <div class="ps-h" style="margin-top:12px">役職手当・売上バックの支給（休み日数）</div>
+    <div class="dim" style="font-size:13px">休み 1〜7日 → 満額<br>休み 8〜14日 → 半額<br>休み 15日以上 → 支給なし</div>
+    <div class="ps-h" style="margin-top:12px">勤怠ペナルティ（日給から減算）</div>
+    <div class="dim" style="font-size:13px">遅刻 −3,000円　当欠 −5,000円　無欠 −8,000円</div>
+  </div>`;
+}
 function termsCard(t){
   if (!t) return '';
   const r = (k, v, red) => `<tr><td>${k}</td><td style="text-align:right;${red ? 'color:#ff6b6b' : ''}">${v}</td></tr>`;
@@ -2338,7 +2355,7 @@ function viewPerson(){
     ${pt ? `<div class="note">前月（${ymLabel(S.prevM.ym)}・${pt.days}日出勤）との差です。前月は月全体の合計です。</div>` : '<div class="note">前月のデータがない（または前月に名簿にいなかった）ため、前月比は表示していません。</div>'}
     <div class="note">月間目標は店舗全体のみです（個人目標は未設定）。</div>
   </div>
-  ${detail ? (() => { const x = extraFor(e); return termsCard((OPS_TERMS[e.name]) || (x && x.terms && x.terms.tiers ? x.terms : null)) + extraCards(x); })() : ''}
+  ${detail ? (() => { const x = extraFor(e); return newOpsCard(e) + termsCard((OPS_TERMS[e.name]) || (x && x.terms && x.terms.tiers ? x.terms : null)) + extraCards(x); })() : ''}
   ${detail ? (() => { const rec = S.role === 'admin' ? (M.pay && M.pay[e.id]) : (S.priv && S.priv.pay); return attendanceCard(M, e, rec) + payslipCard(rec, M.ym, extraFor(e), e) + nyukinCard(M, e); })() : ''}
   ${!detail ? '<div class="card"><h2>🔒 日別履歴</h2><div class="dim">日別の数字は、本人の個人ログイン、または管理者だけが見られます。</div></div>' : `<div class="card"><h2>日別履歴</h2>
     <div class="scrollx"><table class="tbl"><thead><tr><th>営業日</th><th>小計</th><th>総売</th><th>本数</th><th>新規</th><th>飲</th><th>送</th><th>ヘ</th><th>同</th></tr></thead><tbody>
