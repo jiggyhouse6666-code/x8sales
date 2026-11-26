@@ -825,7 +825,7 @@ const YEAR_SALES = { 'はいる': { asof: '11月は途中（11月18日時点のE
 const DORM = {"いぶ":[[10,40000],[11,40000]],"とうや":[[10,40000],[11,40000]],"ざくろ":[[10,40000],[11,40000]],"ひそか":[[10,40000]],"れお":[[10,40000],[11,40000]],"はるの":[[10,70000]],"みかげ":[[10,50000],[11,50000]],"まお":[[10,40000],[11,40000]],"あおい":[[11,40000]]};  // 寮費（給与シート）10月確定・11月は11/21時点のExcel
 const ADMIN_EMAIL = 'admin@x8sales.app', STAFF_EMAIL = 'staff@x8sales.app';
 const FB_VER = '12.19.0';
-const BUILD = 'sales-96 - 2026-11-25';
+const BUILD = 'sales-98 - 2026-11-26';
 
 const GRP_RANK = { asof: '10月31日営業終了時点', lists: [
   { k:'a', ym:'2026-10', label:'総合', asof:'10月31日営業終了時点', rows: [[1,"結月瑠衣","社長","X8-本店-",17906200],[2,"ひかる","社長","Taurus/X8-Scorpius-",4494900],[3,"結城春乃","VP","X8-本店-",4074200],[4,"春葵るか","PD","X8-本店-",3884900],[5,"ねむ","支配人","Taurus/X8-Scorpius-",3607700],[6,"酸りお","SV","X8-本店-",3557900],[7,"りくと","店長","Attirant",3064500],[8,"白馬 皐矢","統括","X8-本店-",2436300],[9,"千冬","主任","222",2409200],[10,"レオなるド","代表代理","Diamant",2274800],[11,"成宮鳴","Legacy Player","X8-本店-",2273100],[12,"るな","店長","Diamant",2118100],[13,"皇 澪旺","代表代理","Attirant",2082100],[14,"蒼森璃央","支配人","Believe",1948500],[15,"凪咲なぎさ","支配人","Diamant",1946400],[16,"椿 雅","店長","Believe",1812900],[17,"にの","副主任","Taurus",1568200],[18,"一ノ瀬紅","店長","222",1505400],[19,"あおい","店長","X8-Scorpius-",1487200],[20,"れん","社長","Attirant",1440700],[21,"まさや","副主任","222",1427400],[22,"神宮寺 福","Lead Player","X8-本店-",1133500],[23,"あおい","幹部補佐","X8-本店-",1130800],[24,"楓","","X8-本店-",1097300],[25,"黒崎斗夢","副主任","X8-本店-",1066600],[26,"イヴ","幹部補佐","X8-本店-",1052300],[27,"暁ときな","幹部補佐","X8-本店-",845600],[28,"N","","Believe",795400],[29,"美澄奏多","AAD","X8-本店-",784800],[30,"椿 翔大","PADV","222",779800],[31,"叶桜","","X8-Scorpius-",761600],[32,"麗夜","","Diamant",604600],[33,"りゅうが","","Believe",584200],[34,"神崎零","幹部","X8-本店-",580600],[35,"そら","PMG","X8-Scorpius-",563800],[36,"ゆうと","PMG","Attirant",557900],[37,"メロ","副主任","Taurus",534800],[38,"あまと","","Diamant",481900],[39,"アヤト","","Believe",445100],[40,"佳夜","","X8-Scorpius-",340700],[41,"しゅん","","222",276400],[42,"ミナミ","","Attirant",255600],[43,"カヲ","PMG","X8-Scorpius-",253900],[44,"こはく","","Diamant",244200],[45,"雨宮 楓","","Attirant",216600],[46,"奏","","X8-本店-",213400],[47,"はんぞう","","Taurus",209500],[48,"密","","X8-本店-",174400],[49,"うた","","Taurus",173500],[50,"冬夜","","X8-本店-",168500]] },
@@ -1752,8 +1752,25 @@ const ATT_MARK = { 'A出勤': ['A', 'var(--gold)'], 'B出勤': ['B', '#7fd1b9'],
 const WORK_END = 26, WORK_START = { 'A出勤': 19, 'B出勤': 20 }, LATE_YEN_PER_30 = 600;
 // その日の勤務：Excelの日別の「遅出勤」「早帰り」金額は、いつも30分＝600円（金額÷1,200＝時間）
 const clk = (h) => { const m = Math.round(h * 60); return Math.floor(m / 60) + ':' + ('0' + (m % 60)).slice(-2); };
-function dayWork(r){
-  const a = r ? r[8] : ''; if (a !== 'A出勤' && a !== 'B出勤') return null;
+// 出欠の日の時給勤務（ラストまで／時間指定）。時給 ¥1,200
+const HOURLY_DAYS = { '2026-11': { '21': { 'れい': [23.5, 26], 'ときな': [23 + 16 / 60, 24 + 16 / 60] } } };
+const HOURLY_YEN = 1200;
+function hourlyOf(e, ym, dd){ const m = HOURLY_DAYS[ym]; const x = m && m[String(Number(dd))]; return x && e ? x[e.name] || null : null; }
+function hourlyAdjust(rec, ym, e){
+  const m = HOURLY_DAYS[ym]; if (!rec || !e || !m) return rec;
+  const items = Object.keys(m).map(dd => { const h = hourlyOf(e, ym, dd); return h ? { dd, hrs: h[1] - h[0], st: h[0], en: h[1] } : null; }).filter(Boolean);
+  if (!items.length) return rec;
+  const add = items.map(x => ({ k: '時給（' + Number(ym.slice(5)) + '/' + Number(x.dd) + ' ' + clk(x.st) + '〜' + clk(x.en) + '）', v: Math.round(x.hrs * HOURLY_YEN), note: (Math.round(x.hrs * 100) / 100) + '時間 × ' + yen(HOURLY_YEN) }));
+  const pay = rec.pay.concat(add), g2 = pay.reduce((a, x) => a + x.v, 0);
+  const kosei = rec.ded.find(x => x.k === '厚生費'), kRate = kosei && rec.gross ? Math.abs(kosei.v) / rec.gross : 0;
+  const ded = rec.ded.map(x => x.k === '厚生費' ? Object.assign({}, x, { v: -Math.round(g2 * kRate * 10) / 10 }) : x);
+  const dedTotal = ded.reduce((a, x) => a + x.v, 0);
+  return Object.assign({}, rec, { pay, ded, gross: g2, dedTotal, net: Math.floor((g2 + dedTotal) / 10) * 10 });
+}
+function dayWork(r, e, dd){
+  const a = r ? r[8] : '';
+  if (a === '出欠' && e && dd) { const h = hourlyOf(e, S.ym, dd); if (h) return { a: ['時', '#9b94a6'], st: h[0], en: h[1], hours: h[1] - h[0], late: 0, early: 0, extra: true }; }
+  if (a !== 'A出勤' && a !== 'B出勤') return null;
   const late = (r[9] || 0) / 1200, early = (r[10] || 0) / 1200;
   const st = WORK_START[a] + late, en = WORK_END - early;
   return { a, st, en, hours: Math.max(0, en - st), late, early };
@@ -1795,9 +1812,9 @@ function attendanceCard(M, e, rec){
       <div class="kpi"><div class="v">${off}</div><div class="l">休み・有給</div></div>
     </div>
     ${(() => { const w = workHours(cnt, rec);
-      const dw = days.map(dd => ({ dd, w: dayWork(rowOf(e, dd)) })).filter(x => x.w);
+      const dw = days.map(dd => ({ dd, w: dayWork(rowOf(e, dd), e, dd) })).filter(x => x.w);
       const hasDay = days.some(dd => { const r = rowOf(e, dd); return r && r.length > 9; });
-      if (hasDay) { w.late = dw.reduce((a, x) => a + x.w.late, 0); w.early = dw.reduce((a, x) => a + x.w.early, 0); w.total = Math.max(0, w.base - w.late - w.early); w.odd = false; }
+      if (hasDay) { w.late = dw.reduce((a, x) => a + x.w.late, 0); w.early = dw.reduce((a, x) => a + x.w.early, 0); w.total = Math.max(0, w.base - w.late - w.early) + dw.filter(x => x.w.extra).reduce((a, x) => a + x.w.hours, 0); w.odd = false; }
       const list = hasDay || dw.length ? `<div class="scrollx" style="margin-top:12px"><table class="tbl"><thead><tr><th>日</th><th>区分</th><th>時間</th><th>勤務</th></tr></thead><tbody>
         ${dw.map(x => `<tr><td>${Number(x.dd)}日</td><td>${x.w.a[0]}</td><td>${clk(x.w.st)}〜${clk(x.w.en)}${(x.w.late || x.w.early) ? `<br><small class="dim">${x.w.late ? '遅出 ' + hFmt(x.w.late) : ''}${x.w.late && x.w.early ? '／' : ''}${x.w.early ? '早帰り ' + hFmt(x.w.early) : ''}</small>` : ''}</td><td>${hFmt(x.w.hours)}</td></tr>`).join('')}
         <tr class="total"><td colspan="3">合計（${dw.length}日）</td><td>${hFmt(dw.reduce((a, x) => a + x.w.hours, 0))}</td></tr></tbody></table></div>` : '';
@@ -2119,7 +2136,7 @@ function meiAdjust(rec, ym, e){
   const late = cnt['遅刻'] || 0, off = (cnt['休み'] || 0) + (cnt['当欠'] || 0) + (cnt['無欠'] || 0) + (cnt['欠勤'] || 0);
   const lim = MEI_OFF[ym] != null ? MEI_OFF[ym] : 7, paid = Math.floor(gross / 1000000), over = Math.max(0, off - lim - paid);
   const kosei = rec.ded.find(x => x.k === '厚生費'), kRate = kosei && rec.gross ? Math.abs(kosei.v) / rec.gross : 0;
-  const keep = rec.pay.filter(x => !/^(基本給|売上バック|.*ポイント)$/.test(x.k));
+  const keep = rec.pay.filter(x => !/^(基本給|売上バック|同伴ポイント|ヘルプポイント)$/.test(x.k))   // 本指名ポイント（指名にチェック → ¥3,000）はExcelのまま残す;
   const salary = Math.round(gross * 0.5);
   const lateP = Math.round(gross * 0.005 * late), absP = Math.round(salary * 0.01 * over);
   const pay = [{ k: '給料（総売の50%）', v: salary, note: '総売 ' + yen(gross) + ' × 50%' }].concat(keep);
@@ -2133,7 +2150,7 @@ function meiAdjust(rec, ym, e){
   return Object.assign({}, rec, { pay, ded, gross: g2, dedTotal, net: Math.floor((g2 + dedTotal) / 10) * 10 });
 }
 function payslipCard(rec, ym, ex, e){
-  rec = meiAdjust(psAdjust(rec, ym, e), ym, e);
+  rec = hourlyAdjust(meiAdjust(psAdjust(rec, ym, e), ym, e), ym, e);
   if (!rec) return '';
   const mon = Number(ym.split('-')[1]);
   const hm = ex && ex.hoshu ? ex.hoshu.find(m => m.n === mon) : null;
